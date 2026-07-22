@@ -610,6 +610,12 @@ bool MoveGenerator::squaresUnderAttack(Board &board, Bitboard squares, bool whit
     return false;
 }
 
+MoveGenerator &MoveGenerator::getInstance()
+{
+    static MoveGenerator instance;
+    return instance;
+}
+
 void MoveGenerator::makeMove(Board &board, Move &move)
 {
     // store information needed for unmake before actually making the move

@@ -30,6 +30,12 @@ uint64 Engine::perft(int depth, bool divide)
     return total_nodes;
 }
 
+Score Engine::evaluateBoard()
+{
+    evaluated_nodes++;
+    return eval.evaluateBoard(board);
+}
+
 // iterative deepening
 Move Engine::search()
 {
@@ -52,6 +58,7 @@ Move Engine::search()
 
     log(SEARCH, "Search score: " + std::to_string(best_root_score));
     log(SEARCH, "Evaluated nodes: " + std::to_string(evaluated_nodes));
+    assert(best_root_move != NULL_MOVE, "No best move found");
     return best_root_move;
 }
 
@@ -130,6 +137,7 @@ Score Engine::negamax_search(int depth, int remaining_depth, Score lower_bound, 
 {
     // use results from transposition table if possible
     Score original_lower_bound = lower_bound;
+    /*
     TranspositionEntry *entry = transposition_table.probe(board.hash);
     if (entry != nullptr && entry->depth >= remaining_depth)
     {
@@ -137,17 +145,18 @@ Score Engine::negamax_search(int depth, int remaining_depth, Score lower_bound, 
         bool below_lower_bound = (entry->type == EXACT || entry->type == UPPER_BOUND) && entry->score <= lower_bound;
         bool above_upper_bound = (entry->type == EXACT || entry->type == LOWER_BOUND) && entry->score >= upper_bound;
         if (below_lower_bound || above_upper_bound)
-            return entry->score;
+        return entry->score;
 
         // tighten lower bound and upper bound
         if (entry->type == LOWER_BOUND && entry->score > lower_bound)
-            lower_bound = entry->score;
+        lower_bound = entry->score;
         if (entry->type == UPPER_BOUND && entry->score < upper_bound)
-            upper_bound = entry->score;
+        upper_bound = entry->score;
 
         if (lower_bound >= upper_bound)
-            return entry->score;
+        return entry->score;
     }
+    */
 
     // ? maybe store quiescence, checkmates and draws in transposition table?
     // return evaluation for leaf nodes (max depth reached)
@@ -249,32 +258,6 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int depth)
     }
 
     return lower_bound;
-}
-
-// todo replace with actual NNUE evaluation
-Score Engine::evaluateBoard()
-{
-    evaluated_nodes++;
-    Score material = 0;
-    material += countSetBits(board.white_pawns) * PAWN_VALUE;
-    material += countSetBits(board.white_knights) * KNIGHT_VALUE;
-    material += countSetBits(board.white_bishops) * BISHOP_VALUE;
-    material += countSetBits(board.white_rooks) * ROOK_VALUE;
-    material += countSetBits(board.white_queens) * QUEEN_VALUE;
-    material += countSetBits(board.white_king) * KING_VALUE;
-
-    material -= countSetBits(board.black_pawns) * PAWN_VALUE;
-    material -= countSetBits(board.black_knights) * KNIGHT_VALUE;
-    material -= countSetBits(board.black_bishops) * BISHOP_VALUE;
-    material -= countSetBits(board.black_rooks) * ROOK_VALUE;
-    material -= countSetBits(board.black_queens) * QUEEN_VALUE;
-    material -= countSetBits(board.black_king) * KING_VALUE;
-
-    Score score = material;
-    // return score from perspective of current player
-    if (!board.white_to_move)
-        score = -score;
-    return score;
 }
 
 void Engine::initializeStartPosition(std::string fen)

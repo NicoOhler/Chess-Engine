@@ -2,6 +2,7 @@
 #include "MoveGenerator.h"
 #include "ZobristHash.h"
 #include "TranspositionTable.h"
+#include "Evaluation.h"
 #include "Timer.h"
 #include "definitions.h"
 #include <iostream>
@@ -27,9 +28,10 @@ public:
 
 private:
     Board board;
-    MoveGenerator move_generator;
+    MoveGenerator move_generator = MoveGenerator::getInstance();
     TranspositionTable transposition_table;
     ZobristHash zobrist;
+    Evaluation eval;
     Timer timer;
 
     uint64 evaluated_nodes = 0;

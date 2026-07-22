@@ -41,17 +41,8 @@ const bool ENABLE_MOVE_SORTING = false;
 const Milliseconds SEARCH_TIME_LIMIT = 5000; // milliseconds
 const int TRANSPOSITION_TABLE_SIZE = 256;    // megabytes
 const int DEFAULT_PERFT_DEPTH = 7;
-const int MAX_SEARCH_DEPTH = 100;
+const int MAX_SEARCH_DEPTH = 4;
 const int MAX_QUIESCENCE_DEPTH = 12;
-const Score PAWN_VALUE = 100;
-const Score KNIGHT_VALUE = 300;
-const Score BISHOP_VALUE = 330;
-const Score ROOK_VALUE = 500;
-const Score QUEEN_VALUE = 900;
-const Score KING_VALUE = 20000;
-const Score DELTA_VALUE = 800;
-const Score MATE_VALUE = 6000000;
-const Score DRAW_VALUE = -200;
 
 enum PIECES
 {

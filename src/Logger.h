@@ -26,6 +26,7 @@ const LogType PERFT = WHITE | LOG_TYPE_ENABLED;
 const LogType SEARCH = WHITE | LOG_TYPE_ENABLED;
 const LogType FEN = WHITE | LOG_TYPE_ENABLED;
 const LogType TIME = WHITE | LOG_TYPE_ENABLED;
+const LogType EVALUATION = WHITE;
 
 void log(LogType logType, std::string message);
 

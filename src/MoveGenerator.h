@@ -69,24 +69,11 @@ struct MoveList
         return size == 0;
     }
 };
-
 class MoveGenerator
 {
 private:
-    // attack masks
-    Bitboard white_pawn_attack_right[NUM_SQUARES];
-    Bitboard white_pawn_attack_left[NUM_SQUARES];
-    Bitboard black_pawn_attack_right[NUM_SQUARES];
-    Bitboard black_pawn_attack_left[NUM_SQUARES];
-    Bitboard knight_moves[NUM_SQUARES];
-    Bitboard queen_moves[NUM_SQUARES];
-    Bitboard king_moves[NUM_SQUARES];
-
-    // precomputed attacks for sliding pieces
-    Bitboard bishop_blockers[NUM_SQUARES];
-    Bitboard rook_blockers[NUM_SQUARES];
-    Bitboard bishop_attacks[NUM_SQUARES][512];
-    Bitboard rook_attacks[NUM_SQUARES][4096];
+    MoveGenerator();
+    static MoveGenerator instance;
 
     // move generation masks
     void initializePawnCaptureMasks();
@@ -117,7 +104,22 @@ private:
     void detectDoublePawnPushForEnPassant(Board &board, Move &move);
 
 public:
-    MoveGenerator();
+    // attack masks
+    Bitboard white_pawn_attack_right[NUM_SQUARES];
+    Bitboard white_pawn_attack_left[NUM_SQUARES];
+    Bitboard black_pawn_attack_right[NUM_SQUARES];
+    Bitboard black_pawn_attack_left[NUM_SQUARES];
+    Bitboard knight_moves[NUM_SQUARES];
+    Bitboard queen_moves[NUM_SQUARES];
+    Bitboard king_moves[NUM_SQUARES];
+
+    // precomputed attacks for sliding pieces
+    Bitboard bishop_blockers[NUM_SQUARES];
+    Bitboard rook_blockers[NUM_SQUARES];
+    Bitboard bishop_attacks[NUM_SQUARES][512];
+    Bitboard rook_attacks[NUM_SQUARES][4096];
+
+    static MoveGenerator &getInstance();
     void makeMove(Board &board, Move &move);
     void unmakeMove(Board &board, Move move);
     MoveList generateLegalMoves(Board board, bool interesting_only = false);

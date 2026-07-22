@@ -32,7 +32,9 @@
             "program": "${workspaceFolder}/engine",
             "args": [
                 "-m",
-                "c"
+                "c",
+                "-t",
+                "500000"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -177,7 +179,7 @@
                 "-p",
                 "5",
                 "-t",
-                "50000"
+                "500000"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
