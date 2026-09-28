@@ -37,7 +37,6 @@ const Position DOWN_LEFT = -9;
 const Position DOWN_RIGHT = -7;
 
 // engine
-const bool ENABLE_MOVE_SORTING = false;
 const Milliseconds SEARCH_TIME_LIMIT = 5000; // milliseconds
 const int TRANSPOSITION_TABLE_SIZE = 256;    // megabytes
 const int DEFAULT_PERFT_DEPTH = 7;

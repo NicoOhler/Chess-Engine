@@ -88,29 +88,6 @@ void Engine::calculateMoveScores(MoveList &moves)
         else
             moves.scores[i] = 0;
     }
-
-    if (ENABLE_MOVE_SORTING)
-        sortMoves(moves);
-}
-
-void Engine::sortMoves(MoveList &moves)
-{
-    // insertion sort seems best for small arrays
-    for (int i = 1; i < moves.size; i++)
-    {
-        Move key_move = moves.moves[i];
-        Score key_score = moves.scores[i];
-        int j = i - 1;
-
-        while (j >= 0 && moves.scores[j] < key_score)
-        {
-            moves.moves[j + 1] = moves.moves[j];
-            moves.scores[j + 1] = moves.scores[j];
-            j--;
-        }
-        moves.moves[j + 1] = key_move;
-        moves.scores[j + 1] = key_score;
-    }
 }
 
 Move Engine::pickBestMove(MoveList &moves)
@@ -128,6 +105,8 @@ Move Engine::pickBestMove(MoveList &moves)
     // mark selected move as used => ensure it is not picked again
     if (best_move_index != -1)
         moves.scores[best_move_index] = NEG_INFINITY;
+    else
+        std::cout << "Does this ever happen?" << std::endl;
 
     return moves.moves[best_move_index];
 }
@@ -180,7 +159,7 @@ Score Engine::negamax_search(int depth, int remaining_depth, Score lower_bound, 
     Move best_move;
     for (int i = 0; i < legal_moves.size; i++)
     {
-        Move move = ENABLE_MOVE_SORTING ? legal_moves.moves[i] : pickBestMove(legal_moves);
+        Move move = pickBestMove(legal_moves);
         makeMove(move);
         // swap and negate lower/upper bounds since the opponent tries to minimize our score
         Score score = -negamax_search(depth + 1, remaining_depth - 1, -upper_bound, -lower_bound);

@@ -33,7 +33,7 @@ void UserInterface::startSearch()
 void UserInterface::startPerft()
 {
     engine.initializeStartPosition(fen);
-    log(PERFT, "Starting perft with a depth of" + std::to_string(depth));
+    log(PERFT, "Starting perft with a depth of " + std::to_string(depth));
     timer.start();
     uint64 nodes = engine.perft(depth > 0 ? depth : MAX_SEARCH_DEPTH, divide);
     timer.stop(PERFT);
