@@ -3,7 +3,7 @@
 TranspositionTable::TranspositionTable(int megabytes)
 {
     table_size = megabytes * 1024 * 1024 / sizeof(TranspositionEntry);
-    table = new TranspositionEntry[table_size];
+    table = new TranspositionEntry[table_size]();
 }
 
 // todo handle indexing and collisions
@@ -15,13 +15,31 @@ TranspositionEntry *TranspositionTable::probe(Hash hash)
     return &entry;
 }
 
-void TranspositionTable::store(Hash hash, Score score, Move best_move, int depth, BoundType type)
+void TranspositionTable::store(Hash hash, Score score, Move best_move, int remaining_depth, BoundType type)
 {
     // ? current replacement strategy: always overwrite
     TranspositionEntry &entry = table[hash % table_size];
     entry.hash = hash;
     entry.score = score;
     entry.best_move = best_move;
-    entry.depth = depth;
+    entry.remaining_depth = remaining_depth;
     entry.type = type;
+}
+
+Score computeTranspositionScore(Score score, int ply)
+{
+    if (score >= MIN_MATE_VALUE)
+        score += ply;
+    else if (score <= -MIN_MATE_VALUE)
+        score -= ply;
+    return score;
+}
+
+Score computeOriginalScore(Score score, int ply)
+{
+    if (score >= MIN_MATE_VALUE)
+        score -= ply;
+    else if (score <= -MIN_MATE_VALUE)
+        score += ply;
+    return score;
 }

@@ -10,10 +10,10 @@ GameState Engine::getGameState(MoveList moves)
     return move_generator.squareUnderAttack(board, king_square, board.white_to_move) ? CHECKMATE : DRAW;
 }
 
-uint64 Engine::perft(int depth, bool divide)
+uint64 Engine::perft(int remaining_depth, bool divide)
 {
     MoveList legal_moves = move_generator.generateLegalMoves(board);
-    if (depth == 1)
+    if (remaining_depth == 1)
         return legal_moves.size;
 
     uint64 total_nodes = 0;
@@ -21,7 +21,7 @@ uint64 Engine::perft(int depth, bool divide)
     {
         Move move = legal_moves.moves[i];
         move_generator.makeMove(board, move);
-        uint64 nodes = perft(depth - 1);
+        uint64 nodes = perft(remaining_depth - 1);
         move_generator.unmakeMove(board, move);
         if (divide)
             log(PERFT, getSquareName(move.from) + getSquareName(move.to) + ": " + std::to_string(nodes));
@@ -40,15 +40,23 @@ Score Engine::evaluateBoard()
 Move Engine::search()
 {
     evaluated_nodes = 0;
-    best_root_score = NEG_INFINITY;
-    best_root_move = NULL_MOVE;
+    Score best_root_score = NEG_INFINITY;
+    Move best_root_move = NULL_MOVE;
 
     timer.start();
     for (int depth = 1; depth <= MAX_SEARCH_DEPTH && timer.timeLeft(); depth++)
     {
-        best_root_score = negamax_search(0, depth, NEG_INFINITY, POS_INFINITY);
-        log(SEARCH, "Depth " + std::to_string(depth) + " best move " + best_root_move.toString() +
-                        " score " + std::to_string(best_root_score));
+        best_move_of_iteration = NULL_MOVE;
+        best_score_of_iteration = negamax_search(0, depth, NEG_INFINITY, POS_INFINITY);
+        log(SEARCH, "Depth " + std::to_string(depth) + " best move " + best_move_of_iteration.toString() +
+                        " score " + std::to_string(best_score_of_iteration));
+
+        // throw away partial results if out of time
+        if (timer.timeLeft())
+        {
+            best_root_score = best_score_of_iteration;
+            best_root_move = best_move_of_iteration;
+        }
     }
 
     if (timer.timeLeft())
@@ -71,20 +79,17 @@ void Engine::calculateMoveScores(MoveList &moves)
     for (int i = 0; i < moves.size; i++)
     {
         Move move = moves.moves[i];
-        // search previously best move first
+        // search previously best move first, which will likely cause a beta cutoff
         if (move == best_move)
             moves.scores[i] = POS_INFINITY;
-
-        // promotions
+        // then promotions
         else if (move.promotion)
             moves.scores[i] = getPieceValue(move.promotion) + 20000;
-
-        // Most Valuable Victim – Least Valuable Aggressor
+        // then captures according to Most Valuable Victim – Least Valuable Aggressor
         // i.e., prioritize captures of high value with low value pieces
         else if (move.captured_piece != EMPTY)
             moves.scores[i] = getPieceValue(move.captured_piece) - getPieceValue(move.piece) + 10000;
-
-        // todo add killer moves, history later on
+        // then quiet non-capture moves
         else
             moves.scores[i] = 0;
     }
@@ -92,52 +97,50 @@ void Engine::calculateMoveScores(MoveList &moves)
 
 Move Engine::pickBestMove(MoveList &moves)
 {
-    int best_move_index = -1;
-    Score best_score = NEG_INFINITY;
+    int best_move_index = 0;
+    Score best_score = moves.scores[0];
 
-    for (int i = 0; i < moves.size; i++)
+    for (int i = 1; i < moves.size; i++)
+    {
+        if (moves.scores[i] == USED_MOVE)
+            continue;
         if (moves.scores[i] > best_score)
         {
             best_score = moves.scores[i];
             best_move_index = i;
         }
+    }
 
-    // mark selected move as used => ensure it is not picked again
-    if (best_move_index != -1)
-        moves.scores[best_move_index] = NEG_INFINITY;
-    else
-        std::cout << "Does this ever happen?" << std::endl;
-
+    moves.scores[best_move_index] = USED_MOVE;
     return moves.moves[best_move_index];
 }
 
-// negamax search with alpha beta pruning and quiescence
-Score Engine::negamax_search(int depth, int remaining_depth, Score lower_bound, Score upper_bound)
+Score Engine::negamax_search(int ply, int remaining_depth, Score lower_bound, Score upper_bound)
 {
     // use results from transposition table if possible
     Score original_lower_bound = lower_bound;
     /*
     TranspositionEntry *entry = transposition_table.probe(board.hash);
+    Score retrieved_score = computeOriginalScore(entry->score, ply);
     if (entry != nullptr && entry->depth >= remaining_depth)
     {
         // immediately return score if already computed
-        bool below_lower_bound = (entry->type == EXACT || entry->type == UPPER_BOUND) && entry->score <= lower_bound;
-        bool above_upper_bound = (entry->type == EXACT || entry->type == LOWER_BOUND) && entry->score >= upper_bound;
+        bool below_lower_bound = (entry->type == EXACT || entry->type == UPPER_BOUND) && retrieved_score <= lower_bound;
+        bool above_upper_bound = (entry->type == EXACT || entry->type == LOWER_BOUND) && retrieved_score >= upper_bound;
         if (below_lower_bound || above_upper_bound)
-        return entry->score;
+        return retrieved_score;
 
         // tighten lower bound and upper bound
-        if (entry->type == LOWER_BOUND && entry->score > lower_bound)
-        lower_bound = entry->score;
-        if (entry->type == UPPER_BOUND && entry->score < upper_bound)
-        upper_bound = entry->score;
+        if (entry->type == LOWER_BOUND && retrieved_score > lower_bound)
+        lower_bound = retrieved_score;
+        if (entry->type == UPPER_BOUND && retrieved_score < upper_bound)
+        upper_bound = retrieved_score;
 
         if (lower_bound >= upper_bound)
-        return entry->score;
+        return retrieved_score;
     }
     */
 
-    // ? maybe store quiescence, checkmates and draws in transposition table?
     // return evaluation for leaf nodes (max depth reached)
     BoundType type = EXACT;
     if (remaining_depth == 0)
@@ -146,23 +149,23 @@ Score Engine::negamax_search(int depth, int remaining_depth, Score lower_bound, 
 
     MoveList legal_moves = move_generator.generateLegalMoves(board);
     GameState game_state = getGameState(legal_moves);
-    // add depth to prefer fast games
-    // ? could this mess with the transition table? => add depth back when storing in table
+    // add ply to prefer fast games
     if (game_state == CHECKMATE)
-        return -MATE_VALUE + depth;
+        return -MATE_VALUE + ply;
+    // do not add ply to avoid drawn out draws
     if (game_state == DRAW)
-        return DRAW_VALUE + depth;
+        return DRAW_VALUE;
 
     // evaluate moves until pruning possible
     calculateMoveScores(legal_moves);
     Score best_score = NEG_INFINITY;
-    Move best_move;
+    Move best_move = NULL_MOVE;
     for (int i = 0; i < legal_moves.size; i++)
     {
         Move move = pickBestMove(legal_moves);
         makeMove(move);
         // swap and negate lower/upper bounds since the opponent tries to minimize our score
-        Score score = -negamax_search(depth + 1, remaining_depth - 1, -upper_bound, -lower_bound);
+        Score score = -negamax_search(ply + 1, remaining_depth - 1, -upper_bound, -lower_bound);
         unmakeMove(move);
 
         // keep track of best move
@@ -170,14 +173,12 @@ Score Engine::negamax_search(int depth, int remaining_depth, Score lower_bound, 
         {
             best_score = score;
             best_move = move;
+            if (ply == 0)
+                best_move_of_iteration = move;
 
             // update lower bound if exceeded
             if (score > lower_bound)
-            {
                 lower_bound = score;
-                if (depth == 0 && score > best_root_score)
-                    best_root_move = move;
-            }
         }
 
         // prune if upper bound exceeded
@@ -186,20 +187,22 @@ Score Engine::negamax_search(int depth, int remaining_depth, Score lower_bound, 
             break;
 
         // interrupt search if time is up
-        if (!timer.timeLeft())
-            return best_score;
+        // if (!timer.timeLeft())
+        //     return best_score;
     }
 
     if (best_score <= original_lower_bound)
         type = UPPER_BOUND;
     else if (best_score >= upper_bound)
         type = LOWER_BOUND;
-    transposition_table.store(board.hash, best_score, best_move, remaining_depth, type);
+
+    Score transposition_score = computeTranspositionScore(best_score, ply);
+    transposition_table.store(board.hash, transposition_score, best_move, remaining_depth, type);
     return best_score;
 }
 
 // ? maybe make use of transposition table?
-Score Engine::quiescence(Score lower_bound, Score upper_bound, int depth)
+Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
 {
     // use static evaluation as baseline
     // in case no further captures are possible
@@ -210,7 +213,7 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int depth)
         lower_bound = stand_pat;
 
     // return if max depth exceeded or if current position is really bad (delta pruning)
-    if (depth >= MAX_QUIESCENCE_DEPTH || stand_pat + DELTA_VALUE < lower_bound)
+    if (ply >= MAX_QUIESCENCE_DEPTH || stand_pat + DELTA_VALUE < lower_bound)
         return stand_pat;
 
     // further examine captures, checks and promotions
@@ -224,7 +227,7 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int depth)
             continue;
 
         makeMove(move);
-        Score score = -quiescence(-upper_bound, -lower_bound, depth + 1);
+        Score score = -quiescence(-upper_bound, -lower_bound, ply + 1);
         unmakeMove(move);
 
         if (score >= upper_bound)
@@ -232,8 +235,8 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int depth)
         if (score > lower_bound)
             lower_bound = score;
 
-        if (!timer.timeLeft())
-            return lower_bound;
+        // if (!timer.timeLeft())
+        //     return lower_bound;
     }
 
     return lower_bound;

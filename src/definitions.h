@@ -23,6 +23,7 @@ const std::string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQk
 const int MAX_MOVES = 200;
 const Score POS_INFINITY = 2147483647;
 const Score NEG_INFINITY = -2147483648;
+const Score USED_MOVE = NEG_INFINITY;
 const Clock HALF_MOVE_CLOCK_RESET = -1;
 const Clock HALF_MOVE_CLOCK_LIMIT = 100;
 

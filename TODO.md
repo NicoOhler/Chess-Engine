@@ -56,6 +56,9 @@
 ### Nice-To-Haves for Later
 + time management
     + cap the search time at remaining time/20 + increment/2
+    + no more time left => ensure consistent state
+        + throw away result of current iteration?
+        + throw away pending updates to transposition table on early exit?
 + UCI support
     + focus on subset required for playing, connecting to GUI and testing
 + setup Sequential Probability Ratio Test

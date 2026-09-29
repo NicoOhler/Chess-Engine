@@ -11,6 +11,7 @@ const Score QUEEN_VALUE = 900;
 const Score KING_VALUE = 20000;
 const Score DELTA_VALUE = 800;
 const Score MATE_VALUE = 6000000;
+const Score MIN_MATE_VALUE = MATE_VALUE - MAX_SEARCH_DEPTH;
 const Score DRAW_VALUE = -200;
 const Score ISOLATED_PAWN_VALUE = -50;
 const Score DOUBLED_PAWN_VALUE = -50;

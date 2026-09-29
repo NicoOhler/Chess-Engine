@@ -35,8 +35,8 @@ private:
     Timer timer;
 
     uint64 evaluated_nodes = 0;
-    Score best_root_score = 0;
-    Move best_root_move = NULL_MOVE;
+    Score best_score_of_iteration = 0;
+    Move best_move_of_iteration = NULL_MOVE;
 
     void calculateMoveScores(MoveList &moves);
     void sortMoves(MoveList &moves);

@@ -107,6 +107,35 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
+            "name": "Perft 6 w/ Divide",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/engine",
+            "args": [
+                "-m",
+                "p",
+                "-p",
+                "6",
+                "-d",
+                "-e",
+                "119060324"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build Chess Engine",
+            "miDebuggerPath": "/usr/bin/gdb",
+        },
+        {
             "name": "Perft 7 w/ Divide",
             "type": "cppdbg",
             "request": "launch",
@@ -150,6 +179,37 @@
                 "-d",
                 "-e",
                 "119060324"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build Chess Engine",
+            "miDebuggerPath": "/usr/bin/gdb",
+        },
+        {
+            "name": "Hard Custom Perft",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/engine",
+            "args": [
+                "-m",
+                "p",
+                "-f",
+                "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
+                "-p",
+                "5",
+                "-d",
+                "-e",
+                "89941194"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
