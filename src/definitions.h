@@ -41,7 +41,7 @@ const Position DOWN_RIGHT = -7;
 const Milliseconds SEARCH_TIME_LIMIT = 5000; // milliseconds
 const int TRANSPOSITION_TABLE_SIZE = 256;    // megabytes
 const int DEFAULT_PERFT_DEPTH = 7;
-const int MAX_SEARCH_DEPTH = 4;
+const int MAX_SEARCH_DEPTH = 6;
 const int MAX_QUIESCENCE_DEPTH = 12;
 
 enum PIECES
@@ -106,6 +106,7 @@ enum MODES
 {
     UCI_MODE = 'u',
     PLAY_MODE = 'c',
+    SELF_PLAY_MODE = 'e',
     PERFT_MODE = 'p',
     SEARCH_MODE = 's'
 };

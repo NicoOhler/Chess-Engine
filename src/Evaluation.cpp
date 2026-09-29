@@ -49,7 +49,7 @@ Score Evaluation::evaluatePawnStructure(Board board)
     Bitboard own_pawns_editable = own_pawns;
 
     // count own isolated, doubled and blocked pawns
-    int own_isolated_pawns, own_doubled_pawns, own_blocked_pawns;
+    int own_isolated_pawns = 0, own_doubled_pawns = 0, own_blocked_pawns = 0;
     while (own_pawns_editable)
     {
         Position square = clearRightmostSetBit(own_pawns_editable);

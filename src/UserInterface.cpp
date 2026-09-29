@@ -8,7 +8,10 @@ void UserInterface::start()
         startUCI();
         break;
     case PLAY_MODE:
-        startGameLoop();
+        startRegularPlay();
+        break;
+    case SELF_PLAY_MODE:
+        startSelfPlay();
         break;
     case PERFT_MODE:
         startPerft();
@@ -27,15 +30,17 @@ void UserInterface::startSearch()
 {
     engine.initializeStartPosition(fen);
     log(CHESS_BOARD, "Starting search with a time limit of " + std::to_string(search_time) + "ms");
-    engine.search();
+    Move best_move = engine.search();
+    if (best_move == NULL_MOVE)
+        log(SEARCH, "No legal moves for current board state.");
 }
 
 void UserInterface::startPerft()
 {
     engine.initializeStartPosition(fen);
-    log(PERFT, "Starting perft with a depth of " + std::to_string(depth));
+    log(PERFT, "Starting perft with a depth of " + std::to_string(ply));
     timer.start();
-    uint64 nodes = engine.perft(depth > 0 ? depth : MAX_SEARCH_DEPTH, divide);
+    uint64 nodes = engine.perft(ply > 0 ? ply : MAX_SEARCH_DEPTH, divide);
     timer.stop(PERFT);
     log(PERFT, "Nodes searched: " + std::to_string(nodes));
     if (expected_perft)
@@ -47,13 +52,13 @@ void UserInterface::startPerft()
 
 void UserInterface::startUCI()
 {
-    std::cout << "ChessEngine started in UCI mode" << std::endl;
+    log(UI, "ChessEngine started in UCI mode");
     std::string command;
     while (std::getline(std::cin, command))
     {
         if (command == "uci")
         {
-            std::cout << "id name Cumshot Chess Engine" << std::endl;
+            std::cout << "id name Chess Engine" << std::endl;
             std::cout << "id author Nico Ohler" << std::endl;
             std::cout << "uciok" << std::endl;
         }
@@ -77,23 +82,45 @@ void UserInterface::startUCI()
     }
 }
 
-void UserInterface::startGameLoop()
+void UserInterface::startRegularPlay()
 {
+    log(UI, "ChessEngine started in regular play mode");
     engine.initializeStartPosition(fen);
     printGameState(engine.getBoard());
     MoveList moves = engine.getLegalMoves();
-    bool ai_turn = true;
+    bool ai_turn = promptForPlayerColor() != engine.getBoard().white_to_move;
+    log(UI, (ai_turn ? "The AI starts.\n" : "You start.\n"));
 
     do
     {
-        Move move = ai_turn ? engine.search() : getLegalMoveFromUser(moves);
+        Move move = ai_turn ? engine.search() : promptForLegalMove(moves);
         if (play_vs_ai)
             ai_turn = !ai_turn;
         applyAndTrackMove(move);
         printGameState(engine.getBoard());
         moves = engine.getLegalMoves();
     } while (engine.getGameState(moves) == IN_PROGRESS);
-    std::cout << (engine.getGameState(moves) == CHECKMATE ? "Checkmate" : "Draw") << std::endl;
+    log(UI, (engine.getGameState(moves) == CHECKMATE ? "Checkmate" : "Draw"));
+}
+
+void UserInterface::startSelfPlay()
+{
+    log(UI, "ChessEngine started in self play mode.");
+    engine.initializeStartPosition(fen);
+    printGameState(engine.getBoard());
+    MoveList moves = engine.getLegalMoves();
+    std::string input;
+
+    do
+    {
+        Move move = engine.search();
+        log(UI, "Press Enter to apply the chosen move.");
+        std::getline(std::cin, input);
+        applyAndTrackMove(move);
+        printGameState(engine.getBoard());
+        moves = engine.getLegalMoves();
+    } while (engine.getGameState(moves) == IN_PROGRESS);
+    log(UI, (engine.getGameState(moves) == CHECKMATE ? "Checkmate" : "Draw"));
 }
 
 void UserInterface::applyAndTrackMove(Move move)
@@ -117,7 +144,7 @@ void UserInterface::applyAndTrackMove(Move move)
     engine.makeMove(move);
 }
 
-Move UserInterface::getLegalMoveFromUser(MoveList legal_moves)
+Move UserInterface::promptForLegalMove(MoveList legal_moves)
 {
     std::string input;
     while (true)
@@ -165,7 +192,7 @@ Move UserInterface::getLegalMoveFromUser(MoveList legal_moves)
             if (legal_move.from == from && legal_move.to == to)
             {
                 if (legal_move.promotion)
-                    legal_move.promotion = getPromotionChoice();
+                    legal_move.promotion = promptForPromotionChoice();
                 return legal_move;
             }
         }
@@ -173,7 +200,31 @@ Move UserInterface::getLegalMoveFromUser(MoveList legal_moves)
     }
 }
 
-Piece UserInterface::getPromotionChoice()
+bool UserInterface::promptForPlayerColor()
+{
+    std::string input;
+    while (true)
+    {
+        std::cout << "Enter your color: ";
+        std::getline(std::cin, input);
+
+        if (input[0] == 'b' || input[0] == 'B')
+        {
+            std::cout << "You chose black." << std::endl;
+            return false;
+        }
+
+        if (input[0] == 'w' || input[0] == 'W')
+        {
+            std::cout << "You chose white." << std::endl;
+            return true;
+        }
+
+        std::cout << "Invalid color. Please enter 'w' for white or 'b' for black." << std::endl;
+    }
+}
+
+Piece UserInterface::promptForPromotionChoice()
 {
     std::cout << "Choose promotion piece: " << std::endl;
     std::cout << "Q - Queen" << std::endl;
@@ -219,7 +270,10 @@ void UserInterface::parseParameters(int argc, char *argv[])
         else if (std::string(argv[i]) == "-f" && i + 1 < argc)
             fen = argv[++i];
         else if (std::string(argv[i]) == "-p" && i + 1 < argc)
-            depth = std::stoi(argv[++i]);
+        {
+            ply = std::stoi(argv[++i]);
+            log(ENGINE_SETTINGS, "Set search ply/depth to " + std::to_string(ply));
+        }
         else if (std::string(argv[i]) == "-e" && i + 1 < argc)
             expected_perft = std::stoull(argv[++i]);
         else if (std::string(argv[i]) == "-d")
@@ -246,9 +300,9 @@ void UserInterface::parseParameters(int argc, char *argv[])
 void UserInterface::printHelp(std::string executable_name)
 {
     std::cout << "Usage: " << executable_name << " [-m mode] [-f FEN] [-p ply] [-d] [-h]\n"
-              << "  -m mode: Set the engine mode (u for UCI, c for console, p for perft)\n"
+              << "  -m mode: Set the engine mode (u for UCI, c for console, p for perft, e for engine self play)\n"
               << "  -f FEN: Start the game with the given FEN string\n"
-              << "  -p ply: Run perft with the given ply/depth/number of half moves)\n"
+              << "  -p ply: Run perft/search with the given ply/depth/number of half moves)\n"
               << "  -d: Divide perft results\n"
               << "  -t: Set search time (in milliseconds)\n"
               << "  -h: Show this help message" << std::endl;

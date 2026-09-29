@@ -1,9 +1,4 @@
 ### Important Features
-+ double check negamax algorithm
-    + visualize algorithm on paper for yourself
-    + understand its logic
-    + check whether implementation matches default algorithm
-    + double check using LLM
 + improve move ordering
     + move ordering is typically staged
         + retrieve best previous move and check it
@@ -15,8 +10,6 @@
         + quiet moves
         + bad captures
     + implement staging (except for PV) later
-    + sorting all moves is a waste of time
-        + instead fetch highest scored move on demand
     + principal variation (best move) from previous search
         + retrieved via hash from transposition table
         + verify its legality

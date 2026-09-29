@@ -16,18 +16,20 @@ private:
     // default parameters
     Mode mode = UCI_MODE;
     std::string fen = START_FEN;
-    int depth = -1;
+    int ply = -1;
     bool divide = false;
     bool play_vs_ai = true;
     uint64 expected_perft = 0;
     Milliseconds search_time = SEARCH_TIME_LIMIT;
 
-    void startGameLoop();
+    void startRegularPlay();
+    void startSelfPlay();
     void startPerft();
     void startUCI();
     void startSearch();
-    void printHelp(std::string executable_name);
-    Move getLegalMoveFromUser(MoveList legal_moves);
     void applyAndTrackMove(Move move);
-    Piece getPromotionChoice();
+    void printHelp(std::string executable_name);
+    Move promptForLegalMove(MoveList legal_moves);
+    bool promptForPlayerColor();
+    Piece promptForPromotionChoice();
 };

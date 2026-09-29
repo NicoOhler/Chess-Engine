@@ -7,7 +7,7 @@ GameState Engine::getGameState(MoveList moves)
     if (!moves.empty())
         return IN_PROGRESS;
     Position king_square = getRightmostSetBit(board.white_to_move ? board.white_king : board.black_king);
-    return move_generator.squareUnderAttack(board, king_square, board.white_to_move) ? CHECKMATE : DRAW;
+    return move_generator.squareUnderAttack(board, king_square, !board.white_to_move) ? CHECKMATE : DRAW;
 }
 
 uint64 Engine::perft(int remaining_depth, bool divide)
@@ -48,8 +48,8 @@ Move Engine::search()
     {
         best_move_of_iteration = NULL_MOVE;
         best_score_of_iteration = negamax_search(0, depth, NEG_INFINITY, POS_INFINITY);
-        log(SEARCH, "Depth " + std::to_string(depth) + " best move " + best_move_of_iteration.toString() +
-                        " score " + std::to_string(best_score_of_iteration));
+        log(SEARCH_DEPTHS, "Depth " + std::to_string(depth) + " best move " + best_move_of_iteration.toString() +
+                               " score " + std::to_string(best_score_of_iteration));
 
         // throw away partial results if out of time
         if (timer.timeLeft())
@@ -65,8 +65,8 @@ Move Engine::search()
         log(SEARCH, "Search interrupted due to time limit.");
 
     log(SEARCH, "Search score: " + std::to_string(best_root_score));
+    log(SEARCH, "Suggested move: " + best_root_move.toString());
     log(SEARCH, "Evaluated nodes: " + std::to_string(evaluated_nodes));
-    assert(best_root_move != NULL_MOVE, "No best move found");
     return best_root_move;
 }
 
@@ -118,34 +118,37 @@ Move Engine::pickBestMove(MoveList &moves)
 Score Engine::negamax_search(int ply, int remaining_depth, Score lower_bound, Score upper_bound)
 {
     // use results from transposition table if possible
-    Score original_lower_bound = lower_bound;
-    /*
     TranspositionEntry *entry = transposition_table.probe(board.hash);
-    Score retrieved_score = computeOriginalScore(entry->score, ply);
-    if (entry != nullptr && entry->depth >= remaining_depth)
+    if (entry != nullptr && entry->remaining_depth >= remaining_depth)
     {
+        log(TRANSPOSITION_TABLE_MATCH, "Found position in transposition table");
+        Score retrieved_score = computeOriginalScore(entry->score, ply);
         // immediately return score if already computed
         bool below_lower_bound = (entry->type == EXACT || entry->type == UPPER_BOUND) && retrieved_score <= lower_bound;
         bool above_upper_bound = (entry->type == EXACT || entry->type == LOWER_BOUND) && retrieved_score >= upper_bound;
         if (below_lower_bound || above_upper_bound)
-        return retrieved_score;
+        {
+            log(TRANSPOSITION_TABLE_MATCH, "Prune tree thanks to transposition table");
+            return retrieved_score;
+        }
 
         // tighten lower bound and upper bound
         if (entry->type == LOWER_BOUND && retrieved_score > lower_bound)
-        lower_bound = retrieved_score;
+            lower_bound = retrieved_score;
         if (entry->type == UPPER_BOUND && retrieved_score < upper_bound)
-        upper_bound = retrieved_score;
+            upper_bound = retrieved_score;
 
         if (lower_bound >= upper_bound)
-        return retrieved_score;
+        {
+            log(TRANSPOSITION_TABLE_MATCH, "Prune tree thanks to transposition table");
+            return retrieved_score;
+        }
     }
-    */
 
     // return evaluation for leaf nodes (max depth reached)
-    BoundType type = EXACT;
     if (remaining_depth == 0)
+        // return quiescence(lower_bound, upper_bound);
         return evaluateBoard();
-    // return quiescence(lower_bound, upper_bound);
 
     MoveList legal_moves = move_generator.generateLegalMoves(board);
     GameState game_state = getGameState(legal_moves);
@@ -157,6 +160,8 @@ Score Engine::negamax_search(int ply, int remaining_depth, Score lower_bound, Sc
         return DRAW_VALUE;
 
     // evaluate moves until pruning possible
+    BoundType type = EXACT;
+    Score original_lower_bound = lower_bound;
     calculateMoveScores(legal_moves);
     Score best_score = NEG_INFINITY;
     Move best_move = NULL_MOVE;
@@ -265,6 +270,7 @@ void Engine::unmakeMove(Move move)
 void Engine::setTimeLimit(Milliseconds time_limit)
 {
     timer.limit = time_limit;
+    log(ENGINE_SETTINGS, "Set time limit to " + std::to_string(time_limit));
 }
 
 Board Engine::getBoard()

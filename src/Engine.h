@@ -39,7 +39,6 @@ private:
     Move best_move_of_iteration = NULL_MOVE;
 
     void calculateMoveScores(MoveList &moves);
-    void sortMoves(MoveList &moves);
     Move pickBestMove(MoveList &moves);
     Score negamax_search(int depth, int remaining_depth, Score alpha, Score beta);
     Score quiescence(Score alpha, Score beta, int max_depth = MAX_QUIESCENCE_DEPTH);

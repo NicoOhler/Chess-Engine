@@ -10,7 +10,7 @@ const bool LOG_TO_CONSOLE = true;
 const bool APPEND_TO_FILE = false;
 
 const LogType LOG_TYPE_ENABLED = 0x1;
-const LogType WHITE = 0x2; // ? color logging
+const LogType WHITE = 0x2;
 
 const LogType CHESS_BOARD = WHITE | LOG_TYPE_ENABLED;
 const LogType MOVE_GENERATOR = WHITE;
@@ -24,9 +24,13 @@ const LogType REMOVE_ILLEGAL_MOVES = WHITE;
 const LogType REMAINING_MOVES = WHITE;
 const LogType PERFT = WHITE | LOG_TYPE_ENABLED;
 const LogType SEARCH = WHITE | LOG_TYPE_ENABLED;
+const LogType SEARCH_DEPTHS = WHITE | LOG_TYPE_ENABLED;
 const LogType FEN = WHITE | LOG_TYPE_ENABLED;
 const LogType TIME = WHITE | LOG_TYPE_ENABLED;
 const LogType EVALUATION = WHITE;
+const LogType TRANSPOSITION_TABLE_MATCH = WHITE;
+const LogType ENGINE_SETTINGS = WHITE | LOG_TYPE_ENABLED;
+const LogType UI = WHITE | LOG_TYPE_ENABLED;
 
 void log(LogType logType, std::string message);
 
