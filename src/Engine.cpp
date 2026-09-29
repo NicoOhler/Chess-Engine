@@ -84,11 +84,11 @@ void Engine::calculateMoveScores(MoveList &moves)
             moves.scores[i] = POS_INFINITY;
         // then promotions
         else if (move.promotion)
-            moves.scores[i] = getPieceValue(move.promotion) + 20000;
-        // then captures according to Most Valuable Victim – Least Valuable Aggressor
+            moves.scores[i] = getPieceValue(move.promotion) + PROMOTION_VALUE;
+        // then captures according to Most Valuable Victim – Least Valuable Attacker
         // i.e., prioritize captures of high value with low value pieces
         else if (move.captured_piece != EMPTY)
-            moves.scores[i] = getPieceValue(move.captured_piece) - getPieceValue(move.piece) + 10000;
+            moves.scores[i] = getPieceValue(move.captured_piece) - getPieceValue(move.piece) + CAPTURE_VALUE;
         // then quiet non-capture moves
         else
             moves.scores[i] = 0;
@@ -147,8 +147,8 @@ Score Engine::negamax_search(int ply, int remaining_depth, Score lower_bound, Sc
 
     // return evaluation for leaf nodes (max depth reached)
     if (remaining_depth == 0)
-        // return quiescence(lower_bound, upper_bound);
-        return evaluateBoard();
+        return quiescence(lower_bound, upper_bound, ply);
+    // return evaluateBoard();
 
     MoveList legal_moves = move_generator.generateLegalMoves(board);
     GameState game_state = getGameState(legal_moves);
@@ -206,7 +206,6 @@ Score Engine::negamax_search(int ply, int remaining_depth, Score lower_bound, Sc
     return best_score;
 }
 
-// ? maybe make use of transposition table?
 Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
 {
     // use static evaluation as baseline
@@ -227,7 +226,6 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
     for (int i = 0; i < legal_moves.size; i++)
     {
         Move move = pickBestMove(legal_moves);
-        // todo also consider checks
         if (move.captured_piece == EMPTY && move.promotion == EMPTY)
             continue;
 

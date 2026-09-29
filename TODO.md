@@ -18,6 +18,8 @@
     + Most Valuable Victim - Least Valuable Attacker (MVV-LVA)
         + prioritize attacks with a lot to gain and little to lose
         + hardcoded 2D array lookup => fast and simple
+        + already implemented into move ordering
+        + optionally integrate into staged move generation
     + optionally Static Exchange Evaluation (SEE)
         + slow, needs to be paired with MVV-LVA
         + read wiki
@@ -31,10 +33,13 @@
         + requires decay mechanism
 + quiescence search
     + requires at least basic move ordering to avoid search explosion
-    + may benefit from pruning
-        + e.g. SEE < 0
     + score of current position is used as lower bound
         + assumes that own next move does not worsen the position (i.e. no zugzwang)
+    + additions
+        + consider checks
+        + maybe make use of transposition table?
+        + may benefit from pruning
+            + e.g. SEE < 0
 + other optimizations
     + use Piece as array index?
     + improve transposition table?

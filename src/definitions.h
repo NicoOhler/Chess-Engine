@@ -42,7 +42,7 @@ const Milliseconds SEARCH_TIME_LIMIT = 5000; // milliseconds
 const int TRANSPOSITION_TABLE_SIZE = 256;    // megabytes
 const int DEFAULT_PERFT_DEPTH = 7;
 const int MAX_SEARCH_DEPTH = 6;
-const int MAX_QUIESCENCE_DEPTH = 12;
+const int MAX_QUIESCENCE_DEPTH = 15;
 
 enum PIECES
 {

@@ -16,6 +16,8 @@ const Score DRAW_VALUE = -200;
 const Score ISOLATED_PAWN_VALUE = -50;
 const Score DOUBLED_PAWN_VALUE = -50;
 const Score BLOCKED_PAWN_VALUE = -50;
+const Score PROMOTION_VALUE = 20000;
+const Score CAPTURE_VALUE = 2000;
 
 class Evaluation
 {
