@@ -35,6 +35,7 @@ public:
     TranspositionTable(int megabytes = TRANSPOSITION_TABLE_SIZE);
     TranspositionEntry *probe(Hash hash);
     void store(Hash hash, Score score, Move best_move, int remaining_depth, BoundType type);
+    BoundType determineBoundType(Score score, Score lower_bound, Score upper_bound);
 
 private:
     uint64 table_size;

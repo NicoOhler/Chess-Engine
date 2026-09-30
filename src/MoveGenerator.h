@@ -125,4 +125,5 @@ public:
     MoveList generateLegalMoves(Board board, bool interesting_only = false);
     bool squareUnderAttack(Board &board, Position square, bool white_is_attacker);
     bool squaresUnderAttack(Board &board, Bitboard squares, bool white_is_attacker);
+    void markMoveAsUsed(MoveList &moves, Move move);
 };

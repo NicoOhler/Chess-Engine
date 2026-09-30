@@ -464,7 +464,6 @@ void MoveGenerator::generatePawnMoves(Board &board, MoveList &moves, bool intere
     }
 }
 
-// todo duplicate code
 void MoveGenerator::generateKnightMoves(Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
@@ -608,6 +607,16 @@ bool MoveGenerator::squaresUnderAttack(Board &board, Bitboard squares, bool whit
         if (squareUnderAttack(board, clearRightmostSetBit(squares), white_is_attacker))
             return true;
     return false;
+}
+
+void MoveGenerator::markMoveAsUsed(MoveList &moves, Move move)
+{
+    if (move == NULL_MOVE)
+        return;
+
+    for (int i = 0; i < moves.size; i++)
+        if (moves.moves[i] == move)
+            moves.scores[i] = USED_MOVE;
 }
 
 MoveGenerator &MoveGenerator::getInstance()

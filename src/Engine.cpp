@@ -46,8 +46,8 @@ Move Engine::search()
     timer.start();
     for (int depth = 1; depth <= MAX_SEARCH_DEPTH && timer.timeLeft(); depth++)
     {
-        best_move_of_iteration = NULL_MOVE;
-        best_score_of_iteration = negamax_search(0, depth, NEG_INFINITY, POS_INFINITY);
+        Score best_score_of_iteration = pv_search(0, depth, NEG_INFINITY, POS_INFINITY);
+        Move best_move_of_iteration = transposition_table.probe(board.hash)->best_move;
         log(SEARCH_DEPTHS, "Depth " + std::to_string(depth) + " best move " + best_move_of_iteration.toString() +
                                " score " + std::to_string(best_score_of_iteration));
 
@@ -59,9 +59,8 @@ Move Engine::search()
         }
     }
 
-    if (timer.timeLeft())
-        timer.stop(SEARCH);
-    else
+    timer.stop(SEARCH);
+    if (!timer.timeLeft())
         log(SEARCH, "Search interrupted due to time limit.");
 
     log(SEARCH, "Search score: " + std::to_string(best_root_score));
@@ -115,62 +114,100 @@ Move Engine::pickBestMove(MoveList &moves)
     return moves.moves[best_move_index];
 }
 
-Score Engine::negamax_search(int ply, int remaining_depth, Score lower_bound, Score upper_bound)
+// Principal Variation Search (PVS)
+Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score upper_bound)
 {
+    Move best_move = NULL_MOVE;
+    Score best_score = NEG_INFINITY;
+    Score original_lower_bound = lower_bound;
+    Score original_upper_bound = upper_bound;
+    bool null_window = false;
+
     // use results from transposition table if possible
     TranspositionEntry *entry = transposition_table.probe(board.hash);
-    if (entry != nullptr && entry->remaining_depth >= remaining_depth)
+    if (entry != nullptr)
     {
-        log(TRANSPOSITION_TABLE_MATCH, "Found position in transposition table");
-        Score retrieved_score = computeOriginalScore(entry->score, ply);
-        // immediately return score if already computed
-        bool below_lower_bound = (entry->type == EXACT || entry->type == UPPER_BOUND) && retrieved_score <= lower_bound;
-        bool above_upper_bound = (entry->type == EXACT || entry->type == LOWER_BOUND) && retrieved_score >= upper_bound;
-        if (below_lower_bound || above_upper_bound)
+        best_move = entry->best_move;
+        // reuse previously computed score if it was computed with sufficient depth
+        if (entry->remaining_depth >= remaining_depth)
         {
-            log(TRANSPOSITION_TABLE_MATCH, "Prune tree thanks to transposition table");
-            return retrieved_score;
-        }
+            log(TRANSPOSITION_TABLE_MATCH, "Found position in transposition table");
+            Score retrieved_score = computeOriginalScore(entry->score, ply);
 
-        // tighten lower bound and upper bound
-        if (entry->type == LOWER_BOUND && retrieved_score > lower_bound)
-            lower_bound = retrieved_score;
-        if (entry->type == UPPER_BOUND && retrieved_score < upper_bound)
-            upper_bound = retrieved_score;
-
-        if (lower_bound >= upper_bound)
-        {
-            log(TRANSPOSITION_TABLE_MATCH, "Prune tree thanks to transposition table");
-            return retrieved_score;
+            // immediately return score if already computed
+            if (entry->type == EXACT)
+                return retrieved_score;
+            // tighten lower bound and upper bound
+            if (entry->type == LOWER_BOUND && retrieved_score > lower_bound)
+                lower_bound = retrieved_score;
+            if (entry->type == UPPER_BOUND && retrieved_score < upper_bound)
+                upper_bound = retrieved_score;
+            if (lower_bound >= upper_bound)
+                return retrieved_score;
         }
     }
 
     // return evaluation for leaf nodes (max depth reached)
     if (remaining_depth == 0)
         return quiescence(lower_bound, upper_bound, ply);
-    // return evaluateBoard();
 
+    // explore retrieved move first to hopefully cause a beta cutoff before generating all legal moves
+    if (best_move != NULL_MOVE)
+    {
+        null_window = true;
+        makeMove(best_move);
+        best_score = -pv_search(ply + 1, remaining_depth - 1, -upper_bound, -lower_bound);
+        unmakeMove(best_move);
+        if (best_score > lower_bound)
+            lower_bound = best_score;
+
+        if (lower_bound >= upper_bound)
+        {
+            Score transposition_score = computeTranspositionScore(best_score, ply);
+            transposition_table.store(board.hash, transposition_score, best_move, remaining_depth, LOWER_BOUND);
+            return lower_bound;
+        }
+    }
+
+    // generate all legal moves and mark previously best move as used to avoid searching it twice
     MoveList legal_moves = move_generator.generateLegalMoves(board);
+    move_generator.markMoveAsUsed(legal_moves, best_move);
+
     GameState game_state = getGameState(legal_moves);
-    // add ply to prefer fast games
     if (game_state == CHECKMATE)
+        // add ply to prefer fast games
         return -MATE_VALUE + ply;
-    // do not add ply to avoid drawn out draws
     if (game_state == DRAW)
+        // do not add ply to avoid drawn out draws
         return DRAW_VALUE;
 
     // evaluate moves until pruning possible
-    BoundType type = EXACT;
-    Score original_lower_bound = lower_bound;
     calculateMoveScores(legal_moves);
-    Score best_score = NEG_INFINITY;
-    Move best_move = NULL_MOVE;
+    Score score;
     for (int i = 0; i < legal_moves.size; i++)
     {
+        // interrupt search if time is up
+        // if (!timer.timeLeft())
+        //     return best_score;
+
+        // prune if upper bound exceeded
+        // i.e., opponent will pick another move that is better
+        if (upper_bound <= lower_bound)
+            break;
+
+        // explore best
         Move move = pickBestMove(legal_moves);
         makeMove(move);
-        // swap and negate lower/upper bounds since the opponent tries to minimize our score
-        Score score = -negamax_search(ply + 1, remaining_depth - 1, -upper_bound, -lower_bound);
+        if (null_window)
+        {
+            // search with null window (alpha, alpha + 1) to hopefully cause a beta cutoff
+            score = -pv_search(ply + 1, remaining_depth - 1, -lower_bound - 1, -lower_bound);
+            // research with full window (alpha, beta) if no beta cutoff occurred
+            if (score > lower_bound && score < upper_bound)
+                score = -pv_search(ply + 1, remaining_depth - 1, -upper_bound, -lower_bound);
+        }
+        else // search with full window precision (i.e., regular negamax search)
+            score = -pv_search(ply + 1, remaining_depth - 1, -upper_bound, -lower_bound);
         unmakeMove(move);
 
         // keep track of best move
@@ -178,29 +215,18 @@ Score Engine::negamax_search(int ply, int remaining_depth, Score lower_bound, Sc
         {
             best_score = score;
             best_move = move;
-            if (ply == 0)
-                best_move_of_iteration = move;
-
-            // update lower bound if exceeded
-            if (score > lower_bound)
-                lower_bound = score;
         }
 
-        // prune if upper bound exceeded
-        // i.e., opponent will pick another move that is better
-        if (upper_bound <= lower_bound)
-            break;
-
-        // interrupt search if time is up
-        // if (!timer.timeLeft())
-        //     return best_score;
+        // update lower bound if exceeded
+        if (score > lower_bound)
+        {
+            lower_bound = score;
+            null_window = true;
+        }
     }
 
-    if (best_score <= original_lower_bound)
-        type = UPPER_BOUND;
-    else if (best_score >= upper_bound)
-        type = LOWER_BOUND;
-
+    // store best move in transposition table
+    BoundType type = transposition_table.determineBoundType(best_score, original_lower_bound, original_upper_bound);
     Score transposition_score = computeTranspositionScore(best_score, ply);
     transposition_table.store(board.hash, transposition_score, best_move, remaining_depth, type);
     return best_score;

@@ -1,4 +1,6 @@
 ### Important Features
++ split up move generation
+    + for staged move generation/ordering/pruning
 + improve move ordering
     + move ordering is typically staged
         + retrieve best previous move and check it
