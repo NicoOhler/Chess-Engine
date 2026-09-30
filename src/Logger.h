@@ -33,7 +33,6 @@ const LogType ENGINE_SETTINGS = WHITE | LOG_TYPE_ENABLED;
 const LogType UI = WHITE | LOG_TYPE_ENABLED;
 
 void log(LogType logType, std::string message);
-std::string logTypeToString(LogType logType);
 
 class Logger
 {

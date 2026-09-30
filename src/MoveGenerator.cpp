@@ -609,6 +609,26 @@ bool MoveGenerator::squaresUnderAttack(Board &board, Bitboard squares, bool whit
     return false;
 }
 
+Move MoveGenerator::pickBestMove(MoveList &moves)
+{
+    int best_move_index = 0;
+    Score best_score = moves.scores[0];
+
+    for (int i = 1; i < moves.size; i++)
+    {
+        if (moves.scores[i] == USED_MOVE)
+            continue;
+        if (moves.scores[i] > best_score)
+        {
+            best_score = moves.scores[i];
+            best_move_index = i;
+        }
+    }
+
+    moves.scores[best_move_index] = USED_MOVE;
+    return moves.moves[best_move_index];
+}
+
 void MoveGenerator::markMoveAsUsed(MoveList &moves, Move move)
 {
     if (move == NULL_MOVE)
@@ -616,7 +636,10 @@ void MoveGenerator::markMoveAsUsed(MoveList &moves, Move move)
 
     for (int i = 0; i < moves.size; i++)
         if (moves.moves[i] == move)
+        {
             moves.scores[i] = USED_MOVE;
+            return;
+        }
 }
 
 MoveGenerator &MoveGenerator::getInstance()

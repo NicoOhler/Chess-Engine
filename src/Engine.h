@@ -36,8 +36,7 @@ private:
 
     uint64 evaluated_nodes = 0;
 
-    void calculateMoveScores(MoveList &moves);
-    Move pickBestMove(MoveList &moves);
+    void calculateMoveScores(MoveList &moves, TranspositionEntry *entry);
     Score pv_search(int depth, int remaining_depth, Score alpha, Score beta);
     Score quiescence(Score alpha, Score beta, int max_depth = MAX_QUIESCENCE_DEPTH);
 };

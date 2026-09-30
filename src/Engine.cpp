@@ -69,12 +69,10 @@ Move Engine::search()
     return best_root_move;
 }
 
-void Engine::calculateMoveScores(MoveList &moves)
+void Engine::calculateMoveScores(MoveList &moves, TranspositionEntry *entry)
 {
-    // extract best move from transposition table if available
-    TranspositionEntry *entry = transposition_table.probe(board.hash);
+    // retrieve best move from transposition table if available
     Move best_move = entry != nullptr ? entry->best_move : NULL_MOVE;
-
     for (int i = 0; i < moves.size; i++)
     {
         Move move = moves.moves[i];
@@ -94,40 +92,16 @@ void Engine::calculateMoveScores(MoveList &moves)
     }
 }
 
-Move Engine::pickBestMove(MoveList &moves)
-{
-    int best_move_index = 0;
-    Score best_score = moves.scores[0];
-
-    for (int i = 1; i < moves.size; i++)
-    {
-        if (moves.scores[i] == USED_MOVE)
-            continue;
-        if (moves.scores[i] > best_score)
-        {
-            best_score = moves.scores[i];
-            best_move_index = i;
-        }
-    }
-
-    moves.scores[best_move_index] = USED_MOVE;
-    return moves.moves[best_move_index];
-}
-
 // Principal Variation Search (PVS)
 Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score upper_bound)
 {
-    Move best_move = NULL_MOVE;
-    Score best_score = NEG_INFINITY;
     Score original_lower_bound = lower_bound;
     Score original_upper_bound = upper_bound;
-    bool null_window = false;
 
     // use results from transposition table if possible
     TranspositionEntry *entry = transposition_table.probe(board.hash);
     if (entry != nullptr)
     {
-        best_move = entry->best_move;
         // reuse previously computed score if it was computed with sufficient depth
         if (entry->remaining_depth >= remaining_depth)
         {
@@ -151,28 +125,8 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
     if (remaining_depth == 0)
         return quiescence(lower_bound, upper_bound, ply);
 
-    // explore retrieved move first to hopefully cause a beta cutoff before generating all legal moves
-    if (best_move != NULL_MOVE)
-    {
-        null_window = true;
-        makeMove(best_move);
-        best_score = -pv_search(ply + 1, remaining_depth - 1, -upper_bound, -lower_bound);
-        unmakeMove(best_move);
-        if (best_score > lower_bound)
-            lower_bound = best_score;
-
-        if (lower_bound >= upper_bound)
-        {
-            Score transposition_score = computeTranspositionScore(best_score, ply);
-            transposition_table.store(board.hash, transposition_score, best_move, remaining_depth, LOWER_BOUND);
-            return lower_bound;
-        }
-    }
-
-    // generate all legal moves and mark previously best move as used to avoid searching it twice
+    // generate and evaluate moves until pruning possible
     MoveList legal_moves = move_generator.generateLegalMoves(board);
-    move_generator.markMoveAsUsed(legal_moves, best_move);
-
     GameState game_state = getGameState(legal_moves);
     if (game_state == CHECKMATE)
         // add ply to prefer fast games
@@ -181,9 +135,10 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
         // do not add ply to avoid drawn out draws
         return DRAW_VALUE;
 
-    // evaluate moves until pruning possible
-    calculateMoveScores(legal_moves);
-    Score score;
+    calculateMoveScores(legal_moves, entry);
+    Move move, best_move = NULL_MOVE;
+    Score score, best_score = NEG_INFINITY;
+    bool null_window = false;
     for (int i = 0; i < legal_moves.size; i++)
     {
         // interrupt search if time is up
@@ -195,12 +150,20 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
         if (upper_bound <= lower_bound)
             break;
 
-        // explore best
-        Move move = pickBestMove(legal_moves);
+        // explore retrieved move first if available, then explore moves in order of score
+        if (i == 0 && entry != nullptr)
+        {
+            move = entry->best_move;
+            move_generator.markMoveAsUsed(legal_moves, move);
+            // todo move needs to be legal (to avoid hash collisions)
+            // ? why does exploring this move before move generation not make search faster
+        }
+        else
+            move = move_generator.pickBestMove(legal_moves);
         makeMove(move);
+        // search with null window (alpha, alpha + 1) to hopefully cause a beta cutoff
         if (null_window)
         {
-            // search with null window (alpha, alpha + 1) to hopefully cause a beta cutoff
             score = -pv_search(ply + 1, remaining_depth - 1, -lower_bound - 1, -lower_bound);
             // research with full window (alpha, beta) if no beta cutoff occurred
             if (score > lower_bound && score < upper_bound)
@@ -248,10 +211,11 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
 
     // further examine captures, checks and promotions
     MoveList legal_moves = move_generator.generateLegalMoves(board, true);
-    calculateMoveScores(legal_moves);
+    TranspositionEntry *entry = transposition_table.probe(board.hash);
+    calculateMoveScores(legal_moves, entry);
     for (int i = 0; i < legal_moves.size; i++)
     {
-        Move move = pickBestMove(legal_moves);
+        Move move = move_generator.pickBestMove(legal_moves);
         if (move.captured_piece == EMPTY && move.promotion == EMPTY)
             continue;
 
