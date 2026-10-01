@@ -1,4 +1,10 @@
 ### Important Features
++ today:
+    + delay move legality check to evaluation/exploration instead of checking all generated moves upfront
+    + exclude move undo information from move struct
+        + copy overhead
+        + RAM usage
+        + instead store history arrays like history_castling[MAX_PLY], history_ep[MAX_PLY] for unmake
 + split up move generation
     + for staged move generation/ordering/pruning
 + improve move ordering

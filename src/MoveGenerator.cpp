@@ -824,10 +824,18 @@ void MoveGenerator::detectDoublePawnPushForEnPassant(Board &board, Move &move)
 {
     Position from_row = move.from / 8;
     Position to_row = move.to / 8;
-    if (board.white_to_move && from_row == ROW_2 && to_row == ROW_4)
-        board.en_passant = move.from + UP;
-    else if (!board.white_to_move && from_row == ROW_7 && to_row == ROW_5)
-        board.en_passant = move.from + DOWN;
-    else
-        board.en_passant = NO_EN_PASSANT;
+    board.en_passant = NO_EN_PASSANT;
+    // mark en passant square if a pawn moved two squares forward and an enemy pawn can capture it
+    if (board.white_to_move && (from_row == ROW_2 && to_row == ROW_4))
+    {
+        Position ep_square = move.from + UP;
+        if ((white_pawn_attack_left[ep_square] | white_pawn_attack_right[ep_square]) & board.black_pawns)
+            board.en_passant = ep_square;
+    }
+    else if (!board.white_to_move && (from_row == ROW_7 && to_row == ROW_5))
+    {
+        Position ep_square = move.from + DOWN;
+        if ((black_pawn_attack_left[ep_square] | black_pawn_attack_right[ep_square]) & board.white_pawns)
+            board.en_passant = ep_square;
+    }
 }

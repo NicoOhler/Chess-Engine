@@ -46,7 +46,7 @@ struct Move
 };
 
 const Move UNDO_MOVE = Move{0, 0, UNDO, 0, 0, 0, 0, 0, 0};
-const Move NULL_MOVE = UNDO_MOVE;
+const Move NULL_MOVE = Move{0, 0, EMPTY, 0, 0, 0, 0, 0, 0};
 
 struct MoveList
 {

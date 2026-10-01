@@ -56,12 +56,13 @@ uint64 ZobristHash::updateHash(Move move, Board &board)
     hash ^= piece_at_square[move.from][move.piece];
 
     // remove previous en passant
-    bool is_pawn_move = move.piece == white_to_move ? WHITE_PAWN : BLACK_PAWN;
+    bool is_pawn_move = move.piece == (white_to_move ? WHITE_PAWN : BLACK_PAWN);
+    bool is_en_passant = is_pawn_move && (move.to == move.previous_en_passant);
     if (move.previous_en_passant != NO_EN_PASSANT)
     {
         hash ^= en_passant_file[move.previous_en_passant % 8];
         // apply en passant capture
-        if (move.to == move.previous_en_passant && is_pawn_move)
+        if (is_en_passant)
             hash ^= piece_at_square[move.to + (white_to_move ? DOWN : UP)][white_to_move ? BLACK_PAWN : WHITE_PAWN];
     }
 
@@ -70,7 +71,7 @@ uint64 ZobristHash::updateHash(Move move, Board &board)
         hash ^= en_passant_file[move.to % 8];
 
     // remove captured piece
-    if (move.captured_piece != EMPTY)
+    if (move.captured_piece != EMPTY && !is_en_passant)
         hash ^= piece_at_square[move.to][move.captured_piece];
 
     // add piece to new position
