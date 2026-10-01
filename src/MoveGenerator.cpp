@@ -341,10 +341,10 @@ MoveList MoveGenerator::generateLegalMoves(Board board, bool interesting_only)
     for (int i = 0; i < pseudo_legal_moves.size; i++)
     {
         Move move = pseudo_legal_moves.moves[i];
+        // legal if new king position is safe
+        bool king_color_before_move = board.white_to_move;
         makeMove(board, move);
-        // new position of king from side whose previous turn it was, has to be safe
-        Position king_square = getRightmostSetBit(board.white_to_move ? board.black_king : board.white_king);
-        bool king_is_safe = !squareUnderAttack(board, king_square, board.white_to_move);
+        bool king_is_safe = isKingSafe(board, king_color_before_move);
         unmakeMove(board, move);
         if (king_is_safe)
             legal_moves.append(move);
@@ -366,6 +366,12 @@ MoveList MoveGenerator::generatePseudoLegalMoves(Board &board, bool interesting_
     generateQueenMoves(board, moves, interesting_only);
     generateKingMoves(board, moves, interesting_only);
     return moves;
+}
+
+bool MoveGenerator::isKingSafe(Board board, bool king_is_white)
+{
+    Position king_square = getRightmostSetBit(king_is_white ? board.white_king : board.black_king);
+    return !squareUnderAttack(board, king_square, !king_is_white);
 }
 
 void MoveGenerator::generateKingMoves(Board &board, MoveList &moves, bool interesting_only)
@@ -417,7 +423,7 @@ void MoveGenerator::generatePawnMoves(Board &board, MoveList &moves, bool intere
     {
         Position to = clearRightmostSetBit(single_moves);
         // skip non promotion moves for interesting_only
-        if (interesting_only && to < UP && to >= NUM_SQUARES + DOWN)
+        if (interesting_only && to >= UP && to < NUM_SQUARES + DOWN)
             continue;
         Position from = to - direction;
         addPawnMoveWithPossiblePromotion(board, moves, Move{from, to, piece});

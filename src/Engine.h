@@ -17,6 +17,7 @@ public:
     Move search();
     uint64 perft(int depth, bool divide = false);
     Score evaluateBoard();
+    bool makeMoveIfLegal(Move move);
     void makeMove(Move move);
     void unmakeMove(Move move);
 

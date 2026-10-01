@@ -6,8 +6,7 @@ GameState Engine::getGameState(MoveList moves)
         return DRAW;
     if (!moves.empty())
         return IN_PROGRESS;
-    Position king_square = getRightmostSetBit(board.white_to_move ? board.white_king : board.black_king);
-    return move_generator.squareUnderAttack(board, king_square, !board.white_to_move) ? CHECKMATE : DRAW;
+    return move_generator.isKingSafe(board, board.white_to_move) ? DRAW : CHECKMATE;
 }
 
 uint64 Engine::perft(int remaining_depth, bool divide)
@@ -240,6 +239,16 @@ void Engine::initializeStartPosition(std::string fen)
     board = generateBoardFromFEN(fen);
     log(CHESS_BOARD, "Initialized board with FEN: " + fen);
     board.hash = zobrist.computeInitialHash(board);
+}
+
+bool Engine::makeMoveIfLegal(Move move)
+{
+    bool king_color_before_move = board.white_to_move;
+    makeMove(move);
+    if (move_generator.isKingSafe(board, king_color_before_move))
+        return true;
+    unmakeMove(move);
+    return false;
 }
 
 void Engine::makeMove(Move move)
