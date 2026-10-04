@@ -14,7 +14,7 @@ class Engine
 {
 public:
     void initializeStartPosition(std::string fen);
-    Move search(int max_depth = MAX_SEARCH_DEPTH);
+    Move search(int max_depth);
     uint64 perft(int depth, bool divide = false);
     Score evaluateBoard();
     bool makeMoveIfLegal(Move &move);
@@ -34,7 +34,7 @@ private:
     ZobristHash zobrist;
     Evaluation eval;
     Timer timer;
-
+    UndoHistory undo_history;
     uint64 evaluated_nodes = 0;
 
     void calculateMoveScores(MoveList &moves, TranspositionEntry *entry);

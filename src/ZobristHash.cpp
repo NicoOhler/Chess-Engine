@@ -44,7 +44,7 @@ uint64 ZobristHash::computeInitialHash(Board &board)
     return hash;
 }
 
-uint64 ZobristHash::updateHash(Move move, Board &board)
+uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
 {
     uint64 &hash = board.hash;
     bool white_to_move = move.piece <= WHITE_KING;
@@ -57,10 +57,10 @@ uint64 ZobristHash::updateHash(Move move, Board &board)
 
     // remove previous en passant
     bool is_pawn_move = move.piece == (white_to_move ? WHITE_PAWN : BLACK_PAWN);
-    bool is_en_passant = is_pawn_move && (move.to == move.previous_en_passant);
-    if (move.previous_en_passant != NO_EN_PASSANT)
+    bool is_en_passant = is_pawn_move && (move.to == undo.en_passant);
+    if (undo.en_passant != NO_EN_PASSANT)
     {
-        hash ^= en_passant_file[move.previous_en_passant % 8];
+        hash ^= en_passant_file[undo.en_passant % 8];
         // apply en passant capture
         if (is_en_passant)
             hash ^= piece_at_square[move.to + (white_to_move ? DOWN : UP)][white_to_move ? BLACK_PAWN : WHITE_PAWN];
@@ -71,8 +71,8 @@ uint64 ZobristHash::updateHash(Move move, Board &board)
         hash ^= en_passant_file[move.to % 8];
 
     // remove captured piece
-    if (move.captured_piece != EMPTY && !is_en_passant)
-        hash ^= piece_at_square[move.to][move.captured_piece];
+    if (undo.captured_piece != EMPTY && !is_en_passant)
+        hash ^= piece_at_square[move.to][undo.captured_piece];
 
     // add piece to new position
     if (move.promotion)
@@ -93,15 +93,15 @@ uint64 ZobristHash::updateHash(Move move, Board &board)
     }
 
     // remove castling rights on change
-    if (move.previous_castling_rights != board.castling_rights)
+    if (undo.castling_rights != board.castling_rights)
     {
-        if ((move.previous_castling_rights ^ board.castling_rights) & WHITE_KING_SIDE_CASTLING)
+        if ((undo.castling_rights ^ board.castling_rights) & WHITE_KING_SIDE_CASTLING)
             hash ^= castling_rights[0];
-        if ((move.previous_castling_rights ^ board.castling_rights) & WHITE_QUEEN_SIDE_CASTLING)
+        if ((undo.castling_rights ^ board.castling_rights) & WHITE_QUEEN_SIDE_CASTLING)
             hash ^= castling_rights[1];
-        if ((move.previous_castling_rights ^ board.castling_rights) & BLACK_KING_SIDE_CASTLING)
+        if ((undo.castling_rights ^ board.castling_rights) & BLACK_KING_SIDE_CASTLING)
             hash ^= castling_rights[2];
-        if ((move.previous_castling_rights ^ board.castling_rights) & BLACK_QUEEN_SIDE_CASTLING)
+        if ((undo.castling_rights ^ board.castling_rights) & BLACK_QUEEN_SIDE_CASTLING)
             hash ^= castling_rights[3];
     }
 

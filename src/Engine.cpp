@@ -19,9 +19,9 @@ uint64 Engine::perft(int remaining_depth, bool divide)
     for (int i = 0; i < legal_moves.size; i++)
     {
         Move move = legal_moves.moves[i];
-        move_generator.makeMove(board, move);
+        UndoInfo undo = move_generator.makeMove(board, move);
         uint64 nodes = perft(remaining_depth - 1);
-        move_generator.unmakeMove(board, move);
+        move_generator.unmakeMove(board, move, undo);
         if (divide)
             log(PERFT, getSquareName(move.from) + getSquareName(move.to) + ": " + std::to_string(nodes));
         total_nodes += nodes;
@@ -249,26 +249,29 @@ void Engine::initializeStartPosition(std::string fen)
 bool Engine::makeMoveIfLegal(Move &move)
 {
     bool king_color_before_move = board.white_to_move;
-    move_generator.makeMove(board, move);
+    UndoInfo undo = move_generator.makeMove(board, move);
     if (move_generator.isKingSafe(board, king_color_before_move))
     {
-        zobrist.updateHash(move, board);
+        undo_history.push(undo);
+        zobrist.updateHash(board, move, undo);
         return true;
     }
-    move_generator.unmakeMove(board, move);
+    move_generator.unmakeMove(board, move, undo);
     return false;
 }
 
 void Engine::makeMove(Move move)
 {
-    move_generator.makeMove(board, move);
-    zobrist.updateHash(move, board);
+    UndoInfo undo = move_generator.makeMove(board, move);
+    undo_history.push(undo);
+    zobrist.updateHash(board, move, undo);
 }
 
 void Engine::unmakeMove(Move move)
 {
-    zobrist.updateHash(move, board);
-    move_generator.unmakeMove(board, move);
+    UndoInfo undo = undo_history.pop();
+    zobrist.updateHash(board, move, undo);
+    move_generator.unmakeMove(board, move, undo);
 }
 
 // getter and setter
@@ -280,7 +283,7 @@ void Engine::setTimeLimit(Milliseconds time_limit)
 
 Board Engine::getBoard()
 {
-    return board; // copy
+    return board;
 }
 
 MoveList Engine::getLegalMoves()

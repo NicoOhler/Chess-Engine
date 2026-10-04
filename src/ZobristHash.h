@@ -14,7 +14,7 @@ public:
     ZobristHash() { initialize(); }
 
     uint64 computeInitialHash(Board &board);
-    uint64 updateHash(Move move, Board &board);
+    uint64 updateHash(Board &board, Move move, UndoInfo undo);
 
 private:
     uint64 whites_turn;

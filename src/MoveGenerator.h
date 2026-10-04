@@ -16,12 +16,6 @@ struct Move
     Piece promotion;
     Bitboard castling;
 
-    // needed for unmake
-    Piece captured_piece;
-    Position previous_en_passant;
-    Bitboard previous_castling_rights;
-    Clock half_move_clock;
-
     bool operator==(const Move &rhs)
     {
         return from == rhs.from && to == rhs.to && piece == rhs.piece;
@@ -45,8 +39,32 @@ struct Move
     }
 };
 
-const Move UNDO_MOVE = Move{0, 0, UNDO, 0, 0, 0, 0, 0, 0};
-const Move NULL_MOVE = Move{0, 0, EMPTY, 0, 0, 0, 0, 0, 0};
+struct UndoInfo
+{
+    Piece captured_piece;
+    Position en_passant;
+    Bitboard castling_rights;
+    Clock half_move_clock;
+};
+
+struct UndoHistory
+{
+    UndoInfo undo_info[MAX_SEARCH_DEPTH + MAX_QUIESCENCE_DEPTH];
+    int size = 0;
+
+    void push(UndoInfo undo)
+    {
+        undo_info[size++] = undo;
+    }
+
+    UndoInfo pop()
+    {
+        return undo_info[--size];
+    }
+};
+
+const Move UNDO_MOVE = Move{0, 0, UNDO, 0, 0};
+const Move NULL_MOVE = Move{0, 0, EMPTY, 0, 0};
 
 struct MoveList
 {
@@ -120,8 +138,8 @@ public:
     Bitboard rook_attacks[NUM_SQUARES][4096];
 
     static MoveGenerator &getInstance();
-    void makeMove(Board &board, Move &move);
-    void unmakeMove(Board &board, Move move);
+    UndoInfo makeMove(Board &board, Move &move);
+    void unmakeMove(Board &board, Move move, UndoInfo undo);
     MoveList generateLegalMoves(Board board, bool interesting_only = false);
     MoveList generatePseudoLegalMoves(Board &board, bool interesting_only = false);
     bool isKingSafe(Board board, bool king_is_white);

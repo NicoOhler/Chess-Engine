@@ -343,10 +343,10 @@ MoveList MoveGenerator::generateLegalMoves(Board board, bool interesting_only)
         Move move = pseudo_legal_moves.moves[i];
         // legal if new king position is safe
         bool king_color_before_move = board.white_to_move;
-        makeMove(board, move);
+        UndoInfo undo = makeMove(board, move);
         if (isKingSafe(board, king_color_before_move))
             legal_moves.append(move);
-        unmakeMove(board, move);
+        unmakeMove(board, move, undo);
     }
 
     return legal_moves;
@@ -651,19 +651,20 @@ MoveGenerator &MoveGenerator::getInstance()
     return instance;
 }
 
-void MoveGenerator::makeMove(Board &board, Move &move)
+UndoInfo MoveGenerator::makeMove(Board &board, Move &move)
 {
     // store information needed for unmake before actually making the move
-    move.captured_piece = board.getPieceAt(move.to);
-    move.previous_en_passant = board.en_passant;
-    move.previous_castling_rights = board.castling_rights;
-    move.half_move_clock = board.half_move_clock;
+    UndoInfo undo;
+    undo.captured_piece = board.getPieceAt(move.to);
+    undo.en_passant = board.en_passant;
+    undo.castling_rights = board.castling_rights;
+    undo.half_move_clock = board.half_move_clock;
 
     // capture piece
-    if (move.captured_piece != EMPTY)
+    if (undo.captured_piece != EMPTY)
     {
         board.half_move_clock = HALF_MOVE_CLOCK_RESET;
-        clear(*board.getBitboardByPiece(move.captured_piece), move.to);
+        clear(*board.getBitboardByPiece(undo.captured_piece), move.to);
         clear(board.white_to_move ? board.black_pieces : board.white_pieces, move.to);
         clear(board.occupied, move.to);
     }
@@ -677,14 +678,14 @@ void MoveGenerator::makeMove(Board &board, Move &move)
             Position captured_piece_position = move.to;
             if (board.white_to_move)
             {
-                move.captured_piece = BLACK_PAWN;
+                undo.captured_piece = BLACK_PAWN;
                 captured_piece_position += DOWN;
                 clear(board.black_pawns, captured_piece_position);
                 clear(board.black_pieces, captured_piece_position);
             }
             else
             {
-                move.captured_piece = WHITE_PAWN;
+                undo.captured_piece = WHITE_PAWN;
                 captured_piece_position += UP;
                 clear(board.white_pawns, captured_piece_position);
                 clear(board.white_pieces, captured_piece_position);
@@ -710,14 +711,15 @@ void MoveGenerator::makeMove(Board &board, Move &move)
     }
     board.white_to_move = !board.white_to_move;
     board.half_move_clock++;
+    return undo;
 }
 
-void MoveGenerator::unmakeMove(Board &board, Move move)
+void MoveGenerator::unmakeMove(Board &board, Move move, UndoInfo undo)
 {
     board.white_to_move = !board.white_to_move;
-    board.half_move_clock = move.half_move_clock;
-    board.castling_rights = move.previous_castling_rights;
-    board.en_passant = move.previous_en_passant;
+    board.half_move_clock = undo.half_move_clock;
+    board.castling_rights = undo.castling_rights;
+    board.en_passant = undo.en_passant;
 
     Bitboard *piece = board.getBitboardByPiece(move.piece);
     Bitboard *own_pieces = board.white_to_move ? &board.white_pieces : &board.black_pieces;
@@ -736,9 +738,9 @@ void MoveGenerator::unmakeMove(Board &board, Move move)
     BitBoard::movePiece(board.occupied, move.to, move.from);
 
     // place captured piece at its original position (to or en_passant)
-    if (move.captured_piece != EMPTY)
+    if (undo.captured_piece != EMPTY)
     {
-        Bitboard *captured_piece = board.getBitboardByPiece(move.captured_piece);
+        Bitboard *captured_piece = board.getBitboardByPiece(undo.captured_piece);
         Bitboard *enemy_pieces = board.white_to_move ? &board.black_pieces : &board.white_pieces;
         Position position = move.to;
         bool en_passant_move = (move.to == board.en_passant) && (move.piece == (board.white_to_move ? WHITE_PAWN : BLACK_PAWN));
