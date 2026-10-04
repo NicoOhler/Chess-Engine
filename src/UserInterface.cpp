@@ -30,7 +30,7 @@ void UserInterface::startSearch()
 {
     engine.initializeStartPosition(fen);
     log(CHESS_BOARD, "Starting search with a time limit of " + std::to_string(search_time) + "ms");
-    Move best_move = engine.search();
+    Move best_move = engine.search(ply);
     if (best_move == NULL_MOVE)
         log(SEARCH, "No legal moves for current board state.");
 }
@@ -93,7 +93,7 @@ void UserInterface::startRegularPlay()
 
     do
     {
-        Move move = ai_turn ? engine.search() : promptForLegalMove(moves);
+        Move move = ai_turn ? engine.search(ply) : promptForLegalMove(moves);
         if (play_vs_ai)
             ai_turn = !ai_turn;
         applyAndTrackMove(move);
@@ -113,7 +113,7 @@ void UserInterface::startSelfPlay()
 
     do
     {
-        Move move = engine.search();
+        Move move = engine.search(ply);
         log(UI, "Press Enter to apply the chosen move.");
         std::getline(std::cin, input);
         applyAndTrackMove(move);

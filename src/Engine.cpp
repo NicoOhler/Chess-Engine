@@ -36,14 +36,14 @@ Score Engine::evaluateBoard()
 }
 
 // iterative deepening
-Move Engine::search()
+Move Engine::search(int max_depth)
 {
     evaluated_nodes = 0;
     Score best_root_score = NEG_INFINITY;
     Move best_root_move = NULL_MOVE;
 
     timer.start();
-    for (int depth = 1; depth <= MAX_SEARCH_DEPTH && timer.timeLeft(); depth++)
+    for (int depth = 1; depth <= max_depth && timer.timeLeft(); depth++)
     {
         Score best_score_of_iteration = pv_search(0, depth, NEG_INFINITY, POS_INFINITY);
         Move best_move_of_iteration = transposition_table.probe(board.hash)->best_move;
@@ -75,6 +75,7 @@ void Engine::calculateMoveScores(MoveList &moves, TranspositionEntry *entry)
     for (int i = 0; i < moves.size; i++)
     {
         Move move = moves.moves[i];
+        Piece captured_piece = board.getPieceAt(move.to);
         // search previously best move first, which will likely cause a beta cutoff
         if (move == best_move)
             moves.scores[i] = POS_INFINITY;
@@ -83,8 +84,8 @@ void Engine::calculateMoveScores(MoveList &moves, TranspositionEntry *entry)
             moves.scores[i] = getPieceValue(move.promotion) + PROMOTION_VALUE;
         // then captures according to Most Valuable Victim – Least Valuable Attacker
         // i.e., prioritize captures of high value with low value pieces
-        else if (move.captured_piece != EMPTY)
-            moves.scores[i] = getPieceValue(move.captured_piece) - getPieceValue(move.piece) + CAPTURE_VALUE;
+        else if (captured_piece != EMPTY)
+            moves.scores[i] = getPieceValue(captured_piece) - getPieceValue(move.piece) + CAPTURE_VALUE;
         // then quiet non-capture moves
         else
             moves.scores[i] = 0;
@@ -125,41 +126,33 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
         return quiescence(lower_bound, upper_bound, ply);
 
     // generate and evaluate moves until pruning possible
-    MoveList legal_moves = move_generator.generateLegalMoves(board);
-    GameState game_state = getGameState(legal_moves);
-    if (game_state == CHECKMATE)
-        // add ply to prefer fast games
-        return -MATE_VALUE + ply;
-    if (game_state == DRAW)
-        // do not add ply to avoid drawn out draws
-        return DRAW_VALUE;
+    MoveList pseudo_legal_moves = move_generator.generatePseudoLegalMoves(board);
+    calculateMoveScores(pseudo_legal_moves, entry);
 
-    calculateMoveScores(legal_moves, entry);
     Move move, best_move = NULL_MOVE;
     Score score, best_score = NEG_INFINITY;
     bool null_window = false;
-    for (int i = 0; i < legal_moves.size; i++)
+    bool legal_move_exists = false;
+    for (int i = 0; i < pseudo_legal_moves.size; i++)
     {
         // interrupt search if time is up
         // if (!timer.timeLeft())
         //     return best_score;
 
-        // prune if upper bound exceeded
-        // i.e., opponent will pick another move that is better
-        if (upper_bound <= lower_bound)
-            break;
-
         // explore retrieved move first if available, then explore moves in order of score
         if (i == 0 && entry != nullptr)
         {
             move = entry->best_move;
-            move_generator.markMoveAsUsed(legal_moves, move);
+            move_generator.markMoveAsUsed(pseudo_legal_moves, move);
             // todo move needs to be legal (to avoid hash collisions)
             // ? why does exploring this move before move generation not make search faster
         }
         else
-            move = move_generator.pickBestMove(legal_moves);
-        makeMove(move);
+            move = move_generator.pickBestMove(pseudo_legal_moves);
+        if (!makeMoveIfLegal(move))
+            continue;
+        legal_move_exists = true;
+
         // search with null window (alpha, alpha + 1) to hopefully cause a beta cutoff
         if (null_window)
         {
@@ -185,7 +178,17 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
             lower_bound = score;
             null_window = true;
         }
+
+        // prune if upper bound exceeded
+        // i.e., opponent will pick another move that is better
+        if (upper_bound <= lower_bound)
+            break;
     }
+    if (!legal_move_exists)
+        if (move_generator.isKingSafe(board, board.white_to_move))
+            return DRAW_VALUE; // do not add ply to avoid drawn out draws
+        else
+            return -MATE_VALUE + ply; // add ply to prefer fast games
 
     // store best move in transposition table
     BoundType type = transposition_table.determineBoundType(best_score, original_lower_bound, original_upper_bound);
@@ -209,16 +212,18 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
         return stand_pat;
 
     // further examine captures, checks and promotions
-    MoveList legal_moves = move_generator.generateLegalMoves(board, true);
+    MoveList pseudo_legal_moves = move_generator.generatePseudoLegalMoves(board, true);
     TranspositionEntry *entry = transposition_table.probe(board.hash);
-    calculateMoveScores(legal_moves, entry);
-    for (int i = 0; i < legal_moves.size; i++)
+    calculateMoveScores(pseudo_legal_moves, entry);
+    for (int i = 0; i < pseudo_legal_moves.size; i++)
     {
-        Move move = move_generator.pickBestMove(legal_moves);
-        if (move.captured_piece == EMPTY && move.promotion == EMPTY)
+        Move move = move_generator.pickBestMove(pseudo_legal_moves);
+        Piece captured_piece = board.getPieceAt(move.to);
+        if (captured_piece == EMPTY && move.promotion == EMPTY)
             continue;
 
-        makeMove(move);
+        if (!makeMoveIfLegal(move))
+            continue;
         Score score = -quiescence(-upper_bound, -lower_bound, ply + 1);
         unmakeMove(move);
 
@@ -241,13 +246,16 @@ void Engine::initializeStartPosition(std::string fen)
     board.hash = zobrist.computeInitialHash(board);
 }
 
-bool Engine::makeMoveIfLegal(Move move)
+bool Engine::makeMoveIfLegal(Move &move)
 {
     bool king_color_before_move = board.white_to_move;
-    makeMove(move);
+    move_generator.makeMove(board, move);
     if (move_generator.isKingSafe(board, king_color_before_move))
+    {
+        zobrist.updateHash(move, board);
         return true;
-    unmakeMove(move);
+    }
+    move_generator.unmakeMove(board, move);
     return false;
 }
 

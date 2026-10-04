@@ -14,10 +14,10 @@ class Engine
 {
 public:
     void initializeStartPosition(std::string fen);
-    Move search();
+    Move search(int max_depth = MAX_SEARCH_DEPTH);
     uint64 perft(int depth, bool divide = false);
     Score evaluateBoard();
-    bool makeMoveIfLegal(Move move);
+    bool makeMoveIfLegal(Move &move);
     void makeMove(Move move);
     void unmakeMove(Move move);
 

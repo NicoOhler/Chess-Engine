@@ -40,12 +40,14 @@ const Position DOWN_RIGHT = -7;
 // engine
 const Milliseconds SEARCH_TIME_LIMIT = 5000; // milliseconds
 const int TRANSPOSITION_TABLE_SIZE = 256;    // megabytes
-const int DEFAULT_PERFT_DEPTH = 7;
-const int MAX_SEARCH_DEPTH = 6;
-const int MAX_QUIESCENCE_DEPTH = 15;
+const int DEFAULT_PERFT_DEPTH = 6;
+const int MAX_SEARCH_DEPTH = 12;
+const int MAX_QUIESCENCE_DEPTH = 30;
 
 enum PIECES
 {
+    EMPTY,
+    UNDO,
     WHITE_PAWN,
     WHITE_KNIGHT,
     WHITE_BISHOP,
@@ -57,9 +59,7 @@ enum PIECES
     BLACK_BISHOP,
     BLACK_ROOK,
     BLACK_QUEEN,
-    BLACK_KING,
-    EMPTY,
-    UNDO
+    BLACK_KING
 };
 
 enum PIECE_SYMBOLS

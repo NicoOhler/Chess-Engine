@@ -18,7 +18,7 @@ Position getSquareIndex(std::string square)
 
 Score getPieceValue(Piece piece)
 {
-    switch (toupper(piece))
+    switch (piece)
     {
     case WHITE_PAWN:
         return PAWN_VALUE;
@@ -32,7 +32,19 @@ Score getPieceValue(Piece piece)
         return QUEEN_VALUE;
     case WHITE_KING:
         return KING_VALUE;
+    case BLACK_PAWN:
+        return PAWN_VALUE;
+    case BLACK_KNIGHT:
+        return KNIGHT_VALUE;
+    case BLACK_BISHOP:
+        return BISHOP_VALUE;
+    case BLACK_ROOK:
+        return ROOK_VALUE;
+    case BLACK_QUEEN:
+        return QUEEN_VALUE;
+    case BLACK_KING:
+        return KING_VALUE;
     default:
-        return 0;
+        assert(false, "Invalid piece");
     }
 }

@@ -344,13 +344,9 @@ MoveList MoveGenerator::generateLegalMoves(Board board, bool interesting_only)
         // legal if new king position is safe
         bool king_color_before_move = board.white_to_move;
         makeMove(board, move);
-        bool king_is_safe = isKingSafe(board, king_color_before_move);
-        unmakeMove(board, move);
-        if (king_is_safe)
+        if (isKingSafe(board, king_color_before_move))
             legal_moves.append(move);
-        // log(REMAINING_MOVES, "Found legal move from " + getSquareName(move.from) + " to " + getSquareName(move.to) + ".");
-        // else
-        //  log(REMOVE_ILLEGAL_MOVES, "Removed illegal move from " + getSquareName(move.from) + " to " + getSquareName(move.to) + ".");
+        unmakeMove(board, move);
     }
 
     return legal_moves;
@@ -622,11 +618,12 @@ Move MoveGenerator::pickBestMove(MoveList &moves)
 
     for (int i = 1; i < moves.size; i++)
     {
-        if (moves.scores[i] == USED_MOVE)
+        Score score = moves.scores[i];
+        if (score == USED_MOVE)
             continue;
-        if (moves.scores[i] > best_score)
+        if (score > best_score)
         {
-            best_score = moves.scores[i];
+            best_score = score;
             best_move_index = i;
         }
     }
