@@ -2,7 +2,7 @@
 
 ZobristHash::ZobristHash()
 {
-    std::mt19937 mt{RAND_SEED};
+    std::mt19937_64 mt{RAND_SEED};
     for (int square = 0; square < 64; square++)
         for (int piece = 0; piece < 12; piece++)
             piece_at_square[square][piece] = mt();

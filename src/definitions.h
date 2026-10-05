@@ -1,8 +1,10 @@
 #pragma once
 #include <string>
+#include <inttypes.h>
 
 typedef unsigned long long uint64;
-typedef signed long Score;
+// typedef signed long Score;
+typedef int32_t Score;
 typedef uint64 Bitboard;
 typedef uint64 Hash;
 typedef unsigned char uint8;

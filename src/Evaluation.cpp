@@ -71,7 +71,7 @@ Score Evaluation::evaluatePawnStructure(Board board)
     log(EVALUATION, "Own blocked pawns: " + std::to_string(own_blocked_pawns));
 
     // count enemy isolated, doubled and blocked pawns
-    int enemy_isolated_pawns, enemy_doubled_pawns, enemy_blocked_pawns;
+    int enemy_isolated_pawns = 0, enemy_doubled_pawns = 0, enemy_blocked_pawns = 0;
     while (enemy_pawns_editable)
     {
         Position square = clearRightmostSetBit(enemy_pawns_editable);

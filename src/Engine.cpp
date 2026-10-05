@@ -159,7 +159,7 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
             score = -pv_search(ply + 1, remaining_depth - 1, -lower_bound - 1, -lower_bound);
             // research with full window (alpha, beta) if no beta cutoff occurred
             if (score > lower_bound && score < upper_bound)
-                score = -pv_search(ply + 1, remaining_depth - 1, -upper_bound, -lower_bound);
+                score = -pv_search(ply + 1, remaining_depth - 1, -upper_bound, -score);
         }
         else // search with full window precision (i.e., regular negamax search)
             score = -pv_search(ply + 1, remaining_depth - 1, -upper_bound, -lower_bound);
@@ -182,6 +182,7 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
         if (upper_bound <= lower_bound)
             break;
     }
+
     if (!null_window) // no legal moves found
         if (move_generator.isKingSafe(board, board.white_to_move))
             return DRAW_VALUE; // do not add ply to avoid drawn out draws
@@ -199,15 +200,15 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
 {
     // use static evaluation as baseline
     // in case no further captures are possible
-    Score stand_pat = evaluateBoard();
-    if (stand_pat >= upper_bound)
-        return upper_bound;
-    if (stand_pat > lower_bound)
-        lower_bound = stand_pat;
+    Score best_score = evaluateBoard();
+    if (best_score >= upper_bound)
+        return best_score;
+    if (best_score > lower_bound)
+        lower_bound = best_score;
 
     // return if max depth exceeded or if current position is really bad (delta pruning)
-    if (ply >= MAX_QUIESCENCE_DEPTH || stand_pat + DELTA_VALUE < lower_bound)
-        return stand_pat;
+    if (ply >= MAX_QUIESCENCE_DEPTH || best_score + DELTA_VALUE < lower_bound)
+        return best_score;
 
     // further examine captures, checks and promotions
     MoveList pseudo_legal_moves = move_generator.generatePseudoLegalMoves(board, true);
@@ -227,6 +228,8 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
 
         if (score >= upper_bound)
             return score;
+        if (score > best_score)
+            best_score = score;
         if (score > lower_bound)
             lower_bound = score;
 
@@ -234,7 +237,7 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
         //     return lower_bound;
     }
 
-    return lower_bound;
+    return best_score;
 }
 
 void Engine::initializeStartPosition(std::string fen)
