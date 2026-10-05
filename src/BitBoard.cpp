@@ -310,7 +310,7 @@ void BitBoard::placePiecesOnBoard(Board board, char board_to_print[8][8])
         while (pieces[i])
         {
             Position position = BitBoard::clearRightmostSetBit(pieces[i]);
-            board_to_print[7 - position / 8][position % 8] = piece_types[i];
+            board_to_print[7 - position / 8][modPow2(position, 8)] = piece_types[i];
         }
     }
 }

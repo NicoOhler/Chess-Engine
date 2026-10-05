@@ -15,3 +15,4 @@
 std::string getSquareName(Position square);
 Position getSquareIndex(std::string square);
 Score getPieceValue(Piece piece);
+uint64 modPow2(uint64 n, uint64 m);

@@ -4,7 +4,7 @@
 std::string getSquareName(Position square)
 {
     assert(square >= 0 && square < 64, "Invalid square");
-    return char('a' + square % 8) + std::to_string(square / 8 + 1);
+    return char('a' + modPow2(square, 8)) + std::to_string(square / 8 + 1);
 }
 
 Position getSquareIndex(std::string square)
@@ -47,4 +47,9 @@ Score getPieceValue(Piece piece)
     default:
         assert(false, "Invalid piece");
     }
+}
+
+uint64 modPow2(uint64 n, uint64 m)
+{
+    return n & (m - 1); // fast modulo for power of 2
 }

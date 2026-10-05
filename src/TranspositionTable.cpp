@@ -2,14 +2,18 @@
 
 TranspositionTable::TranspositionTable(int megabytes)
 {
-    table_size = megabytes * 1024 * 1024 / sizeof(TranspositionEntry);
+    uint64 required_size = megabytes * 1024 * 1024 / sizeof(TranspositionEntry);
+    table_size = 1;
+    while (table_size <= required_size)
+        table_size *= 2;
     table = new TranspositionEntry[table_size]();
 }
 
 // todo handle indexing and collisions
 TranspositionEntry *TranspositionTable::probe(Hash hash)
 {
-    TranspositionEntry &entry = table[hash % table_size];
+    Hash index = modPow2(hash, table_size);
+    TranspositionEntry &entry = table[index];
     if (entry.hash != hash)
         return nullptr;
     return &entry;
@@ -17,8 +21,13 @@ TranspositionEntry *TranspositionTable::probe(Hash hash)
 
 void TranspositionTable::store(Hash hash, Score score, Move best_move, int remaining_depth, BoundType type)
 {
-    // ? current replacement strategy: always overwrite
-    TranspositionEntry &entry = table[hash % table_size];
+    Hash index = modPow2(hash, table_size);
+    TranspositionEntry &entry = table[index];
+    // keep entry with greater remaining depth
+    if (entry.hash == hash && entry.remaining_depth > remaining_depth)
+        // keep exact score over bound score
+        if (type != EXACT && entry.type == EXACT)
+            return;
     entry.hash = hash;
     entry.score = score;
     entry.best_move = best_move;

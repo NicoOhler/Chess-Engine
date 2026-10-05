@@ -124,6 +124,7 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
     // return evaluation for leaf nodes (max depth reached)
     if (remaining_depth == 0)
         return quiescence(lower_bound, upper_bound, ply);
+    // return evaluateBoard();
 
     // generate and evaluate moves until pruning possible
     MoveList pseudo_legal_moves = move_generator.generatePseudoLegalMoves(board);
@@ -132,7 +133,6 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
     Move move, best_move = NULL_MOVE;
     Score score, best_score = NEG_INFINITY;
     bool null_window = false;
-    bool legal_move_exists = false;
     for (int i = 0; i < pseudo_legal_moves.size; i++)
     {
         // interrupt search if time is up
@@ -143,15 +143,15 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
         if (i == 0 && entry != nullptr)
         {
             move = entry->best_move;
-            move_generator.markMoveAsUsed(pseudo_legal_moves, move);
-            // todo move needs to be legal (to avoid hash collisions)
+            // move needs to be pseudo-legal (to avoid hash collisions)
+            if (!move_generator.markMoveAsUsed(pseudo_legal_moves, move))
+                continue;
             // ? why does exploring this move before move generation not make search faster
         }
         else
             move = move_generator.pickBestMove(pseudo_legal_moves);
         if (!makeMoveIfLegal(move))
             continue;
-        legal_move_exists = true;
 
         // search with null window (alpha, alpha + 1) to hopefully cause a beta cutoff
         if (null_window)
@@ -163,6 +163,7 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
         }
         else // search with full window precision (i.e., regular negamax search)
             score = -pv_search(ply + 1, remaining_depth - 1, -upper_bound, -lower_bound);
+        null_window = true;
         unmakeMove(move);
 
         // keep track of best move
@@ -174,17 +175,14 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
 
         // update lower bound if exceeded
         if (score > lower_bound)
-        {
             lower_bound = score;
-            null_window = true;
-        }
 
         // prune if upper bound exceeded
         // i.e., opponent will pick another move that is better
         if (upper_bound <= lower_bound)
             break;
     }
-    if (!legal_move_exists)
+    if (!null_window) // no legal moves found
         if (move_generator.isKingSafe(board, board.white_to_move))
             return DRAW_VALUE; // do not add ply to avoid drawn out draws
         else
@@ -228,7 +226,7 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
         unmakeMove(move);
 
         if (score >= upper_bound)
-            return upper_bound;
+            return score;
         if (score > lower_bound)
             lower_bound = score;
 

@@ -146,5 +146,5 @@ public:
     bool squareUnderAttack(Board &board, Position square, bool white_is_attacker);
     bool squaresUnderAttack(Board &board, Bitboard squares, bool white_is_attacker);
     Move pickBestMove(MoveList &moves);
-    void markMoveAsUsed(MoveList &moves, Move move);
+    bool markMoveAsUsed(MoveList &moves, Move move);
 };

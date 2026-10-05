@@ -1,12 +1,5 @@
 ### Important Features
-+ today:
-    + delay move legality check to evaluation/exploration instead of checking all generated moves upfront
-    + exclude move undo information from move struct
-        + copy overhead
-        + RAM usage
-        + instead store history arrays like history_castling[MAX_PLY], history_ep[MAX_PLY] for unmake
 + split up move generation
-    + for staged move generation/ordering/pruning
 + improve move ordering
     + move ordering is typically staged
         + retrieve best previous move and check it
@@ -17,19 +10,7 @@
         + generate quiet moves
         + quiet moves
         + bad captures
-    + implement staging (except for PV) later
-    + principal variation (best move) from previous search
-        + retrieved via hash from transposition table
-        + verify its legality
-        + search it BEFORE generating remaining legal moves
-            + why?
-    + Most Valuable Victim - Least Valuable Attacker (MVV-LVA)
-        + prioritize attacks with a lot to gain and little to lose
-        + hardcoded 2D array lookup => fast and simple
-        + already implemented into move ordering
-        + optionally integrate into staged move generation
     + optionally Static Exchange Evaluation (SEE)
-        + slow, needs to be paired with MVV-LVA
         + read wiki
     + optionally killer heuristic
         + orders quiet (non-capture) moves that cause beta cutoffs
@@ -44,14 +25,10 @@
     + score of current position is used as lower bound
         + assumes that own next move does not worsen the position (i.e. no zugzwang)
     + additions
-        + consider checks
+        + consider checks + en passant
         + maybe make use of transposition table?
         + may benefit from pruning
             + e.g. SEE < 0
-+ other optimizations
-    + use Piece as array index?
-    + improve transposition table?
-    + keep track of attacked squares https://www.youtube.com/watch?v=U4ogK0MIzqk&t=435s, 8:00
 + evaluation using NNUE
     + read up on them
     + check for state of the art alternatives

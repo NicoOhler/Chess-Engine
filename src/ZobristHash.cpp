@@ -1,6 +1,6 @@
 #include "ZobristHash.h"
 
-void ZobristHash::initialize()
+ZobristHash::ZobristHash()
 {
     std::mt19937 mt{RAND_SEED};
     for (int square = 0; square < 64; square++)
@@ -30,7 +30,7 @@ uint64 ZobristHash::computeInitialHash(Board &board)
 
     // add en passant
     if (board.en_passant != NO_EN_PASSANT)
-        hash ^= en_passant_file[board.en_passant % 8];
+        hash ^= en_passant_file[modPow2(board.en_passant, 8)];
 
     // add castling rights
     if (board.castling_rights & WHITE_KING_SIDE_CASTLING)
@@ -60,7 +60,7 @@ uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
     bool is_en_passant = is_pawn_move && (move.to == undo.en_passant);
     if (undo.en_passant != NO_EN_PASSANT)
     {
-        hash ^= en_passant_file[undo.en_passant % 8];
+        hash ^= en_passant_file[modPow2(undo.en_passant, 8)];
         // apply en passant capture
         if (is_en_passant)
             hash ^= piece_at_square[move.to + (white_to_move ? DOWN : UP)][white_to_move ? BLACK_PAWN : WHITE_PAWN];
@@ -68,7 +68,7 @@ uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
 
     // add new en passant square
     if (is_pawn_move && (abs(move.from - move.to) == 16))
-        hash ^= en_passant_file[move.to % 8];
+        hash ^= en_passant_file[modPow2(move.to, 8)];
 
     // remove captured piece
     if (undo.captured_piece != EMPTY && !is_en_passant)
