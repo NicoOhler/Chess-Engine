@@ -21,9 +21,6 @@
         + prioritize those
         + requires decay mechanism
 + quiescence search
-    + requires at least basic move ordering to avoid search explosion
-    + score of current position is used as lower bound
-        + assumes that own next move does not worsen the position (i.e. no zugzwang)
     + additions
         + consider checks + en passant
         + maybe make use of transposition table?

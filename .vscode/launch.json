@@ -26,15 +26,13 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "Play with Default Board",
+            "name": "Local PvP w/ Default Board",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/engine",
             "args": [
                 "-m",
-                "c",
-                "-t",
-                "500000"
+                "l",
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -52,17 +50,39 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "Play with Custom Board",
+            "name": "Local PvP w/ Custom Board",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/engine",
             "args": [
                 "-m",
-                "e",
-                "-p",
-                "5",
+                "l",
                 "-f",
                 "rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/8/P1PPPPPP/RNBQKBNR w KQkq c6 0 3"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build Chess Engine",
+            "miDebuggerPath": "/usr/bin/gdb",
+        },
+        {
+            "name": "PvE w/ Default Board",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/engine",
+            "args": [
+                "-m",
+                "r",
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -229,7 +249,38 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "Search from Starting Position",
+            "name": "Hard Kiwipete Perft",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/engine",
+            "args": [
+                "-m",
+                "p",
+                "-f",
+                "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -",
+                "-p",
+                "6",
+                "-d",
+                "-e",
+                "8031647685"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build Chess Engine",
+            "miDebuggerPath": "/usr/bin/gdb",
+        },
+        {
+            "name": "Search from Default Board",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/engine",
@@ -259,7 +310,7 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "Search from Custom Position",
+            "name": "Search from Custom Board",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/engine",

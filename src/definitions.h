@@ -22,7 +22,7 @@ const Position NUM_SQUARES = 64;
 const Position NUM_ROWS = 8;
 const Position NUM_COLS = 8;
 const std::string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-const int MAX_MOVES = 200;
+const int MAX_MOVES = 218;
 const Score POS_INFINITY = 2147483647;
 const Score NEG_INFINITY = -2147483648;
 const Score USED_MOVE = NEG_INFINITY;
@@ -48,8 +48,6 @@ const int MAX_QUIESCENCE_DEPTH = 30;
 
 enum PIECES
 {
-    EMPTY,
-    UNDO,
     WHITE_PAWN,
     WHITE_KNIGHT,
     WHITE_BISHOP,
@@ -61,7 +59,9 @@ enum PIECES
     BLACK_BISHOP,
     BLACK_ROOK,
     BLACK_QUEEN,
-    BLACK_KING
+    BLACK_KING,
+    EMPTY,
+    UNDO
 };
 
 enum PIECE_SYMBOLS
@@ -107,8 +107,9 @@ enum COLUMNS
 enum MODES
 {
     UCI_MODE = 'u',
-    PLAY_MODE = 'c',
-    SELF_PLAY_MODE = 'e',
+    PLAYER_VS_PLAYER_MODE = 'l',
+    PLAYER_VS_ENGINE_MODE = 'r',
+    ENGINE_VS_ENGINE_MODE = 'e',
     PERFT_MODE = 'p',
     SEARCH_MODE = 's'
 };

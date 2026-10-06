@@ -7,11 +7,14 @@ void UserInterface::start()
     case UCI_MODE:
         startUCI();
         break;
-    case PLAY_MODE:
-        startRegularPlay();
+    case PLAYER_VS_PLAYER_MODE:
+        startPlayerVsPlayer();
         break;
-    case SELF_PLAY_MODE:
-        startSelfPlay();
+    case PLAYER_VS_ENGINE_MODE:
+        startPlayerVsEngine();
+        break;
+    case ENGINE_VS_ENGINE_MODE:
+        startEngineVsEngine();
         break;
     case PERFT_MODE:
         startPerft();
@@ -37,10 +40,15 @@ void UserInterface::startSearch()
 
 void UserInterface::startPerft()
 {
+    if (ply <= 0)
+    {
+        log(UI, "Invalid perft depth. Please specify a positive integer for the depth.");
+        return;
+    }
     engine.initializeStartPosition(fen);
     log(PERFT, "Starting perft with a depth of " + std::to_string(ply));
     timer.start();
-    uint64 nodes = engine.perft(ply > 0 ? ply : MAX_SEARCH_DEPTH, divide);
+    uint64 nodes = engine.perft(ply, divide);
     timer.stop(PERFT);
     log(PERFT, "Nodes searched: " + std::to_string(nodes));
     if (expected_perft)
@@ -82,20 +90,17 @@ void UserInterface::startUCI()
     }
 }
 
-void UserInterface::startRegularPlay()
+void UserInterface::startPlayerVsPlayer()
 {
-    log(UI, "ChessEngine started in regular play mode");
+    log(UI, "ChessEngine started in player vs player mode.");
     engine.initializeStartPosition(fen);
     printGameState(engine.getBoard());
     MoveList moves = engine.getLegalMoves();
-    bool ai_turn = promptForPlayerColor() != engine.getBoard().white_to_move;
-    log(UI, (ai_turn ? "The AI starts.\n" : "You start.\n"));
+    log(UI, "Enter 'p' to print legal moves or 'u' to undo the last move.");
 
     do
     {
-        Move move = ai_turn ? engine.search(ply) : promptForLegalMove(moves);
-        if (play_vs_ai)
-            ai_turn = !ai_turn;
+        Move move = promptForLegalMove(moves);
         applyAndTrackMove(move);
         printGameState(engine.getBoard());
         moves = engine.getLegalMoves();
@@ -103,9 +108,30 @@ void UserInterface::startRegularPlay()
     log(UI, (engine.getGameState(moves) == CHECKMATE ? "Checkmate" : "Draw"));
 }
 
-void UserInterface::startSelfPlay()
+void UserInterface::startPlayerVsEngine()
 {
-    log(UI, "ChessEngine started in self play mode.");
+    log(UI, "ChessEngine started in player vs engine mode.");
+    engine.initializeStartPosition(fen);
+    printGameState(engine.getBoard());
+    MoveList moves = engine.getLegalMoves();
+    bool ai_turn = promptForPlayerColor() != engine.getBoard().white_to_move;
+    log(UI, (ai_turn ? "The AI starts.\n" : "You start.\n"));
+    log(UI, "Enter 'p' to print legal moves or 'u' to undo the last move.");
+
+    do
+    {
+        Move move = ai_turn ? engine.search(ply) : promptForLegalMove(moves);
+        ai_turn = !ai_turn;
+        applyAndTrackMove(move, true);
+        printGameState(engine.getBoard());
+        moves = engine.getLegalMoves();
+    } while (engine.getGameState(moves) == IN_PROGRESS);
+    log(UI, (engine.getGameState(moves) == CHECKMATE ? "Checkmate" : "Draw"));
+}
+
+void UserInterface::startEngineVsEngine()
+{
+    log(UI, "ChessEngine started in engine vs engine mode.");
     engine.initializeStartPosition(fen);
     printGameState(engine.getBoard());
     MoveList moves = engine.getLegalMoves();
@@ -123,21 +149,21 @@ void UserInterface::startSelfPlay()
     log(UI, (engine.getGameState(moves) == CHECKMATE ? "Checkmate" : "Draw"));
 }
 
-void UserInterface::applyAndTrackMove(Move move)
+void UserInterface::applyAndTrackMove(Move move, bool play_vs_engine)
 {
     if (move.piece == UNDO)
     {
         assert(!move_history.empty(), "No move to undo");
-        move = move_history.top();
-        move_history.pop();
-        engine.unmakeMove(move);
-        // also undo ai move
-        if (play_vs_ai)
+        // additionally undo the AI's move if playing against the engine
+        if (play_vs_engine && !move_history.empty())
         {
             move = move_history.top();
             move_history.pop();
             engine.unmakeMove(move);
         }
+        move = move_history.top();
+        move_history.pop();
+        engine.unmakeMove(move);
         return;
     }
     move_history.push(move);
