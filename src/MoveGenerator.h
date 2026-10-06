@@ -13,17 +13,17 @@ struct Move
     Position from;
     Position to;
     Piece piece;
-    Piece promotion;
-    Bitboard castling;
+    Piece promotion = 0;
+    Bitboard castling = 0;
 
     bool operator==(const Move &rhs)
     {
-        return from == rhs.from && to == rhs.to && piece == rhs.piece;
+        return from == rhs.from && to == rhs.to && piece == rhs.piece && promotion == rhs.promotion && castling == rhs.castling;
     }
 
     bool operator!=(const Move &rhs)
     {
-        return from != rhs.from || to != rhs.to || piece != rhs.piece;
+        return from != rhs.from || to != rhs.to || piece != rhs.piece || promotion != rhs.promotion || castling != rhs.castling;
     }
 
     std::string toString() const

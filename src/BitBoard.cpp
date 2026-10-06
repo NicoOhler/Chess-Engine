@@ -235,10 +235,10 @@ Piece BitBoard::Board::getPieceAt(Position position)
     return EMPTY;
 }
 
-void BitBoard::printBitboard(Bitboard board)
+void BitBoard::printBitboard(Bitboard board, std::string title)
 {
     std::vector<bool> bits = getBits(board);
-    std::cout << std::endl;
+    std::cout << title << std::endl;
     for (Position row = NUM_ROWS - 1; row >= 0; row--)
     {
         std::cout << row + 1 << " ";

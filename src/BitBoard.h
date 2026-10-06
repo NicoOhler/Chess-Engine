@@ -94,7 +94,7 @@ namespace BitBoard
     void clear(Bitboard &board, Position position);
     bool isSet(Bitboard board, Position position);
     std::vector<bool> getBits(Bitboard board);
-    void printBitboard(Bitboard board);
+    void printBitboard(Bitboard board, std::string title = "");
     int8 countSetBits(Bitboard board);
     Position clearRightmostSetBit(Bitboard &board); // sets the rightmost set bit to 0 and returns its index
     Position getRightmostSetBit(Bitboard &board);

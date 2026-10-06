@@ -425,18 +425,20 @@ void MoveGenerator::generatePawnMoves(Board &board, MoveList &moves, bool intere
         addPawnMoveWithPossiblePromotion(board, moves, Move{from, to, piece});
     }
 
-    // double move
-    Bitboard double_moves = pawns & start_row;
-    double_moves = white_to_move ? (double_moves << UP) : (double_moves >> UP);
-    double_moves &= ~board.occupied;
-    double_moves = white_to_move ? (double_moves << UP) : (double_moves >> UP);
-    double_moves &= ~board.occupied;
-    while (double_moves && !interesting_only)
+    if (!interesting_only)
     {
-        Position to = clearRightmostSetBit(double_moves);
-        Position from = to - 2 * direction;
-        moves.append(Move{from, to, piece});
-        // log(PAWN_MOVE, "Found pawn move from " + getSquareName(from) + " to " + getSquareName(to) + ".");
+        // double move
+        Bitboard pawns_on_start_row = pawns & start_row;
+        Bitboard pawns_blocked_by_pieces_one_square_in_front = (white_to_move ? (board.occupied >> UP) : (board.occupied << UP));
+        Bitboard pawns_blocked_by_pieces_two_squares_in_front = (white_to_move ? (board.occupied >> (2 * UP)) : (board.occupied << (2 * UP)));
+        Bitboard double_moves = pawns_on_start_row & ~pawns_blocked_by_pieces_one_square_in_front & ~pawns_blocked_by_pieces_two_squares_in_front;
+        while (double_moves)
+        {
+            Position from = clearRightmostSetBit(double_moves);
+            Position to = from + 2 * direction;
+            moves.append(Move{from, to, piece});
+            // log(PAWN_MOVE, "Found pawn move from " + getSquareName(from) + " to " + getSquareName(to) + ".");
+        }
     }
 
     // for each pawn check attack masks
@@ -804,15 +806,15 @@ void MoveGenerator::handleCastling(Board &board, Move &move)
     Bitboard enemy_queen_side_rook_start_position = board.white_to_move ? BLACK_QUEEN_SIDE_ROOK_START_POSITION : WHITE_QUEEN_SIDE_ROOK_START_POSITION;
 
     bool king_moved = move.piece == (board.white_to_move ? WHITE_KING : BLACK_KING);
-    bool king_side_rook_gone = !(*own_rooks & king_side_rook_start_position);
-    bool queen_side_rook_gone = !(*own_rooks & queen_side_rook_start_position);
-    bool enemy_queen_side_rook_captured = *own_pieces & (board.white_to_move ? BLACK_QUEEN_SIDE_ROOK_START_POSITION : WHITE_QUEEN_SIDE_ROOK_START_POSITION);
-    bool enemy_king_side_rook_captured = *own_pieces & (board.white_to_move ? BLACK_KING_SIDE_ROOK_START_POSITION : WHITE_KING_SIDE_ROOK_START_POSITION);
+    bool own_king_side_rook_moved = !(*own_rooks & king_side_rook_start_position);
+    bool own_queen_side_rook_moved = !(*own_rooks & queen_side_rook_start_position);
+    bool enemy_queen_side_rook_captured = *own_pieces & enemy_queen_side_rook_start_position;
+    bool enemy_king_side_rook_captured = *own_pieces & enemy_king_side_rook_start_position;
     if (king_moved)
         board.castling_rights &= ~king_side & ~queen_side;
-    if (king_side_rook_gone)
+    if (own_king_side_rook_moved)
         board.castling_rights &= ~king_side;
-    if (queen_side_rook_gone)
+    if (own_queen_side_rook_moved)
         board.castling_rights &= ~queen_side;
     if (enemy_queen_side_rook_captured)
         board.castling_rights &= ~(board.white_to_move ? BLACK_QUEEN_SIDE_CASTLING : WHITE_QUEEN_SIDE_CASTLING);
