@@ -86,23 +86,23 @@ namespace BitBoard
         Bitboard *getBitboardByPiece(Piece piece);
         Bitboard *getBitboardByPieceSymbol(Piece piece);
         Piece getPieceAt(Position position);
-        bool isSquareOccupied(Position position);
+        bool isSquareOccupied(Position position) const;
     };
 
     void movePiece(Bitboard &board, Position from, Position to);
     void set(Bitboard &board, Position position);
     void clear(Bitboard &board, Position position);
-    bool isSet(Bitboard board, Position position);
-    std::vector<bool> getBits(Bitboard board);
-    void printBitboard(Bitboard board, std::string title = "");
-    int8 countSetBits(Bitboard board);
+    bool isSet(const Bitboard &board, Position position);
+    std::vector<bool> getBits(const Bitboard &board);
+    void printBitboard(const Bitboard &board, std::string title = "");
+    int8 countSetBits(const Bitboard &board);
     Position clearRightmostSetBit(Bitboard &board); // sets the rightmost set bit to 0 and returns its index
-    Position getRightmostSetBit(Bitboard &board);
+    Position getRightmostSetBit(const Bitboard &board);
     Board generateBoardFromFEN(std::string fen);
 
     // print board
-    void printGameState(Board board);
-    void printBoard(Board board);
-    void printCastlingRights(Board board);
-    void placePiecesOnBoard(Board board, char board_to_print[8][8]);
+    void printGameState(const Board &board);
+    void printBoard(const Board &board);
+    void printCastlingRights(const Board &board);
+    void placePiecesOnBoard(const Board &board, char board_to_print[8][8]);
 }

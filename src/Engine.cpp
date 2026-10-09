@@ -246,7 +246,7 @@ void Engine::initializeStartPosition(std::string fen)
     board.hash = zobrist.computeInitialHash(board);
 }
 
-bool Engine::makeMoveIfLegal(Move &move)
+bool Engine::makeMoveIfLegal(Move move)
 {
     bool king_color_before_move = board.white_to_move;
     UndoInfo undo = move_generator.makeMove(board, move);

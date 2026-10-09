@@ -102,14 +102,14 @@ private:
     void initializeKingMoves();
 
     // move generation
-    void addPawnMoveWithPossiblePromotion(Board &board, MoveList &moves, Move move);
-    void addCastlingMoves(Board &board, MoveList &moves);
-    void generateKingMoves(Board &board, MoveList &moves, bool interesting_only = false);
-    void generatePawnMoves(Board &board, MoveList &moves, bool interesting_only = false);
-    void generateKnightMoves(Board &board, MoveList &moves, bool interesting_only = false);
-    void generateBishopMoves(Board &board, MoveList &moves, bool interesting_only = false);
-    void generateRookMoves(Board &board, MoveList &moves, bool interesting_only = false);
-    void generateQueenMoves(Board &board, MoveList &moves, bool interesting_only = false);
+    void addPawnMoveWithPossiblePromotion(MoveList &moves, Move move, bool white_to_move);
+    void addCastlingMoves(const Board &board, MoveList &moves);
+    void generateKingMoves(const Board &board, MoveList &moves, bool interesting_only = false);
+    void generatePawnMoves(const Board &board, MoveList &moves, bool interesting_only = false);
+    void generateKnightMoves(const Board &board, MoveList &moves, bool interesting_only = false);
+    void generateBishopMoves(const Board &board, MoveList &moves, bool interesting_only = false);
+    void generateRookMoves(const Board &board, MoveList &moves, bool interesting_only = false);
+    void generateQueenMoves(const Board &board, MoveList &moves, bool interesting_only = false);
 
     // precomputed attacks for sliding pieces (bishop and rook) using magic bitboards
     void initializeRookBishopAttacks();                                           // precomputes squares under attack for every position for every relevant occupancy
@@ -118,8 +118,8 @@ private:
     Bitboard precomputeSlidingBishopAttacks(Position square, Bitboard occupied);
 
     // move application
-    void handleCastling(Board &board, Move &move);
-    void detectDoublePawnPushForEnPassant(Board &board, Move &move);
+    void handleCastling(Board &board, Move move);
+    void detectDoublePawnPushForEnPassant(Board &board, Move move);
 
 public:
     // attack masks
@@ -138,13 +138,13 @@ public:
     Bitboard rook_attacks[NUM_SQUARES][4096];
 
     static MoveGenerator &getInstance();
-    UndoInfo makeMove(Board &board, Move &move);
+    UndoInfo makeMove(Board &board, Move move);
     void unmakeMove(Board &board, Move move, UndoInfo undo);
-    MoveList generateLegalMoves(Board board, bool interesting_only = false);
+    MoveList generateLegalMoves(Board &board, bool interesting_only = false);
     MoveList generatePseudoLegalMoves(Board &board, bool interesting_only = false);
-    bool isKingSafe(Board board, bool king_is_white);
-    bool squareUnderAttack(Board &board, Position square, bool white_is_attacker);
-    bool squaresUnderAttack(Board &board, Bitboard squares, bool white_is_attacker);
+    bool isKingSafe(const Board &board, bool king_is_white);
+    bool squareUnderAttack(const Board &board, Position square, bool white_is_attacker);
+    bool squaresUnderAttack(const Board &board, Bitboard squares, bool white_is_attacker);
     Move pickBestMove(MoveList &moves);
     bool markMoveAsUsed(MoveList &moves, Move move);
 };

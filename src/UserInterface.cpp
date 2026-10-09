@@ -45,13 +45,13 @@ void UserInterface::startBenchmark()
     log(BENCHMARK, "Benchmarking move generation with a perft of depth " + std::to_string(ply));
     timer.start();
     uint64 nodes = engine.perft(ply, divide);
-    log(BENCHMARK, "Nodes searched: " + std::to_string(nodes));
     timer.stop(BENCHMARK);
+    log(BENCHMARK, "Nodes searched: " + std::to_string(nodes));
 
     log(BENCHMARK, "Benchmarking search up to depth " + std::to_string(ply) + " without a time limit.");
     engine.setTimeLimit(POS_INFINITY);
     timer.start();
-    Move best_move = engine.search(ply);
+    engine.search(ply);
     timer.stop(BENCHMARK);
 
     log(BENCHMARK, "Benchmarking evaluation of the current board state 10,000 times.");
@@ -376,6 +376,7 @@ void UserInterface::printGameState()
 
 int main(int argc, char *argv[])
 {
+    std::cout << sizeof(Move) << std::endl;
     UserInterface ui;
     ui.parseParameters(argc, argv);
     ui.start();

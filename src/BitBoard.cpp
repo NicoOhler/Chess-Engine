@@ -15,12 +15,12 @@ void BitBoard::clear(Bitboard &board, Position position)
     board ^= 1ULL << position;
 }
 
-bool BitBoard::isSet(Bitboard board, Position position)
+bool BitBoard::isSet(const Bitboard &board, Position position)
 {
     return board & (1ULL << position);
 }
 
-std::vector<bool> BitBoard::getBits(Bitboard board)
+std::vector<bool> BitBoard::getBits(const Bitboard &board)
 {
     std::vector<bool> bits(NUM_SQUARES);
     for (int i = 0; i < NUM_SQUARES; i++)
@@ -28,7 +28,7 @@ std::vector<bool> BitBoard::getBits(Bitboard board)
     return bits;
 }
 
-int8 BitBoard::countSetBits(Bitboard board)
+int8 BitBoard::countSetBits(const Bitboard &board)
 {
     return __builtin_popcountll(board);
 }
@@ -39,12 +39,12 @@ Position BitBoard::clearRightmostSetBit(Bitboard &board)
     return index_of_LSB;
 }
 
-Position BitBoard::getRightmostSetBit(Bitboard &board)
+Position BitBoard::getRightmostSetBit(const Bitboard &board)
 {
     return __builtin_ctzll(board);
 }
 
-bool BitBoard::Board::isSquareOccupied(Position position)
+bool BitBoard::Board::isSquareOccupied(Position position) const
 {
     return occupied & (1ULL << position);
 }
@@ -235,7 +235,7 @@ Piece BitBoard::Board::getPieceAt(Position position)
     return EMPTY;
 }
 
-void BitBoard::printBitboard(Bitboard board, std::string title)
+void BitBoard::printBitboard(const Bitboard &board, std::string title)
 {
     std::vector<bool> bits = getBits(board);
     std::cout << title << std::endl;
@@ -253,7 +253,7 @@ void BitBoard::printBitboard(Bitboard board, std::string title)
               << std::endl;
 }
 
-void BitBoard::printGameState(Board board)
+void BitBoard::printGameState(const Board &board)
 {
     printBoard(board);
     if (board.en_passant != NO_EN_PASSANT)
@@ -264,7 +264,7 @@ void BitBoard::printGameState(Board board)
               << std::endl;
 }
 
-void BitBoard::printBoard(Board board)
+void BitBoard::printBoard(const Board &board)
 {
     char board_to_print[8][8];
     placePiecesOnBoard(board, board_to_print);
@@ -281,7 +281,7 @@ void BitBoard::printBoard(Board board)
               << std::endl;
 }
 
-void BitBoard::printCastlingRights(Board board)
+void BitBoard::printCastlingRights(const Board &board)
 {
     std::cout << "Castling rights: ";
     if (board.castling_rights & WHITE_KING_SIDE_CASTLING)
@@ -295,7 +295,7 @@ void BitBoard::printCastlingRights(Board board)
     std::cout << std::endl;
 }
 
-void BitBoard::placePiecesOnBoard(Board board, char board_to_print[8][8])
+void BitBoard::placePiecesOnBoard(const Board &board, char board_to_print[8][8])
 {
     Bitboard pieces[12] = {board.white_pawns, board.white_rooks, board.white_knights, board.white_bishops, board.white_queens, board.white_king,
                            board.black_pawns, board.black_rooks, board.black_knights, board.black_bishops, board.black_queens, board.black_king};

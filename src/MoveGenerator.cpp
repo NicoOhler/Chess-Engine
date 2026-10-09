@@ -163,7 +163,7 @@ void MoveGenerator::initializeKingMoves()
     }
 }
 
-void MoveGenerator::addPawnMoveWithPossiblePromotion(Board &board, MoveList &moves, Move move)
+void MoveGenerator::addPawnMoveWithPossiblePromotion(MoveList &moves, Move move, bool white_to_move)
 {
     // regular move
     if (move.to >= UP && move.to < NUM_SQUARES + DOWN)
@@ -174,7 +174,6 @@ void MoveGenerator::addPawnMoveWithPossiblePromotion(Board &board, MoveList &mov
     }
 
     // pawn promotion
-    bool white_to_move = board.white_to_move;
     move.promotion = white_to_move ? WHITE_QUEEN : BLACK_QUEEN;
     moves.append(move);
     move.promotion = white_to_move ? WHITE_ROOK : BLACK_ROOK;
@@ -186,7 +185,7 @@ void MoveGenerator::addPawnMoveWithPossiblePromotion(Board &board, MoveList &mov
     // log(PAWN_MOVE, "Found pawn promotion from " + getSquareName(move.from) + " to " + getSquareName(move.to) + ".");
 }
 
-void MoveGenerator::addCastlingMoves(Board &board, MoveList &moves)
+void MoveGenerator::addCastlingMoves(const Board &board, MoveList &moves)
 {
     bool white_to_move = board.white_to_move;
     Piece piece = white_to_move ? WHITE_KING : BLACK_KING;
@@ -332,7 +331,7 @@ Bitboard MoveGenerator::precomputeSlidingBishopAttacks(Position square, Bitboard
     return attacks;
 }
 
-MoveList MoveGenerator::generateLegalMoves(Board board, bool interesting_only)
+MoveList MoveGenerator::generateLegalMoves(Board &board, bool interesting_only)
 {
     MoveList legal_moves;
     MoveList pseudo_legal_moves = generatePseudoLegalMoves(board, interesting_only);
@@ -364,13 +363,13 @@ MoveList MoveGenerator::generatePseudoLegalMoves(Board &board, bool interesting_
     return moves;
 }
 
-bool MoveGenerator::isKingSafe(Board board, bool king_is_white)
+bool MoveGenerator::isKingSafe(const Board &board, bool king_is_white)
 {
     Position king_square = getRightmostSetBit(king_is_white ? board.white_king : board.black_king);
     return !squareUnderAttack(board, king_square, !king_is_white);
 }
 
-void MoveGenerator::generateKingMoves(Board &board, MoveList &moves, bool interesting_only)
+void MoveGenerator::generateKingMoves(const Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
     Piece piece = white_to_move ? WHITE_KING : BLACK_KING;
@@ -398,7 +397,7 @@ void MoveGenerator::generateKingMoves(Board &board, MoveList &moves, bool intere
         addCastlingMoves(board, moves);
 }
 
-void MoveGenerator::generatePawnMoves(Board &board, MoveList &moves, bool interesting_only)
+void MoveGenerator::generatePawnMoves(const Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
     Piece piece = white_to_move ? WHITE_PAWN : BLACK_PAWN;
@@ -422,7 +421,7 @@ void MoveGenerator::generatePawnMoves(Board &board, MoveList &moves, bool intere
         if (interesting_only && to >= UP && to < NUM_SQUARES + DOWN)
             continue;
         Position from = to - direction;
-        addPawnMoveWithPossiblePromotion(board, moves, Move{from, to, piece});
+        addPawnMoveWithPossiblePromotion(moves, Move{from, to, piece}, board.white_to_move);
     }
 
     if (!interesting_only)
@@ -451,7 +450,7 @@ void MoveGenerator::generatePawnMoves(Board &board, MoveList &moves, bool intere
         Bitboard attack = attack_right[from] & enemies;
         bool en_passant_right = (modPow2(from, 8) != COL_H && board.en_passant == to_right);
         if (attack)
-            addPawnMoveWithPossiblePromotion(board, moves, Move{from, to_right, piece});
+            addPawnMoveWithPossiblePromotion(moves, Move{from, to_right, piece}, board.white_to_move);
         else if (en_passant_right)
             moves.append(Move{from, to_right, piece});
         // log(PAWN_MOVE, "Found en passant move from " + getSquareName(from) + " to " + getSquareName(to_right) + ".");
@@ -461,14 +460,14 @@ void MoveGenerator::generatePawnMoves(Board &board, MoveList &moves, bool intere
         attack = attack_left[from] & enemies;
         bool en_passant_left = (modPow2(from, 8) != COL_A && board.en_passant == to_left);
         if (attack)
-            addPawnMoveWithPossiblePromotion(board, moves, Move{from, to_left, piece});
+            addPawnMoveWithPossiblePromotion(moves, Move{from, to_left, piece}, board.white_to_move);
         else if (en_passant_left)
             moves.append(Move{from, to_left, piece});
         // log(PAWN_MOVE, "Found en passant move from " + getSquareName(from) + " to " + getSquareName(to_left) + ".");
     }
 }
 
-void MoveGenerator::generateKnightMoves(Board &board, MoveList &moves, bool interesting_only)
+void MoveGenerator::generateKnightMoves(const Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
     Piece piece = white_to_move ? WHITE_KNIGHT : BLACK_KNIGHT;
@@ -491,7 +490,7 @@ void MoveGenerator::generateKnightMoves(Board &board, MoveList &moves, bool inte
     }
 }
 
-void MoveGenerator::generateBishopMoves(Board &board, MoveList &moves, bool interesting_only)
+void MoveGenerator::generateBishopMoves(const Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
     Piece piece = white_to_move ? WHITE_BISHOP : BLACK_BISHOP;
@@ -519,7 +518,7 @@ void MoveGenerator::generateBishopMoves(Board &board, MoveList &moves, bool inte
     }
 }
 
-void MoveGenerator::generateRookMoves(Board &board, MoveList &moves, bool interesting_only)
+void MoveGenerator::generateRookMoves(const Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
     Piece piece = white_to_move ? WHITE_ROOK : BLACK_ROOK;
@@ -544,7 +543,7 @@ void MoveGenerator::generateRookMoves(Board &board, MoveList &moves, bool intere
     }
 }
 
-void MoveGenerator::generateQueenMoves(Board &board, MoveList &moves, bool interesting_only)
+void MoveGenerator::generateQueenMoves(const Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
     Piece piece = white_to_move ? WHITE_QUEEN : BLACK_QUEEN;
@@ -571,7 +570,7 @@ void MoveGenerator::generateQueenMoves(Board &board, MoveList &moves, bool inter
     }
 }
 
-bool MoveGenerator::squareUnderAttack(Board &board, Position square, bool white_is_attacker)
+bool MoveGenerator::squareUnderAttack(const Board &board, Position square, bool white_is_attacker)
 {
     // pretend that the piece on this square could move like a knight/bishop/...
     // could it attack an enemy piece of the corresponding type?
@@ -605,7 +604,7 @@ bool MoveGenerator::squareUnderAttack(Board &board, Position square, bool white_
     return white_pawn_attack_right[square] & board.black_pawns || white_pawn_attack_left[square] & board.black_pawns;
 }
 
-bool MoveGenerator::squaresUnderAttack(Board &board, Bitboard squares, bool white_is_attacker)
+bool MoveGenerator::squaresUnderAttack(const Board &board, Bitboard squares, bool white_is_attacker)
 {
     while (squares)
         if (squareUnderAttack(board, clearRightmostSetBit(squares), white_is_attacker))
@@ -654,7 +653,7 @@ MoveGenerator &MoveGenerator::getInstance()
     return instance;
 }
 
-UndoInfo MoveGenerator::makeMove(Board &board, Move &move)
+UndoInfo MoveGenerator::makeMove(Board &board, Move move)
 {
     // store information needed for unmake before actually making the move
     UndoInfo undo;
@@ -767,12 +766,11 @@ void MoveGenerator::unmakeMove(Board &board, Move move, UndoInfo undo)
     }
 }
 
-void MoveGenerator::handleCastling(Board &board, Move &move)
+void MoveGenerator::handleCastling(Board &board, Move move)
 {
     if (!board.castling_rights)
         return;
 
-    // todo simplify constant fetching, maybe two constant classes one for white and one for black
     Bitboard king_side = board.white_to_move ? WHITE_KING_SIDE_CASTLING : BLACK_KING_SIDE_CASTLING;
     Bitboard queen_side = board.white_to_move ? WHITE_QUEEN_SIDE_CASTLING : BLACK_QUEEN_SIDE_CASTLING;
     Bitboard *own_rooks = board.white_to_move ? &board.white_rooks : &board.black_rooks;
@@ -822,7 +820,7 @@ void MoveGenerator::handleCastling(Board &board, Move &move)
         board.castling_rights &= ~(board.white_to_move ? BLACK_KING_SIDE_CASTLING : WHITE_KING_SIDE_CASTLING);
 }
 
-void MoveGenerator::detectDoublePawnPushForEnPassant(Board &board, Move &move)
+void MoveGenerator::detectDoublePawnPushForEnPassant(Board &board, Move move)
 {
     Position from_row = move.from / 8;
     Position to_row = move.to / 8;

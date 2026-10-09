@@ -12,6 +12,7 @@ typedef signed char int8;
 typedef signed char Position;
 typedef Position Direction;
 typedef unsigned char Piece;
+typedef unsigned char PieceSymbol;
 typedef unsigned char Mode;
 typedef unsigned char GameState;
 typedef signed char Clock;

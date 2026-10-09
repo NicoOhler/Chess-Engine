@@ -1,5 +1,5 @@
 ### Important Features
-+ split up move generation
++ store move as 16-bit integer
 + improve move ordering
     + move ordering is typically staged
         + retrieve best previous move and check it
