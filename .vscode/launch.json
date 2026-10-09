@@ -34,7 +34,7 @@
                 "-m",
                 "b",
                 "-p",
-                "6"
+                "5"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -365,5 +365,37 @@
             "preLaunchTask": "Build Chess Engine",
             "miDebuggerPath": "/usr/bin/gdb",
         },
+        {
+            "name": "gprof Profiling",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/bin/bash",
+            "args": [
+                "-c",
+                "gprof ./engine gmon.out > profiling.txt"
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "Build Chess Engine with Profiling",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Valgrind",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/bin/bash",
+            "args": [
+                "-c",
+                "\"valgrind -s --leak-check=full --show-leak-kinds=all ./engine -m b -p 3\"",
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "Build Chess Engine",
+            "miDebuggerPath": "/usr/bin/gdb"
+        }
     ]
 }

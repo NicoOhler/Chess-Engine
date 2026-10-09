@@ -54,9 +54,9 @@ void UserInterface::startBenchmark()
     Move best_move = engine.search(ply);
     timer.stop(BENCHMARK);
 
-    log(BENCHMARK, "Benchmarking evaluation of the current board state 100,000 times.");
+    log(BENCHMARK, "Benchmarking evaluation of the current board state 10,000 times.");
     timer.start();
-    for (int i = 0; i < 100000; i++)
+    for (int i = 0; i < 10000; i++)
         engine.evaluateBoard();
     timer.stop(BENCHMARK);
 }
