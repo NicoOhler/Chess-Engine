@@ -13,10 +13,11 @@ void Timer::start()
     start_time = getMilliseconds();
 }
 
-void Timer::stop(LogType log_type)
+Milliseconds Timer::stop(LogType log_type)
 {
     end_time = getMilliseconds();
     log(log_type, "Time taken: " + convertMillisecondsToString(end_time - start_time));
+    return end_time;
 }
 
 bool Timer::timeLeft()

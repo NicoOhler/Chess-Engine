@@ -27,6 +27,7 @@ private:
     void startPerft();
     void startUCI();
     void startSearch();
+    void startBenchmark();
     void applyAndTrackMove(Move move, bool play_vs_engine = false);
     void printHelp(std::string executable_name);
     void printGameState();

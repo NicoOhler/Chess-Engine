@@ -26,6 +26,32 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
+            "name": "Benchmark",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/engine",
+            "args": [
+                "-m",
+                "b",
+                "-p",
+                "6"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build Chess Engine",
+            "miDebuggerPath": "/usr/bin/gdb",
+        },
+        {
             "name": "Local PvP w/ Default Board",
             "type": "cppdbg",
             "request": "launch",

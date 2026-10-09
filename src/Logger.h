@@ -10,6 +10,7 @@ const bool LOG_TO_CONSOLE = true;
 const bool APPEND_TO_FILE = false;
 
 const LogType LOG_TYPE_ENABLED = 0x1;
+const LogType LOG_TYPE_DISABLED = 0x0;
 const LogType WHITE = 0x2;
 
 const LogType CHESS_BOARD = WHITE | LOG_TYPE_ENABLED;
@@ -28,6 +29,7 @@ const LogType SEARCH_DEPTHS = WHITE | LOG_TYPE_ENABLED;
 const LogType FEN = WHITE | LOG_TYPE_ENABLED;
 const LogType TIME = WHITE | LOG_TYPE_ENABLED;
 const LogType EVALUATION = WHITE;
+const LogType BENCHMARK = WHITE | LOG_TYPE_ENABLED;
 const LogType TRANSPOSITION_TABLE_MATCH = WHITE;
 const LogType ENGINE_SETTINGS = WHITE | LOG_TYPE_ENABLED;
 const LogType UI = WHITE | LOG_TYPE_ENABLED;

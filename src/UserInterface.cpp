@@ -19,6 +19,9 @@ void UserInterface::start()
     case PERFT_MODE:
         startPerft();
         break;
+    case BENCHMARK_MODE:
+        startBenchmark();
+        break;
     case SEARCH_MODE:
         startSearch();
         break;
@@ -27,6 +30,35 @@ void UserInterface::start()
         exit(1);
         break;
     }
+}
+
+void UserInterface::startBenchmark()
+{
+    log(BENCHMARK, "Starting benchmark of move generation, evaluation and search.");
+    engine.initializeStartPosition(fen);
+    if (ply <= 0)
+    {
+        log(UI, "Invalid benchmark depth. Please specify a positive integer for the depth.");
+        return;
+    }
+
+    log(BENCHMARK, "Benchmarking move generation with a perft of depth " + std::to_string(ply));
+    timer.start();
+    uint64 nodes = engine.perft(ply, divide);
+    log(BENCHMARK, "Nodes searched: " + std::to_string(nodes));
+    timer.stop(BENCHMARK);
+
+    log(BENCHMARK, "Benchmarking search up to depth " + std::to_string(ply) + " without a time limit.");
+    engine.setTimeLimit(POS_INFINITY);
+    timer.start();
+    Move best_move = engine.search(ply);
+    timer.stop(BENCHMARK);
+
+    log(BENCHMARK, "Benchmarking evaluation of the current board state 100,000 times.");
+    timer.start();
+    for (int i = 0; i < 100000; i++)
+        engine.evaluateBoard();
+    timer.stop(BENCHMARK);
 }
 
 void UserInterface::startSearch()
@@ -327,7 +359,7 @@ void UserInterface::parseParameters(int argc, char *argv[])
 void UserInterface::printHelp(std::string executable_name)
 {
     std::cout << "Usage: " << executable_name << " [-m mode] [-f FEN] [-p ply] [-d] [-h]\n"
-              << "  -m mode: Set the engine mode (u for UCI, c for console, p for perft, e for engine self play)\n"
+              << "  -m mode: Set the engine mode (u for UCI, b for benchmark, s for search, l for player vs player, r for player vs engine, e for engine vs engine, p for perft)\n"
               << "  -f FEN: Start the game with the given FEN string\n"
               << "  -p ply: Run perft/search with the given ply/depth/number of half moves)\n"
               << "  -d: Divide perft results\n"

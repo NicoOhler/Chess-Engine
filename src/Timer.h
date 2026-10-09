@@ -11,7 +11,7 @@ public:
     Milliseconds limit = SEARCH_TIME_LIMIT;
 
     void start();
-    void stop(LogType log_type = TIME);
+    Milliseconds stop(LogType log_type = TIME);
     bool timeLeft();
 
 private:

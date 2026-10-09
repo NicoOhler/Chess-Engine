@@ -111,6 +111,7 @@ enum MODES
     PLAYER_VS_ENGINE_MODE = 'r',
     ENGINE_VS_ENGINE_MODE = 'e',
     PERFT_MODE = 'p',
+    BENCHMARK_MODE = 'b',
     SEARCH_MODE = 's'
 };
 
