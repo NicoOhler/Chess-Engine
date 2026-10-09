@@ -124,7 +124,6 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
     // return evaluation for leaf nodes (max depth reached)
     if (remaining_depth == 0)
         return quiescence(lower_bound, upper_bound, ply);
-    // return evaluateBoard();
 
     // generate and evaluate moves until pruning possible
     MoveList pseudo_legal_moves = move_generator.generatePseudoLegalMoves(board);

@@ -280,7 +280,7 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "Search from Default Board",
+            "name": "Custom Search 1",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/engine",
@@ -310,7 +310,7 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "Search from Custom Board",
+            "name": "Custom Search 2",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/engine",

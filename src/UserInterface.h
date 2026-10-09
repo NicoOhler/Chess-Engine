@@ -29,6 +29,7 @@ private:
     void startSearch();
     void applyAndTrackMove(Move move, bool play_vs_engine = false);
     void printHelp(std::string executable_name);
+    void printGameState();
     Move promptForLegalMove(MoveList legal_moves);
     bool promptForPlayerColor();
     Piece promptForPromotionChoice();

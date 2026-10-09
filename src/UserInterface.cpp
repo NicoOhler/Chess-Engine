@@ -94,7 +94,7 @@ void UserInterface::startPlayerVsPlayer()
 {
     log(UI, "ChessEngine started in player vs player mode.");
     engine.initializeStartPosition(fen);
-    printGameState(engine.getBoard());
+    printGameState();
     MoveList moves = engine.getLegalMoves();
     log(UI, "Enter 'p' to print legal moves or 'u' to undo the last move.");
 
@@ -102,7 +102,7 @@ void UserInterface::startPlayerVsPlayer()
     {
         Move move = promptForLegalMove(moves);
         applyAndTrackMove(move);
-        printGameState(engine.getBoard());
+        printGameState();
         moves = engine.getLegalMoves();
     } while (engine.getGameState(moves) == IN_PROGRESS);
     log(UI, (engine.getGameState(moves) == CHECKMATE ? "Checkmate" : "Draw"));
@@ -112,7 +112,7 @@ void UserInterface::startPlayerVsEngine()
 {
     log(UI, "ChessEngine started in player vs engine mode.");
     engine.initializeStartPosition(fen);
-    printGameState(engine.getBoard());
+    printGameState();
     MoveList moves = engine.getLegalMoves();
     bool ai_turn = promptForPlayerColor() != engine.getBoard().white_to_move;
     log(UI, (ai_turn ? "The AI starts.\n" : "You start.\n"));
@@ -123,7 +123,7 @@ void UserInterface::startPlayerVsEngine()
         Move move = ai_turn ? engine.search(ply) : promptForLegalMove(moves);
         ai_turn = !ai_turn;
         applyAndTrackMove(move, true);
-        printGameState(engine.getBoard());
+        printGameState();
         moves = engine.getLegalMoves();
     } while (engine.getGameState(moves) == IN_PROGRESS);
     log(UI, (engine.getGameState(moves) == CHECKMATE ? "Checkmate" : "Draw"));
@@ -133,7 +133,7 @@ void UserInterface::startEngineVsEngine()
 {
     log(UI, "ChessEngine started in engine vs engine mode.");
     engine.initializeStartPosition(fen);
-    printGameState(engine.getBoard());
+    printGameState();
     MoveList moves = engine.getLegalMoves();
     std::string input;
 
@@ -143,7 +143,7 @@ void UserInterface::startEngineVsEngine()
         log(UI, "Press Enter to apply the chosen move.");
         std::getline(std::cin, input);
         applyAndTrackMove(move);
-        printGameState(engine.getBoard());
+        printGameState();
         moves = engine.getLegalMoves();
     } while (engine.getGameState(moves) == IN_PROGRESS);
     log(UI, (engine.getGameState(moves) == CHECKMATE ? "Checkmate" : "Draw"));
@@ -166,6 +166,7 @@ void UserInterface::applyAndTrackMove(Move move, bool play_vs_engine)
         engine.unmakeMove(move);
         return;
     }
+
     move_history.push(move);
     engine.makeMove(move);
 }
@@ -332,6 +333,13 @@ void UserInterface::printHelp(std::string executable_name)
               << "  -d: Divide perft results\n"
               << "  -t: Set search time (in milliseconds)\n"
               << "  -h: Show this help message" << std::endl;
+}
+
+void UserInterface::printGameState()
+{
+    Score score = engine.evaluateBoard();
+    log(UI, "Board Evaluation: " + std::to_string(score));
+    BitBoard::printGameState(engine.getBoard());
 }
 
 int main(int argc, char *argv[])
