@@ -174,13 +174,13 @@ void MoveGenerator::addPawnMoveWithPossiblePromotion(MoveList &moves, Move move,
     }
 
     // pawn promotion
-    move.promotion = white_to_move ? WHITE_QUEEN : BLACK_QUEEN;
+    move.promotion_and_castling = PROMOTE_TO_QUEEN;
     moves.append(move);
-    move.promotion = white_to_move ? WHITE_ROOK : BLACK_ROOK;
+    move.promotion_and_castling = PROMOTE_TO_ROOK;
     moves.append(move);
-    move.promotion = white_to_move ? WHITE_BISHOP : BLACK_BISHOP;
+    move.promotion_and_castling = PROMOTE_TO_BISHOP;
     moves.append(move);
-    move.promotion = white_to_move ? WHITE_KNIGHT : BLACK_KNIGHT;
+    move.promotion_and_castling = PROMOTE_TO_KNIGHT;
     moves.append(move);
     // log(PAWN_MOVE, "Found pawn promotion from " + getSquareName(move.from) + " to " + getSquareName(move.to) + ".");
 }
@@ -203,7 +203,7 @@ void MoveGenerator::addCastlingMoves(const Board &board, MoveList &moves)
             if (!king_side_attacked) // squares that the king passes through must not be attacked
             {
                 Position to = king_start + RIGHT * 2;
-                moves.append(Move{king_start, to, king, 0, king_side_castling});
+                moves.append(Move{king_start, to, king, king_side_castling});
                 // log(KING_MOVE, "Found king side castling from " + getSquareName(king_start) + " to " + getSquareName(to) + ".");
             }
         }
@@ -222,7 +222,7 @@ void MoveGenerator::addCastlingMoves(const Board &board, MoveList &moves)
             if (!queen_side_attacked) // squares that the king passes through must not be attacked
             {
                 Position to = king_start + LEFT * 2;
-                moves.append(Move{king_start, to, king, 0, queen_side_castling});
+                moves.append(Move{king_start, to, king, queen_side_castling});
                 // log(KING_MOVE, "Found queen side castling from " + getSquareName(king_start) + " to " + getSquareName(to) + ".");
             }
         }
@@ -717,10 +717,11 @@ UndoInfo MoveGenerator::makeMove(Board &board, Move move)
     BitBoard::movePiece(board.occupied, move.from, move.to);
 
     handleCastling(board, move);
-    if (move.promotion)
+    if (move.isPromotion())
     {
+        Piece promotion_piece = getPromotionPiece(move.promotion_and_castling, board.white_to_move);
         BitBoard::clear(*piece, move.to);
-        BitBoard::set(*board.getBitboardByPiece(move.promotion), move.to);
+        BitBoard::set(*board.getBitboardByPiece(promotion_piece), move.to);
     }
     board.white_to_move = !board.white_to_move;
     board.half_move_clock++;
@@ -740,9 +741,10 @@ void MoveGenerator::unmakeMove(Board &board, Move move, UndoInfo undo)
     Bitboard *own_pieces = white_to_move ? &board.white_pieces : &board.black_pieces;
 
     // replace promoted piece with pawn
-    if (move.promotion)
+    if (move.isPromotion())
     {
-        Bitboard *promoted_piece = board.getBitboardByPiece(move.promotion);
+        Piece promotion_piece = getPromotionPiece(move.promotion_and_castling, white_to_move);
+        Bitboard *promoted_piece = board.getBitboardByPiece(promotion_piece);
         BitBoard::clear(*promoted_piece, move.to);
         BitBoard::set(*piece, move.to);
     }
@@ -767,10 +769,10 @@ void MoveGenerator::unmakeMove(Board &board, Move move, UndoInfo undo)
     }
 
     // place rook where it was before castling
-    if (move.castling)
+    if (move.isCastling())
     {
         Bitboard *rooks = board.getBitboardByPiece(white_to_move ? WHITE_ROOK : BLACK_ROOK);
-        bool king_side_castling = move.castling & (white_to_move ? WHITE_KING_CASTLING : BLACK_KING_CASTLING);
+        bool king_side_castling = move.promotion_and_castling & (white_to_move ? WHITE_KING_CASTLING : BLACK_KING_CASTLING);
         move.from += king_side_castling ? RIGHT : LEFT;
         move.to += king_side_castling ? RIGHT : 2 * LEFT;
         BitBoard::movePiece(*rooks, move.from, move.to);
@@ -794,7 +796,7 @@ void MoveGenerator::handleCastling(Board &board, Move move)
     Bitboard *occupied = &board.occupied;
 
     // apply castling move
-    if (move.castling)
+    if (move.isCastling())
     {
         // clear castling rights
         board.castling_rights &= ~queen_side_castling_rights & ~king_side_castling_rights;
@@ -802,7 +804,7 @@ void MoveGenerator::handleCastling(Board &board, Move move)
         // update rook position, king already updated by makeMove
         Position rook_from = move.from;
         Position rook_to = move.from;
-        bool queen_side_castling = move.castling & queen_side_castling_rights;
+        bool queen_side_castling = move.promotion_and_castling & queen_side_castling_rights;
         rook_from += queen_side_castling ? 4 * LEFT : 3 * RIGHT;
         rook_to += queen_side_castling ? LEFT : RIGHT;
         BitBoard::movePiece(*own_rooks, rook_from, rook_to);

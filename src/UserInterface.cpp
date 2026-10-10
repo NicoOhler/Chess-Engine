@@ -216,13 +216,7 @@ Move UserInterface::promptForLegalMove(MoveList legal_moves)
         {
             std::cout << "Legal moves: " << legal_moves.size << std::endl;
             for (int i = 0; i < legal_moves.size; i++)
-            {
-                Move legal_move = legal_moves.moves[i];
-                std::cout << "\t" << getSquareName(legal_move.from) << getSquareName(legal_move.to);
-                if (legal_move.promotion)
-                    std::cout << " (" << legal_move.promotion << ")";
-                std::cout << std::endl;
-            }
+                std::cout << "\t" << legal_moves.moves[i].toString() << std::endl;
             continue;
         }
 
@@ -250,8 +244,8 @@ Move UserInterface::promptForLegalMove(MoveList legal_moves)
             Move legal_move = legal_moves.moves[i];
             if (legal_move.from == from && legal_move.to == to)
             {
-                if (legal_move.promotion)
-                    legal_move.promotion = promptForPromotionChoice();
+                if (legal_move.isPromotion())
+                    legal_move.promotion_and_castling = promptForPromotionChoice();
                 return legal_move;
             }
         }
@@ -298,21 +292,17 @@ Piece UserInterface::promptForPromotionChoice()
         switch (choice)
         {
         case WHITE_QUEEN_SYMBOL:
-            return WHITE_QUEEN;
-        case WHITE_ROOK_SYMBOL:
-            return WHITE_ROOK;
-        case WHITE_BISHOP_SYMBOL:
-            return WHITE_BISHOP;
-        case WHITE_KNIGHT_SYMBOL:
-            return WHITE_KNIGHT;
         case BLACK_QUEEN_SYMBOL:
-            return BLACK_QUEEN;
+            return PROMOTE_TO_QUEEN;
+        case WHITE_ROOK_SYMBOL:
         case BLACK_ROOK_SYMBOL:
-            return BLACK_ROOK;
+            return PROMOTE_TO_ROOK;
+        case WHITE_BISHOP_SYMBOL:
         case BLACK_BISHOP_SYMBOL:
-            return BLACK_BISHOP;
+            return PROMOTE_TO_BISHOP;
+        case WHITE_KNIGHT_SYMBOL:
         case BLACK_KNIGHT_SYMBOL:
-            return BLACK_KNIGHT;
+            return PROMOTE_TO_KNIGHT;
         default:
             break;
         }

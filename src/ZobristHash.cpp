@@ -75,13 +75,11 @@ uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
         hash ^= piece_at_square[move.to][undo.captured_piece];
 
     // add piece to new position
-    if (move.promotion)
-        hash ^= piece_at_square[move.to][move.promotion];
-    else
-        hash ^= piece_at_square[move.to][move.piece];
+    Piece piece = move.isPromotion() ? getPromotionPiece(move.promotion_and_castling, white_to_move) : move.piece;
+    hash ^= piece_at_square[move.to][piece];
 
-    // handle castling moves by moving the rook
-    if (move.castling)
+    // additionally move rook if castling
+    if (move.isCastling())
     {
         // remove old rook position and add new rook position
         bool king_side_castling = move.to > move.from;

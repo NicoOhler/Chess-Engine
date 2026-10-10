@@ -1,6 +1,23 @@
 #include "utils.h"
 #include "Evaluation.h"
 
+Piece getPromotionPiece(Promotion promotion, bool white_to_move)
+{
+    switch (promotion)
+    {
+    case PROMOTE_TO_QUEEN:
+        return white_to_move ? WHITE_QUEEN : BLACK_QUEEN;
+    case PROMOTE_TO_ROOK:
+        return white_to_move ? WHITE_ROOK : BLACK_ROOK;
+    case PROMOTE_TO_BISHOP:
+        return white_to_move ? WHITE_BISHOP : BLACK_BISHOP;
+    case PROMOTE_TO_KNIGHT:
+        return white_to_move ? WHITE_KNIGHT : BLACK_KNIGHT;
+    default:
+        assert(false, "Invalid promotion piece");
+    }
+}
+
 std::string getSquareName(Position square)
 {
     assert(square >= 0 && square < 64, "Invalid square");

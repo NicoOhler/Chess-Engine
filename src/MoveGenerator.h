@@ -13,17 +13,16 @@ struct Move
     Position from;
     Position to;
     Piece piece;
-    Piece promotion = NO_PROMOTION;
-    CastlingRights castling = NO_CASTLING;
+    PromotionAndCastlingRights promotion_and_castling = NO_PROMOTION_OR_CASTLING;
 
     bool operator==(const Move &rhs)
     {
-        return from == rhs.from && to == rhs.to && piece == rhs.piece && promotion == rhs.promotion && castling == rhs.castling;
+        return from == rhs.from && to == rhs.to && piece == rhs.piece && promotion_and_castling == rhs.promotion_and_castling;
     }
 
     bool operator!=(const Move &rhs)
     {
-        return from != rhs.from || to != rhs.to || piece != rhs.piece || promotion != rhs.promotion || castling != rhs.castling;
+        return from != rhs.from || to != rhs.to || piece != rhs.piece || promotion_and_castling != rhs.promotion_and_castling;
     }
 
     std::string toString() const
@@ -31,11 +30,29 @@ struct Move
         std::string result;
         result += getSquareName(from);
         result += getSquareName(to);
-        if (promotion)
-            result += promotion;
-        if (castling)
-            result += ((castling == WHITE_KING_CASTLING) || (castling == BLACK_KING_CASTLING)) ? "O-O" : "O-O-O";
+        if (promotion_and_castling & PROMOTE_TO_QUEEN)
+            result += 'q';
+        if (promotion_and_castling & PROMOTE_TO_ROOK)
+            result += 'r';
+        if (promotion_and_castling & PROMOTE_TO_BISHOP)
+            result += 'b';
+        if (promotion_and_castling & PROMOTE_TO_KNIGHT)
+            result += 'n';
+        if (promotion_and_castling & (WHITE_KING_CASTLING | BLACK_KING_CASTLING))
+            result += "O-O";
+        if (promotion_and_castling & (WHITE_QUEEN_CASTLING | BLACK_QUEEN_CASTLING))
+            result += "O-O-O";
         return result;
+    }
+
+    bool isPromotion() const
+    {
+        return promotion_and_castling & (PROMOTE_TO_QUEEN | PROMOTE_TO_ROOK | PROMOTE_TO_BISHOP | PROMOTE_TO_KNIGHT);
+    }
+
+    bool isCastling() const
+    {
+        return promotion_and_castling & (WHITE_KING_CASTLING | WHITE_QUEEN_CASTLING | BLACK_KING_CASTLING | BLACK_QUEEN_CASTLING);
     }
 };
 
@@ -63,8 +80,8 @@ struct UndoHistory
     }
 };
 
-const Move UNDO_MOVE = Move{0, 0, UNDO, 0, 0};
-const Move NULL_MOVE = Move{0, 0, EMPTY, 0, 0};
+const Move UNDO_MOVE = Move{0, 0, UNDO, NO_PROMOTION_OR_CASTLING};
+const Move NULL_MOVE = Move{0, 0, EMPTY, NO_PROMOTION_OR_CASTLING};
 
 struct MoveList
 {
