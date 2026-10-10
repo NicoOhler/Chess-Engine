@@ -33,13 +33,13 @@ uint64 ZobristHash::computeInitialHash(Board &board)
         hash ^= en_passant_file[modPow2(board.en_passant, 8)];
 
     // add castling rights
-    if (board.castling_rights & WHITE_KING_SIDE_CASTLING)
+    if (board.castling_rights & WHITE_KING_CASTLING)
         hash ^= castling_rights[0];
-    if (board.castling_rights & WHITE_QUEEN_SIDE_CASTLING)
+    if (board.castling_rights & WHITE_QUEEN_CASTLING)
         hash ^= castling_rights[1];
-    if (board.castling_rights & BLACK_KING_SIDE_CASTLING)
+    if (board.castling_rights & BLACK_KING_CASTLING)
         hash ^= castling_rights[2];
-    if (board.castling_rights & BLACK_QUEEN_SIDE_CASTLING)
+    if (board.castling_rights & BLACK_QUEEN_CASTLING)
         hash ^= castling_rights[3];
     return hash;
 }
@@ -95,13 +95,13 @@ uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
     // remove castling rights on change
     if (undo.castling_rights != board.castling_rights)
     {
-        if ((undo.castling_rights ^ board.castling_rights) & WHITE_KING_SIDE_CASTLING)
+        if ((undo.castling_rights ^ board.castling_rights) & WHITE_KING_CASTLING)
             hash ^= castling_rights[0];
-        if ((undo.castling_rights ^ board.castling_rights) & WHITE_QUEEN_SIDE_CASTLING)
+        if ((undo.castling_rights ^ board.castling_rights) & WHITE_QUEEN_CASTLING)
             hash ^= castling_rights[1];
-        if ((undo.castling_rights ^ board.castling_rights) & BLACK_KING_SIDE_CASTLING)
+        if ((undo.castling_rights ^ board.castling_rights) & BLACK_KING_CASTLING)
             hash ^= castling_rights[2];
-        if ((undo.castling_rights ^ board.castling_rights) & BLACK_QUEEN_SIDE_CASTLING)
+        if ((undo.castling_rights ^ board.castling_rights) & BLACK_QUEEN_CASTLING)
             hash ^= castling_rights[3];
     }
 

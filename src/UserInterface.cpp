@@ -376,7 +376,6 @@ void UserInterface::printGameState()
 
 int main(int argc, char *argv[])
 {
-    std::cout << sizeof(Move) << std::endl;
     UserInterface ui;
     ui.parseParameters(argc, argv);
     ui.start();

@@ -11,6 +11,7 @@ typedef unsigned char uint8;
 typedef signed char int8;
 typedef signed char Position;
 typedef Position Direction;
+typedef unsigned char CastlingRights;
 typedef unsigned char Piece;
 typedef unsigned char PieceSymbol;
 typedef unsigned char Mode;
@@ -29,6 +30,7 @@ const Score NEG_INFINITY = -2147483648;
 const Score USED_MOVE = NEG_INFINITY;
 const Clock HALF_MOVE_CLOCK_RESET = -1;
 const Clock HALF_MOVE_CLOCK_LIMIT = 100;
+const Piece NO_PROMOTION = 0;
 
 // directions
 const Position UP = 8;
@@ -46,6 +48,31 @@ const int TRANSPOSITION_TABLE_SIZE = 256;    // megabytes
 const int DEFAULT_PERFT_DEPTH = 6;
 const int MAX_SEARCH_DEPTH = 12;
 const int MAX_QUIESCENCE_DEPTH = 30;
+
+enum CASTLING_RIGHTS
+{
+    NO_CASTLING = 0,
+    WHITE_KING_CASTLING = 1 << 0,
+    WHITE_QUEEN_CASTLING = 1 << 1,
+    BLACK_KING_CASTLING = 1 << 2,
+    BLACK_QUEEN_CASTLING = 1 << 3,
+    WHITE_CASTLING = WHITE_KING_CASTLING | WHITE_QUEEN_CASTLING,
+    BLACK_CASTLING = BLACK_KING_CASTLING | BLACK_QUEEN_CASTLING,
+    ALL_CASTLING = WHITE_CASTLING | BLACK_CASTLING
+};
+
+enum PROMOTION_PIECES
+{
+    NO_PROMOTION = 0,
+    WHITE_QUEEN = 1,
+    WHITE_ROOK = 2,
+    WHITE_BISHOP = 3,
+    WHITE_KNIGHT = 4,
+    BLACK_QUEEN = 5,
+    BLACK_ROOK = 6,
+    BLACK_BISHOP = 7,
+    BLACK_KNIGHT = 8
+};
 
 enum PIECES
 {

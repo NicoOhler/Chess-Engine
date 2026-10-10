@@ -91,16 +91,16 @@ BitBoard::Board BitBoard::generateBoardFromFEN(std::string fen)
             switch (fen[i++])
             {
             case WHITE_KING_SYMBOL:
-                board.castling_rights |= WHITE_KING_SIDE_CASTLING;
+                board.castling_rights |= WHITE_KING_CASTLING;
                 break;
             case WHITE_QUEEN_SYMBOL:
-                board.castling_rights |= WHITE_QUEEN_SIDE_CASTLING;
+                board.castling_rights |= WHITE_QUEEN_CASTLING;
                 break;
             case BLACK_KING_SYMBOL:
-                board.castling_rights |= BLACK_KING_SIDE_CASTLING;
+                board.castling_rights |= BLACK_KING_CASTLING;
                 break;
             case BLACK_QUEEN_SYMBOL:
-                board.castling_rights |= BLACK_QUEEN_SIDE_CASTLING;
+                board.castling_rights |= BLACK_QUEEN_CASTLING;
                 break;
             default:
                 assert(false, "Invalid FEN");
@@ -284,13 +284,13 @@ void BitBoard::printBoard(const Board &board)
 void BitBoard::printCastlingRights(const Board &board)
 {
     std::cout << "Castling rights: ";
-    if (board.castling_rights & WHITE_KING_SIDE_CASTLING)
+    if (board.castling_rights & WHITE_KING_CASTLING)
         std::cout << "K";
-    if (board.castling_rights & WHITE_QUEEN_SIDE_CASTLING)
+    if (board.castling_rights & WHITE_QUEEN_CASTLING)
         std::cout << "Q";
-    if (board.castling_rights & BLACK_KING_SIDE_CASTLING)
+    if (board.castling_rights & BLACK_KING_CASTLING)
         std::cout << "k";
-    if (board.castling_rights & BLACK_QUEEN_SIDE_CASTLING)
+    if (board.castling_rights & BLACK_QUEEN_CASTLING)
         std::cout << "q";
     std::cout << std::endl;
 }

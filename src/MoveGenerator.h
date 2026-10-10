@@ -13,8 +13,8 @@ struct Move
     Position from;
     Position to;
     Piece piece;
-    Piece promotion = 0;
-    Bitboard castling = 0;
+    Piece promotion = NO_PROMOTION;
+    CastlingRights castling = NO_CASTLING;
 
     bool operator==(const Move &rhs)
     {
@@ -34,7 +34,7 @@ struct Move
         if (promotion)
             result += promotion;
         if (castling)
-            result += castling == WHITE_KING_SIDE_CASTLING || castling == BLACK_KING_SIDE_CASTLING ? "O-O" : "O-O-O";
+            result += ((castling == WHITE_KING_CASTLING) || (castling == BLACK_KING_CASTLING)) ? "O-O" : "O-O-O";
         return result;
     }
 };
@@ -43,7 +43,7 @@ struct UndoInfo
 {
     Piece captured_piece;
     Position en_passant;
-    Bitboard castling_rights;
+    CastlingRights castling_rights;
     Clock half_move_clock;
 };
 

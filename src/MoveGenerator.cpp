@@ -188,32 +188,43 @@ void MoveGenerator::addPawnMoveWithPossiblePromotion(MoveList &moves, Move move,
 void MoveGenerator::addCastlingMoves(const Board &board, MoveList &moves)
 {
     bool white_to_move = board.white_to_move;
-    Piece piece = white_to_move ? WHITE_KING : BLACK_KING;
+    Piece king = white_to_move ? WHITE_KING : BLACK_KING;
     Position king_start = white_to_move ? WHITE_KING_START_POSITION : BLACK_KING_START_POSITION;
-    Bitboard king_side_castling = white_to_move ? WHITE_KING_SIDE_CASTLING : BLACK_KING_SIDE_CASTLING;
-    if (board.castling_rights & king_side_castling) // not possible if king or rook has moved
+
+    // king side castling: king moves two squares to the right, rook moves to the left of the king
+    CastlingRights king_side_castling = white_to_move ? WHITE_KING_CASTLING : BLACK_KING_CASTLING;
+    if (board.castling_rights & king_side_castling)
     {
-        Bitboard king_side_blocked = board.occupied & king_side_castling;                        // squares between king and rook must be empty
-        bool king_side_attacked = squaresUnderAttack(board, king_side_castling, !white_to_move); // squares in between must not be attacked
-        if (!king_side_blocked && !king_side_attacked)
+        Bitboard free_king_squares = white_to_move ? WHITE_KING_CASTLING_FREE_SQUARES : BLACK_KING_CASTLING_FREE_SQUARES;
+        Bitboard king_side_blocked = board.occupied & free_king_squares;
+        if (!king_side_blocked) // all squares between king and rook must be empty
         {
-            Position to = king_start + RIGHT * 2;
-            moves.append(Move{king_start, to, piece, 0, king_side_castling});
-            // log(KING_MOVE, "Found king side castling from " + getSquareName(king_start) + " to " + getSquareName(to) + ".");
+            bool king_side_attacked = squaresUnderAttack(board, free_king_squares, !white_to_move);
+            if (!king_side_attacked) // squares that the king passes through must not be attacked
+            {
+                Position to = king_start + RIGHT * 2;
+                moves.append(Move{king_start, to, king, 0, king_side_castling});
+                // log(KING_MOVE, "Found king side castling from " + getSquareName(king_start) + " to " + getSquareName(to) + ".");
+            }
         }
     }
 
-    Bitboard queen_side_castling = white_to_move ? WHITE_QUEEN_SIDE_CASTLING : BLACK_QUEEN_SIDE_CASTLING;
+    // queen side castling: king moves two squares to the left, rook moves to the right of the king
+    CastlingRights queen_side_castling = white_to_move ? WHITE_QUEEN_CASTLING : BLACK_QUEEN_CASTLING;
     if (board.castling_rights & queen_side_castling)
     {
-        Bitboard queen_side_blocked = board.occupied & queen_side_castling;
-        Bitboard queen_side_not_under_check = white_to_move ? WHITE_QUEEN_SIDE_CASTLING_NOT_UNDER_CHECK : BLACK_QUEEN_SIDE_CASTLING_NOT_UNDER_CHECK;
-        bool queen_side_attacked = squaresUnderAttack(board, queen_side_not_under_check, !white_to_move);
-        if (!queen_side_blocked && !queen_side_attacked)
+        Bitboard free_queen_squares = white_to_move ? WHITE_QUEEN_CASTLING_FREE_SQUARES : BLACK_QUEEN_CASTLING_FREE_SQUARES;
+        Bitboard queen_side_blocked = board.occupied & free_queen_squares;
+        if (!queen_side_blocked) // all squares between king and rook must be empty
         {
-            Position to = king_start + LEFT * 2;
-            moves.append(Move{king_start, to, piece, 0, queen_side_castling});
-            // log(KING_MOVE, "Found queen side castling from " + getSquareName(king_start) + " to " + getSquareName(to) + ".");
+            Bitboard safe_squares = white_to_move ? WHITE_QUEEN_CASTLING_SAFE_SQUARES : BLACK_QUEEN_CASTLING_SAFE_SQUARES;
+            bool queen_side_attacked = squaresUnderAttack(board, safe_squares, !white_to_move);
+            if (!queen_side_attacked) // squares that the king passes through must not be attacked
+            {
+                Position to = king_start + LEFT * 2;
+                moves.append(Move{king_start, to, king, 0, queen_side_castling});
+                // log(KING_MOVE, "Found queen side castling from " + getSquareName(king_start) + " to " + getSquareName(to) + ".");
+            }
         }
     }
 }
@@ -718,13 +729,15 @@ UndoInfo MoveGenerator::makeMove(Board &board, Move move)
 
 void MoveGenerator::unmakeMove(Board &board, Move move, UndoInfo undo)
 {
+    // the player who made the move is now the one to move
     board.white_to_move = !board.white_to_move;
     board.half_move_clock = undo.half_move_clock;
     board.castling_rights = undo.castling_rights;
     board.en_passant = undo.en_passant;
 
+    bool white_to_move = board.white_to_move;
     Bitboard *piece = board.getBitboardByPiece(move.piece);
-    Bitboard *own_pieces = board.white_to_move ? &board.white_pieces : &board.black_pieces;
+    Bitboard *own_pieces = white_to_move ? &board.white_pieces : &board.black_pieces;
 
     // replace promoted piece with pawn
     if (move.promotion)
@@ -743,11 +756,11 @@ void MoveGenerator::unmakeMove(Board &board, Move move, UndoInfo undo)
     if (undo.captured_piece != EMPTY)
     {
         Bitboard *captured_piece = board.getBitboardByPiece(undo.captured_piece);
-        Bitboard *enemy_pieces = board.white_to_move ? &board.black_pieces : &board.white_pieces;
+        Bitboard *enemy_pieces = white_to_move ? &board.black_pieces : &board.white_pieces;
         Position position = move.to;
-        bool en_passant_move = (move.to == board.en_passant) && (move.piece == (board.white_to_move ? WHITE_PAWN : BLACK_PAWN));
+        bool en_passant_move = (move.to == board.en_passant) && (move.piece == (white_to_move ? WHITE_PAWN : BLACK_PAWN));
         if (en_passant_move)
-            position += (board.white_to_move ? DOWN : UP);
+            position += (white_to_move ? DOWN : UP);
         BitBoard::set(*captured_piece, position);
         BitBoard::set(*enemy_pieces, position);
         BitBoard::set(board.occupied, position);
@@ -756,8 +769,8 @@ void MoveGenerator::unmakeMove(Board &board, Move move, UndoInfo undo)
     // place rook where it was before castling
     if (move.castling)
     {
-        Bitboard *rooks = board.getBitboardByPiece(board.white_to_move ? WHITE_ROOK : BLACK_ROOK);
-        bool king_side_castling = move.castling & (board.white_to_move ? WHITE_KING_SIDE_CASTLING : BLACK_KING_SIDE_CASTLING);
+        Bitboard *rooks = board.getBitboardByPiece(white_to_move ? WHITE_ROOK : BLACK_ROOK);
+        bool king_side_castling = move.castling & (white_to_move ? WHITE_KING_CASTLING : BLACK_KING_CASTLING);
         move.from += king_side_castling ? RIGHT : LEFT;
         move.to += king_side_castling ? RIGHT : 2 * LEFT;
         BitBoard::movePiece(*rooks, move.from, move.to);
@@ -771,8 +784,11 @@ void MoveGenerator::handleCastling(Board &board, Move move)
     if (!board.castling_rights)
         return;
 
-    Bitboard king_side = board.white_to_move ? WHITE_KING_SIDE_CASTLING : BLACK_KING_SIDE_CASTLING;
-    Bitboard queen_side = board.white_to_move ? WHITE_QUEEN_SIDE_CASTLING : BLACK_QUEEN_SIDE_CASTLING;
+    CastlingRights queen_side_castling_rights = board.white_to_move ? WHITE_QUEEN_CASTLING : BLACK_QUEEN_CASTLING;
+    CastlingRights king_side_castling_rights = board.white_to_move ? WHITE_KING_CASTLING : BLACK_KING_CASTLING;
+
+    Bitboard king_side = board.white_to_move ? WHITE_KING_CASTLING_FREE_SQUARES : BLACK_KING_CASTLING_FREE_SQUARES;
+    Bitboard queen_side = board.white_to_move ? WHITE_QUEEN_CASTLING_FREE_SQUARES : BLACK_QUEEN_CASTLING_FREE_SQUARES;
     Bitboard *own_rooks = board.white_to_move ? &board.white_rooks : &board.black_rooks;
     Bitboard *own_pieces = board.white_to_move ? &board.white_pieces : &board.black_pieces;
     Bitboard *occupied = &board.occupied;
@@ -780,44 +796,45 @@ void MoveGenerator::handleCastling(Board &board, Move move)
     // apply castling move
     if (move.castling)
     {
-        bool king_side_castling = move.castling & king_side;
-        bool queen_side_castling = move.castling & queen_side;
-        assert(king_side_castling != queen_side_castling, "Castling move must be either queen side or king side.");
-        board.castling_rights &= ~queen_side & ~king_side; // clear castling rights
-
-        Position rook_from = move.from;
-        Position rook_to = move.from;
-        rook_from += queen_side_castling ? 4 * LEFT : 3 * RIGHT;
-        rook_to += queen_side_castling ? LEFT : RIGHT;
+        // clear castling rights
+        board.castling_rights &= ~queen_side_castling_rights & ~king_side_castling_rights;
 
         // update rook position, king already updated by makeMove
+        Position rook_from = move.from;
+        Position rook_to = move.from;
+        bool queen_side_castling = move.castling & queen_side_castling_rights;
+        rook_from += queen_side_castling ? 4 * LEFT : 3 * RIGHT;
+        rook_to += queen_side_castling ? LEFT : RIGHT;
         BitBoard::movePiece(*own_rooks, rook_from, rook_to);
         BitBoard::movePiece(*own_pieces, rook_from, rook_to);
         BitBoard::movePiece(*occupied, rook_from, rook_to);
         return;
     }
 
-    // update castling rights if own king or rook moved or enemy rook captured
-    Bitboard king_side_rook_start_position = board.white_to_move ? WHITE_KING_SIDE_ROOK_START_POSITION : BLACK_KING_SIDE_ROOK_START_POSITION;
-    Bitboard queen_side_rook_start_position = board.white_to_move ? WHITE_QUEEN_SIDE_ROOK_START_POSITION : BLACK_QUEEN_SIDE_ROOK_START_POSITION;
-    Bitboard enemy_king_side_rook_start_position = board.white_to_move ? BLACK_KING_SIDE_ROOK_START_POSITION : WHITE_KING_SIDE_ROOK_START_POSITION;
-    Bitboard enemy_queen_side_rook_start_position = board.white_to_move ? BLACK_QUEEN_SIDE_ROOK_START_POSITION : WHITE_QUEEN_SIDE_ROOK_START_POSITION;
+    // update castling rights
+    // remove own castling rights if king or rook moved
+    Bitboard king_side_rook_start_position = board.white_to_move ? WHITE_KING_ROOK_START_POSITION : BLACK_KING_ROOK_START_POSITION;
+    Bitboard queen_side_rook_start_position = board.white_to_move ? WHITE_QUEEN_ROOK_START_POSITION : BLACK_QUEEN_ROOK_START_POSITION;
 
     bool king_moved = move.piece == (board.white_to_move ? WHITE_KING : BLACK_KING);
     bool own_king_side_rook_moved = !(*own_rooks & king_side_rook_start_position);
     bool own_queen_side_rook_moved = !(*own_rooks & queen_side_rook_start_position);
-    bool enemy_queen_side_rook_captured = *own_pieces & enemy_queen_side_rook_start_position;
-    bool enemy_king_side_rook_captured = *own_pieces & enemy_king_side_rook_start_position;
     if (king_moved)
-        board.castling_rights &= ~king_side & ~queen_side;
+        board.castling_rights &= ~queen_side_castling_rights & ~king_side_castling_rights;
     if (own_king_side_rook_moved)
-        board.castling_rights &= ~king_side;
+        board.castling_rights &= ~king_side_castling_rights;
     if (own_queen_side_rook_moved)
-        board.castling_rights &= ~queen_side;
+        board.castling_rights &= ~queen_side_castling_rights;
+
+    // remove enemy castling rights if their rook was captured
+    Bitboard enemy_queen_side_rook_start_position = board.white_to_move ? BLACK_QUEEN_ROOK_START_POSITION : WHITE_QUEEN_ROOK_START_POSITION;
+    Bitboard enemy_king_side_rook_start_position = board.white_to_move ? BLACK_KING_ROOK_START_POSITION : WHITE_KING_ROOK_START_POSITION;
+    bool enemy_queen_side_rook_captured = *own_pieces & enemy_queen_side_rook_start_position;
     if (enemy_queen_side_rook_captured)
-        board.castling_rights &= ~(board.white_to_move ? BLACK_QUEEN_SIDE_CASTLING : WHITE_QUEEN_SIDE_CASTLING);
+        board.castling_rights &= ~(board.white_to_move ? BLACK_QUEEN_CASTLING : WHITE_QUEEN_CASTLING);
+    bool enemy_king_side_rook_captured = *own_pieces & enemy_king_side_rook_start_position;
     if (enemy_king_side_rook_captured)
-        board.castling_rights &= ~(board.white_to_move ? BLACK_KING_SIDE_CASTLING : WHITE_KING_SIDE_CASTLING);
+        board.castling_rights &= ~(board.white_to_move ? BLACK_KING_CASTLING : WHITE_KING_CASTLING);
 }
 
 void MoveGenerator::detectDoublePawnPushForEnPassant(Board &board, Move move)
