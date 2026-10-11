@@ -46,7 +46,7 @@ const Position DOWN_RIGHT = -7;
 // engine
 const Milliseconds SEARCH_TIME_LIMIT = 5000; // milliseconds
 const int TRANSPOSITION_TABLE_SIZE = 256;    // megabytes
-const int DEFAULT_PERFT_DEPTH = 6;
+const int DEFAULT_PERFT_DEPTH = 10;
 const int MAX_SEARCH_DEPTH = 12;
 const int MAX_QUIESCENCE_DEPTH = 30;
 

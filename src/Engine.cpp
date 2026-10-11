@@ -47,20 +47,17 @@ Move Engine::search(int max_depth)
     {
         Score best_score_of_iteration = pv_search(0, depth, NEG_INFINITY, POS_INFINITY);
         Move best_move_of_iteration = transposition_table.probe(board.hash)->best_move;
-        log(SEARCH_DEPTHS, "Depth " + std::to_string(depth) + " best move " + best_move_of_iteration.toString() +
-                               " score " + std::to_string(best_score_of_iteration));
 
         // throw away partial results if out of time
         if (timer.timeLeft())
         {
+            log(SEARCH_DEPTHS, "Depth " + std::to_string(depth) + " best move " + best_move_of_iteration.toString() +
+                                   " score " + std::to_string(best_score_of_iteration));
             best_root_score = best_score_of_iteration;
             best_root_move = best_move_of_iteration;
         }
     }
-
     timer.stop(SEARCH);
-    if (!timer.timeLeft())
-        log(SEARCH, "Search interrupted due to time limit.");
 
     log(SEARCH, "Search score: " + std::to_string(best_root_score));
     log(SEARCH, "Suggested move: " + best_root_move.toString());
@@ -135,8 +132,8 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
     for (int i = 0; i < pseudo_legal_moves.size; i++)
     {
         // interrupt search if time is up
-        // if (!timer.timeLeft())
-        //     return best_score;
+        if (!timer.timeLeft())
+            return best_score;
 
         // explore retrieved move first if available, then explore moves in order of score
         if (i == 0 && entry != nullptr)
@@ -232,8 +229,8 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
         if (score > lower_bound)
             lower_bound = score;
 
-        // if (!timer.timeLeft())
-        //     return lower_bound;
+        if (!timer.timeLeft())
+            return lower_bound;
     }
 
     return best_score;

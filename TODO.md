@@ -1,5 +1,10 @@
 ### Important Features
-+ store move as 16-bit integer
++ evaluation using NNUE
+    + read up on them
+    + check for state of the art alternatives
+    + define its input output formats
+    + fetch/create dataset from played games
+    + setup training environment 
 + improve move ordering
     + move ordering is typically staged
         + retrieve best previous move and check it
@@ -26,19 +31,10 @@
         + maybe make use of transposition table?
         + may benefit from pruning
             + e.g. SEE < 0
-+ evaluation using NNUE
-    + read up on them
-    + check for state of the art alternatives
-    + define its input output formats
-    + fetch/create dataset from played games
-    + setup training environment 
 
 ### Nice-To-Haves for Later
 + time management
     + cap the search time at remaining time/20 + increment/2
-    + no more time left => ensure consistent state
-        + throw away result of current iteration?
-        + throw away pending updates to transposition table on early exit?
 + UCI support
     + focus on subset required for playing, connecting to GUI and testing
 + setup Sequential Probability Ratio Test
