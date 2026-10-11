@@ -27,7 +27,8 @@
             "label": "Build Chess Engine with Profiling",
             "command": "/usr/bin/g++",
             "args": [
-                "-pg",
+                "-O3",
+                "-fno-omit-frame-pointer",
                 "-g",
                 "${workspaceFolder}/src/*.cpp",
                 "-o",

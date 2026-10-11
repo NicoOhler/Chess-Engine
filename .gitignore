@@ -3,3 +3,4 @@ engine
 log.txt
 profiling.txt
 gmon.out
+perf.data

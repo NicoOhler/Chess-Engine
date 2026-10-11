@@ -369,8 +369,13 @@
             "name": "Search w/ Profiling",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "/bin/bash",
             "args": [
+                "perf",
+                "record",
+                "-g",
+                "--",
+                "./engine",
                 "-m",
                 "s",
                 "-p",
@@ -392,13 +397,13 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "Process Profiling Info",
+            "name": "Show Profiling Info",
             "type": "cppdbg",
             "request": "launch",
             "program": "/bin/bash",
             "args": [
                 "-c",
-                "gprof ./engine gmon.out > profiling.txt"
+                "perf report"
             ],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
