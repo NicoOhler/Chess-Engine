@@ -13,31 +13,39 @@ using namespace std;
 class Engine
 {
 public:
-    void initializeStartPosition(std::string fen);
-    Move search(int max_depth);
-    uint64 perft(int depth, bool divide = false);
+    Engine();
+    void initializeBoard(std::string fen);
+    Move search();
+    void reset();
+    void stop();
+    uint64 perft();
     Score evaluateBoard();
-    bool makeMoveIfLegal(Move move);
-    void makeMove(Move move);
+    void makeMove(Move move, bool store_in_history = true);
     void unmakeMove(Move move);
 
     // getter and setter
+    Board getBoard();
     GameState getGameState(MoveList moves);
     MoveList getLegalMoves();
+    bool isIdle();
     void setTimeLimit(Milliseconds time_limit);
-    Board getBoard();
+    void setSearchDepth(int search_depth);
 
 private:
-    Board board;
+    Board board = generateBoardFromFEN(START_FEN);
     MoveGenerator move_generator = MoveGenerator::getInstance();
     TranspositionTable transposition_table;
     ZobristHash zobrist;
     Evaluation eval;
     Timer timer;
     UndoHistory undo_history;
-    uint64 evaluated_nodes = 0;
+    uint64 evaluated_nodes;
+    int search_depth;
+    bool search_stopped;
 
+    bool makeMoveIfLegal(Move move);
     void calculateMoveScores(MoveList &moves, TranspositionEntry *entry);
+    uint64 perft(int remaining_depth, bool divide = false);
     Score pv_search(int depth, int remaining_depth, Score alpha, Score beta);
     Score quiescence(Score alpha, Score beta, int max_depth = MAX_QUIESCENCE_DEPTH);
 };

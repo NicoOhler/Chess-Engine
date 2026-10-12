@@ -44,10 +44,11 @@ const Position DOWN_LEFT = -9;
 const Position DOWN_RIGHT = -7;
 
 // engine
-const Milliseconds SEARCH_TIME_LIMIT = 5000; // milliseconds
-const int TRANSPOSITION_TABLE_SIZE = 256;    // megabytes
+const Milliseconds DEFAULT_SEARCH_TIME = 5000;
+const int TRANSPOSITION_TABLE_SIZE_MB = 256;
 const int DEFAULT_PERFT_DEPTH = 10;
-const int MAX_SEARCH_DEPTH = 12;
+const int DEFAULT_SEARCH_DEPTH = 8;
+const int MAX_SEARCH_DEPTH = 40;
 const int MAX_QUIESCENCE_DEPTH = 30;
 
 // promotion and castling rights can be stored within a single byte
@@ -123,17 +124,6 @@ enum COLUMNS
     COL_F,
     COL_G,
     COL_H
-};
-
-enum MODES
-{
-    UCI_MODE = 'u',
-    PLAYER_VS_PLAYER_MODE = 'l',
-    PLAYER_VS_ENGINE_MODE = 'r',
-    ENGINE_VS_ENGINE_MODE = 'e',
-    PERFT_MODE = 'p',
-    BENCHMARK_MODE = 'b',
-    SEARCH_MODE = 's'
 };
 
 enum GAME_STATE

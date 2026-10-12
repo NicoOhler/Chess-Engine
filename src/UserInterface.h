@@ -1,6 +1,19 @@
 #pragma once
 #include "Engine.h"
+#include "UCI.h"
 #include <stack>
+
+std::string AVAILABLE_MODES = "u (UCI), b (benchmark), s (search), l (player vs player), r (player vs engine), e (engine vs engine), p (perft)";
+enum MODES
+{
+    UCI_MODE = 'u',
+    PLAYER_VS_PLAYER_MODE = 'l',
+    PLAYER_VS_ENGINE_MODE = 'r',
+    ENGINE_VS_ENGINE_MODE = 'e',
+    PERFT_MODE = 'p',
+    BENCHMARK_MODE = 'b',
+    SEARCH_MODE = 's'
+};
 
 class UserInterface
 {
@@ -15,11 +28,7 @@ private:
 
     // default parameters
     Mode mode = UCI_MODE;
-    std::string fen = START_FEN;
-    int ply = DEFAULT_PERFT_DEPTH;
-    bool divide = false;
     uint64 expected_perft = 0;
-    Milliseconds search_time = SEARCH_TIME_LIMIT;
 
     void startPlayerVsPlayer();
     void startPlayerVsEngine();

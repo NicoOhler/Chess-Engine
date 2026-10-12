@@ -31,7 +31,7 @@ const LogType TIME = WHITE | LOG_TYPE_ENABLED;
 const LogType EVALUATION = WHITE;
 const LogType BENCHMARK = WHITE | LOG_TYPE_ENABLED;
 const LogType TRANSPOSITION_TABLE_MATCH = WHITE;
-const LogType ENGINE_SETTINGS = WHITE | LOG_TYPE_ENABLED;
+const LogType ENGINE_SETTINGS = WHITE;
 const LogType UI = WHITE | LOG_TYPE_ENABLED;
 
 void log(LogType logType, std::string message);

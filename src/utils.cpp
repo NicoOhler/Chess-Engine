@@ -70,3 +70,15 @@ uint64 modPow2(uint64 n, uint64 m)
 {
     return n & (m - 1); // fast modulo for power of 2
 }
+
+void print(std::string message, bool newline)
+{
+    std::cout << message;
+    if (newline)
+        std::cout << std::endl;
+}
+
+bool startsWith(const std::string &str, const std::string &prefix)
+{
+    return str.rfind(prefix, 0) == 0;
+}

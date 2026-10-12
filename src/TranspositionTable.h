@@ -33,10 +33,11 @@ Score computeOriginalScore(Score score, int ply);
 class TranspositionTable
 {
 public:
-    TranspositionTable(int megabytes = TRANSPOSITION_TABLE_SIZE);
+    TranspositionTable(int megabytes = TRANSPOSITION_TABLE_SIZE_MB);
     TranspositionEntry *probe(Hash hash);
     void store(Hash hash, Score score, Move best_move, int remaining_depth, BoundType type);
     BoundType determineBoundType(Score score, Score lower_bound, Score upper_bound);
+    void clear();
 
 private:
     uint64 table_size;

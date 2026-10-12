@@ -4,6 +4,7 @@
 #include "Logger.h"
 #include <string>
 #include <iostream>
+#include <mutex>
 
 #define assert(condition, message)         \
     if (!(condition))                      \
@@ -17,3 +18,15 @@ std::string getSquareName(Position square);
 Position getSquareIndex(std::string square);
 Score getPieceValue(Piece piece);
 uint64 modPow2(uint64 n, uint64 m);
+void print(std::string message, bool newline = true);
+bool startsWith(const std::string &str, const std::string &prefix);
+
+class ScopeLock
+{
+public:
+    ScopeLock(std::mutex &mutex) : mutex(mutex) { mutex.lock(); }
+    ~ScopeLock() { mutex.unlock(); }
+
+private:
+    std::mutex &mutex;
+};

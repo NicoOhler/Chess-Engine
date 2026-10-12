@@ -26,7 +26,7 @@ void UserInterface::start()
         startSearch();
         break;
     default:
-        std::cout << "Invalid mode. Use 'u' for UCI, 'c' for console, 'p' for perft or 's' for search." << std::endl;
+        print("Invalid mode. Choose from the following: " + AVAILABLE_MODES);
         exit(1);
         break;
     }
@@ -35,26 +35,21 @@ void UserInterface::start()
 void UserInterface::startBenchmark()
 {
     log(BENCHMARK, "Starting benchmark of move generation, evaluation and search.");
-    engine.initializeStartPosition(fen);
-    if (ply <= 0)
-    {
-        log(UI, "Invalid benchmark depth. Please specify a positive integer for the depth.");
-        return;
-    }
-
-    log(BENCHMARK, "Benchmarking move generation with a perft of depth " + std::to_string(ply));
+    log(BENCHMARK, "Generate legal moves recursively to a depth of 6.");
+    engine.setSearchDepth(6);
     timer.start();
-    uint64 nodes = engine.perft(ply, divide);
+    uint64 nodes = engine.perft();
     timer.stop(BENCHMARK);
     log(BENCHMARK, "Nodes searched: " + std::to_string(nodes));
 
-    log(BENCHMARK, "Benchmarking search up to depth " + std::to_string(ply) + " without a time limit.");
+    log(BENCHMARK, "Search for the best move with a depth of 7.");
+    engine.setSearchDepth(7);
     engine.setTimeLimit(POS_INFINITY);
     timer.start();
-    engine.search(ply);
+    engine.search();
     timer.stop(BENCHMARK);
 
-    log(BENCHMARK, "Benchmarking evaluation of the current board state 10,000 times.");
+    log(BENCHMARK, "Evaluation of the current board state 10,000 times.");
     timer.start();
     for (int i = 0; i < 10000; i++)
         engine.evaluateBoard();
@@ -63,24 +58,17 @@ void UserInterface::startBenchmark()
 
 void UserInterface::startSearch()
 {
-    engine.initializeStartPosition(fen);
-    log(CHESS_BOARD, "Starting search with a time limit of " + std::to_string(search_time) + "ms");
-    Move best_move = engine.search(ply);
+    log(CHESS_BOARD, "Starting search");
+    Move best_move = engine.search();
     if (best_move == NULL_MOVE)
         log(SEARCH, "No legal moves for current board state.");
 }
 
 void UserInterface::startPerft()
 {
-    if (ply <= 0)
-    {
-        log(UI, "Invalid perft depth. Please specify a positive integer for the depth.");
-        return;
-    }
-    engine.initializeStartPosition(fen);
-    log(PERFT, "Starting perft with a depth of " + std::to_string(ply));
+    log(PERFT, "Starting perft");
     timer.start();
-    uint64 nodes = engine.perft(ply, divide);
+    uint64 nodes = engine.perft();
     timer.stop(PERFT);
     log(PERFT, "Nodes searched: " + std::to_string(nodes));
     if (expected_perft)
@@ -93,39 +81,13 @@ void UserInterface::startPerft()
 void UserInterface::startUCI()
 {
     log(UI, "ChessEngine started in UCI mode");
-    std::string command;
-    while (std::getline(std::cin, command))
-    {
-        if (command == "uci")
-        {
-            std::cout << "id name Chess Engine" << std::endl;
-            std::cout << "id author Nico Ohler" << std::endl;
-            std::cout << "uciok" << std::endl;
-        }
-        else if (command == "isready")
-            std::cout << "readyok" << std::endl;
-        // position [ fen fenstring | startpos ] moves move1 ... movei
-        else if (command.substr(0, 8) == "position")
-        {
-            std::string fen = command.substr(9);
-            if (fen == "startpos")
-                fen = START_FEN;
-            engine.initializeStartPosition(fen);
-        }
-        else if (command.substr(0, 4) == "go ")
-        {
-            // parse depth or other parameters if needed
-            startPerft();
-        }
-        else if (command == "quit")
-            exit(0);
-    }
+    UCI uci = UCI(engine);
+    uci.start();
 }
 
 void UserInterface::startPlayerVsPlayer()
 {
     log(UI, "ChessEngine started in player vs player mode.");
-    engine.initializeStartPosition(fen);
     printGameState();
     MoveList moves = engine.getLegalMoves();
     log(UI, "Enter 'p' to print legal moves or 'u' to undo the last move.");
@@ -143,7 +105,6 @@ void UserInterface::startPlayerVsPlayer()
 void UserInterface::startPlayerVsEngine()
 {
     log(UI, "ChessEngine started in player vs engine mode.");
-    engine.initializeStartPosition(fen);
     printGameState();
     MoveList moves = engine.getLegalMoves();
     bool ai_turn = promptForPlayerColor() != engine.getBoard().white_to_move;
@@ -152,7 +113,7 @@ void UserInterface::startPlayerVsEngine()
 
     do
     {
-        Move move = ai_turn ? engine.search(ply) : promptForLegalMove(moves);
+        Move move = ai_turn ? engine.search() : promptForLegalMove(moves);
         ai_turn = !ai_turn;
         applyAndTrackMove(move, true);
         printGameState();
@@ -164,14 +125,13 @@ void UserInterface::startPlayerVsEngine()
 void UserInterface::startEngineVsEngine()
 {
     log(UI, "ChessEngine started in engine vs engine mode.");
-    engine.initializeStartPosition(fen);
     printGameState();
     MoveList moves = engine.getLegalMoves();
     std::string input;
 
     do
     {
-        Move move = engine.search(ply);
+        Move move = engine.search();
         log(UI, "Press Enter to apply the chosen move.");
         std::getline(std::cin, input);
         applyAndTrackMove(move);
@@ -225,14 +185,14 @@ Move UserInterface::promptForLegalMove(MoveList legal_moves)
         {
             if (!move_history.empty())
                 return UNDO_MOVE;
-            std::cout << "No move to undo" << std::endl;
+            print("No move to undo");
             continue;
         }
 
         // skip invalid moves
         if (input[0] < 'a' || input[0] > 'h' || input[1] < '1' || input[1] > '8' || input[2] < 'a' || input[2] > 'h' || input[3] < '1' || input[3] > '8')
         {
-            std::cout << "Invalid move. Please enter a move in the format: 'a2c3'" << std::endl;
+            print("Invalid move. Please enter a move in the format: 'a2c3'");
             continue;
         }
 
@@ -249,7 +209,7 @@ Move UserInterface::promptForLegalMove(MoveList legal_moves)
                 return legal_move;
             }
         }
-        std::cout << "Illegal move. Please enter a legal move." << std::endl;
+        print("Illegal move. Please enter a legal move.");
     }
 }
 
@@ -258,32 +218,32 @@ bool UserInterface::promptForPlayerColor()
     std::string input;
     while (true)
     {
-        std::cout << "Enter your color: ";
+        print("Enter your color: ", false);
         std::getline(std::cin, input);
 
         if (input[0] == 'b' || input[0] == 'B')
         {
-            std::cout << "You chose black." << std::endl;
+            print("You chose black.");
             return false;
         }
 
         if (input[0] == 'w' || input[0] == 'W')
         {
-            std::cout << "You chose white." << std::endl;
+            print("You chose white.");
             return true;
         }
 
-        std::cout << "Invalid color. Please enter 'w' for white or 'b' for black." << std::endl;
+        print("Invalid color. Please enter 'w' for white or 'b' for black.");
     }
 }
 
 Piece UserInterface::promptForPromotionChoice()
 {
-    std::cout << "Choose promotion piece: " << std::endl;
-    std::cout << "Q - Queen" << std::endl;
-    std::cout << "R - Rook" << std::endl;
-    std::cout << "B - Bishop" << std::endl;
-    std::cout << "N - Knight" << std::endl;
+    print("Choose promotion piece: ");
+    print("Q - Queen");
+    print("R - Rook");
+    print("B - Bishop");
+    print("N - Knight");
 
     Piece choice;
     while (true)
@@ -306,7 +266,7 @@ Piece UserInterface::promptForPromotionChoice()
         default:
             break;
         }
-        std::cout << "Invalid choice. Please enter Q, R, B or N." << std::endl;
+        print("Invalid choice. Please enter Q, R, B or N.");
     }
 }
 
@@ -317,21 +277,13 @@ void UserInterface::parseParameters(int argc, char *argv[])
         if (std::string(argv[i]) == "-m" && i + 1 < argc)
             mode = argv[++i][0];
         else if (std::string(argv[i]) == "-f" && i + 1 < argc)
-            fen = argv[++i];
+            engine.initializeBoard(argv[++i]);
         else if (std::string(argv[i]) == "-p" && i + 1 < argc)
-        {
-            ply = std::stoi(argv[++i]);
-            log(ENGINE_SETTINGS, "Set search ply/depth to " + std::to_string(ply));
-        }
+            engine.setSearchDepth(std::stoi(argv[++i]));
         else if (std::string(argv[i]) == "-e" && i + 1 < argc)
             expected_perft = std::stoull(argv[++i]);
-        else if (std::string(argv[i]) == "-d")
-            divide = true;
         else if (std::string(argv[i]) == "-t" && i + 1 < argc)
-        {
-            search_time = std::stoull(argv[++i]);
-            engine.setTimeLimit(search_time);
-        }
+            engine.setTimeLimit(std::stoull(argv[++i]));
         else if (std::string(argv[i]) == "-h")
         {
             printHelp(argv[0]);
@@ -348,11 +300,10 @@ void UserInterface::parseParameters(int argc, char *argv[])
 
 void UserInterface::printHelp(std::string executable_name)
 {
-    std::cout << "Usage: " << executable_name << " [-m mode] [-f FEN] [-p ply] [-d] [-h]\n"
-              << "  -m mode: Set the engine mode (u for UCI, b for benchmark, s for search, l for player vs player, r for player vs engine, e for engine vs engine, p for perft)\n"
+    std::cout << "Usage: " << executable_name << " [-m mode] [-f FEN] [-p ply] [-h]\n"
+              << "  -m mode: Set the engine mode (" << AVAILABLE_MODES << ")\n"
               << "  -f FEN: Start the game with the given FEN string\n"
               << "  -p ply: Run perft/search with the given ply/depth/number of half moves)\n"
-              << "  -d: Divide perft results\n"
               << "  -t: Set search time (in milliseconds)\n"
               << "  -h: Show this help message" << std::endl;
 }

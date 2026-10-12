@@ -8,7 +8,7 @@
 class Timer
 {
 public:
-    Milliseconds limit = SEARCH_TIME_LIMIT;
+    Milliseconds limit = DEFAULT_SEARCH_TIME;
 
     void start();
     Milliseconds stop(LogType log_type = TIME);

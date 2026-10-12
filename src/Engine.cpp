@@ -1,55 +1,47 @@
 #include "Engine.h"
 
-GameState Engine::getGameState(MoveList moves)
+Engine::Engine()
 {
-    if (board.half_move_clock >= HALF_MOVE_CLOCK_LIMIT)
-        return DRAW;
-    if (!moves.empty())
-        return IN_PROGRESS;
-    return move_generator.isKingSafe(board, board.white_to_move) ? DRAW : CHECKMATE;
+    board = generateBoardFromFEN(START_FEN);
+    board.hash = zobrist.computeInitialHash(board);
+    search_depth = DEFAULT_SEARCH_DEPTH;
+    timer.limit = POS_INFINITY;
 }
 
-uint64 Engine::perft(int remaining_depth, bool divide)
+void Engine::initializeBoard(std::string fen)
 {
-    MoveList legal_moves = move_generator.generateLegalMoves(board);
-    if (remaining_depth == 1)
-        return legal_moves.size;
-
-    uint64 total_nodes = 0;
-    for (int i = 0; i < legal_moves.size; i++)
-    {
-        Move move = legal_moves.moves[i];
-        UndoInfo undo = move_generator.makeMove(board, move);
-        uint64 nodes = perft(remaining_depth - 1);
-        move_generator.unmakeMove(board, move, undo);
-        if (divide)
-            log(PERFT, getSquareName(move.from) + getSquareName(move.to) + ": " + std::to_string(nodes));
-        total_nodes += nodes;
-    }
-    return total_nodes;
+    board = generateBoardFromFEN(fen);
+    log(CHESS_BOARD, "Initialized board with FEN: " + fen);
+    board.hash = zobrist.computeInitialHash(board);
 }
 
-Score Engine::evaluateBoard()
+void Engine::reset()
 {
-    evaluated_nodes++;
-    return eval.evaluateBoard(board);
+    search_stopped = true;
+    undo_history.clear();
+    transposition_table.clear();
+}
+
+void Engine::stop()
+{
+    search_stopped = true;
 }
 
 // iterative deepening
-Move Engine::search(int max_depth)
+Move Engine::search()
 {
     evaluated_nodes = 0;
     Score best_root_score = NEG_INFINITY;
     Move best_root_move = NULL_MOVE;
 
+    search_stopped = false;
     timer.start();
-    for (int depth = 1; depth <= max_depth && timer.timeLeft(); depth++)
+    for (int depth = 1; depth <= search_depth && !search_stopped; depth++)
     {
         Score best_score_of_iteration = pv_search(0, depth, NEG_INFINITY, POS_INFINITY);
         Move best_move_of_iteration = transposition_table.probe(board.hash)->best_move;
 
-        // throw away partial results if out of time
-        if (timer.timeLeft())
+        if (!search_stopped)
         {
             log(SEARCH_DEPTHS, "Depth " + std::to_string(depth) + " best move " + best_move_of_iteration.toString() +
                                    " score " + std::to_string(best_score_of_iteration));
@@ -58,10 +50,7 @@ Move Engine::search(int max_depth)
         }
     }
     timer.stop(SEARCH);
-
-    log(SEARCH, "Search score: " + std::to_string(best_root_score));
-    log(SEARCH, "Suggested move: " + best_root_move.toString());
-    log(SEARCH, "Evaluated nodes: " + std::to_string(evaluated_nodes));
+    // log(SEARCH, "Evaluated nodes: " + std::to_string(evaluated_nodes));
     return best_root_move;
 }
 
@@ -131,8 +120,7 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
     bool null_window = false;
     for (int i = 0; i < pseudo_legal_moves.size; i++)
     {
-        // interrupt search if time is up
-        if (!timer.timeLeft())
+        if (search_stopped)
             return best_score;
 
         // explore retrieved move first if available, then explore moves in order of score
@@ -212,6 +200,9 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
     calculateMoveScores(pseudo_legal_moves, entry);
     for (int i = 0; i < pseudo_legal_moves.size; i++)
     {
+        if (search_stopped)
+            return lower_bound;
+
         Move move = move_generator.pickBestMove(pseudo_legal_moves);
         Piece captured_piece = board.getPieceAt(move.to);
         if (captured_piece == EMPTY && move.isPromotion())
@@ -228,19 +219,40 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
             best_score = score;
         if (score > lower_bound)
             lower_bound = score;
-
-        if (!timer.timeLeft())
-            return lower_bound;
     }
 
     return best_score;
 }
 
-void Engine::initializeStartPosition(std::string fen)
+uint64 Engine::perft()
 {
-    board = generateBoardFromFEN(fen);
-    log(CHESS_BOARD, "Initialized board with FEN: " + fen);
-    board.hash = zobrist.computeInitialHash(board);
+    return perft(search_depth, true);
+}
+
+uint64 Engine::perft(int remaining_depth, bool divide)
+{
+    MoveList legal_moves = move_generator.generateLegalMoves(board);
+    if (remaining_depth == 1)
+        return legal_moves.size;
+
+    uint64 total_nodes = 0;
+    for (int i = 0; i < legal_moves.size; i++)
+    {
+        Move move = legal_moves.moves[i];
+        UndoInfo undo = move_generator.makeMove(board, move);
+        uint64 nodes = perft(remaining_depth - 1);
+        move_generator.unmakeMove(board, move, undo);
+        if (divide)
+            log(PERFT, getSquareName(move.from) + getSquareName(move.to) + ": " + std::to_string(nodes));
+        total_nodes += nodes;
+    }
+    return total_nodes;
+}
+
+Score Engine::evaluateBoard()
+{
+    evaluated_nodes++;
+    return eval.evaluateBoard(board);
 }
 
 bool Engine::makeMoveIfLegal(Move move)
@@ -257,10 +269,11 @@ bool Engine::makeMoveIfLegal(Move move)
     return false;
 }
 
-void Engine::makeMove(Move move)
+void Engine::makeMove(Move move, bool store_in_history)
 {
     UndoInfo undo = move_generator.makeMove(board, move);
-    undo_history.push(undo);
+    if (store_in_history)
+        undo_history.push(undo);
     zobrist.updateHash(board, move, undo);
 }
 
@@ -278,6 +291,18 @@ void Engine::setTimeLimit(Milliseconds time_limit)
     log(ENGINE_SETTINGS, "Set time limit to " + std::to_string(time_limit));
 }
 
+void Engine::setSearchDepth(int search_depth)
+{
+    if (search_depth <= 0)
+    {
+        log(ENGINE_SETTINGS, "Invalid search depth. Please specify a positive integer for the depth.");
+        return;
+    }
+
+    this->search_depth = search_depth;
+    log(ENGINE_SETTINGS, "Set search depth to " + std::to_string(search_depth));
+}
+
 Board Engine::getBoard()
 {
     return board;
@@ -286,4 +311,13 @@ Board Engine::getBoard()
 MoveList Engine::getLegalMoves()
 {
     return move_generator.generateLegalMoves(board);
+}
+
+GameState Engine::getGameState(MoveList moves)
+{
+    if (board.half_move_clock >= HALF_MOVE_CLOCK_LIMIT)
+        return DRAW;
+    if (!moves.empty())
+        return IN_PROGRESS;
+    return move_generator.isKingSafe(board, board.white_to_move) ? DRAW : CHECKMATE;
 }

@@ -1,109 +1,11 @@
 #pragma once
 #include "definitions.h"
+#include "Move.h"
 #include "BitBoard.h"
 #include "Logger.h"
 #include "Magics.h"
-#include "utils.h"
-#include <vector>
 
 using namespace BitBoard;
-
-struct Move
-{
-    Position from;
-    Position to;
-    Piece piece;
-    PromotionAndCastlingRights promotion_and_castling = NO_PROMOTION_OR_CASTLING;
-
-    bool operator==(const Move &rhs)
-    {
-        return from == rhs.from && to == rhs.to && piece == rhs.piece && promotion_and_castling == rhs.promotion_and_castling;
-    }
-
-    bool operator!=(const Move &rhs)
-    {
-        return from != rhs.from || to != rhs.to || piece != rhs.piece || promotion_and_castling != rhs.promotion_and_castling;
-    }
-
-    std::string toString() const
-    {
-        std::string result;
-        result += getSquareName(from);
-        result += getSquareName(to);
-        if (promotion_and_castling & PROMOTE_TO_QUEEN)
-            result += 'q';
-        if (promotion_and_castling & PROMOTE_TO_ROOK)
-            result += 'r';
-        if (promotion_and_castling & PROMOTE_TO_BISHOP)
-            result += 'b';
-        if (promotion_and_castling & PROMOTE_TO_KNIGHT)
-            result += 'n';
-        if (promotion_and_castling & (WHITE_KING_CASTLING | BLACK_KING_CASTLING))
-            result += "O-O";
-        if (promotion_and_castling & (WHITE_QUEEN_CASTLING | BLACK_QUEEN_CASTLING))
-            result += "O-O-O";
-        return result;
-    }
-
-    bool isPromotion() const
-    {
-        return promotion_and_castling & (PROMOTE_TO_QUEEN | PROMOTE_TO_ROOK | PROMOTE_TO_BISHOP | PROMOTE_TO_KNIGHT);
-    }
-
-    bool isCastling() const
-    {
-        return promotion_and_castling & (WHITE_KING_CASTLING | WHITE_QUEEN_CASTLING | BLACK_KING_CASTLING | BLACK_QUEEN_CASTLING);
-    }
-};
-
-struct UndoInfo
-{
-    Piece captured_piece;
-    Position en_passant;
-    CastlingRights castling_rights;
-    Clock half_move_clock;
-};
-
-struct UndoHistory
-{
-    UndoInfo undo_info[MAX_SEARCH_DEPTH + MAX_QUIESCENCE_DEPTH];
-    int size = 0;
-
-    void push(UndoInfo undo)
-    {
-        undo_info[size++] = undo;
-    }
-
-    UndoInfo pop()
-    {
-        return undo_info[--size];
-    }
-};
-
-const Move UNDO_MOVE = Move{0, 0, UNDO, NO_PROMOTION_OR_CASTLING};
-const Move NULL_MOVE = Move{0, 0, EMPTY, NO_PROMOTION_OR_CASTLING};
-
-struct MoveList
-{
-    Move moves[MAX_MOVES];
-    Score scores[MAX_MOVES];
-    int size = 0;
-
-    void append(Move move)
-    {
-        moves[size++] = move;
-    }
-
-    void clear()
-    {
-        size = 0;
-    }
-
-    bool empty()
-    {
-        return size == 0;
-    }
-};
 
 class MoveGenerator
 {

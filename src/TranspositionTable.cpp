@@ -53,6 +53,18 @@ BoundType TranspositionTable::determineBoundType(Score score, Score lower_bound,
     return type;
 }
 
+void TranspositionTable::clear()
+{
+    for (uint64 i = 0; i < table_size; i++)
+    {
+        table[i].hash = 0;
+        table[i].score = 0;
+        table[i].best_move = NULL_MOVE;
+        table[i].remaining_depth = 0;
+        table[i].type = EXACT;
+    }
+}
+
 Score computeTranspositionScore(Score score, int ply)
 {
     if (score >= MIN_MATE_VALUE)
