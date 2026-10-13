@@ -2,12 +2,12 @@
 
 bool Move::operator==(const Move &rhs)
 {
-    return from == rhs.from && to == rhs.to && piece == rhs.piece && promotion_and_castling == rhs.promotion_and_castling;
+    return from == rhs.from && to == rhs.to && promotion_and_castling == rhs.promotion_and_castling;
 }
 
 bool Move::operator!=(const Move &rhs)
 {
-    return from != rhs.from || to != rhs.to || piece != rhs.piece || promotion_and_castling != rhs.promotion_and_castling;
+    return from != rhs.from || to != rhs.to || promotion_and_castling != rhs.promotion_and_castling;
 }
 
 bool Move::isPromotion() const

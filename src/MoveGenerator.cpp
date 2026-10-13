@@ -188,7 +188,6 @@ void MoveGenerator::addPawnMoveWithPossiblePromotion(MoveList &moves, Move move,
 void MoveGenerator::addCastlingMoves(const Board &board, MoveList &moves)
 {
     bool white_to_move = board.white_to_move;
-    Piece king = white_to_move ? WHITE_KING : BLACK_KING;
     Position king_start = white_to_move ? WHITE_KING_START_POSITION : BLACK_KING_START_POSITION;
 
     // king side castling: king moves two squares to the right, rook moves to the left of the king
@@ -203,7 +202,7 @@ void MoveGenerator::addCastlingMoves(const Board &board, MoveList &moves)
             if (!king_side_attacked) // squares that the king passes through must not be attacked
             {
                 Position to = king_start + RIGHT * 2;
-                moves.append(Move{king_start, to, king, king_side_castling});
+                moves.append(Move{king_start, to, king_side_castling});
                 // log(KING_MOVE, "Found king side castling from " + getSquareName(king_start) + " to " + getSquareName(to) + ".");
             }
         }
@@ -222,7 +221,7 @@ void MoveGenerator::addCastlingMoves(const Board &board, MoveList &moves)
             if (!queen_side_attacked) // squares that the king passes through must not be attacked
             {
                 Position to = king_start + LEFT * 2;
-                moves.append(Move{king_start, to, king, queen_side_castling});
+                moves.append(Move{king_start, to, queen_side_castling});
                 // log(KING_MOVE, "Found queen side castling from " + getSquareName(king_start) + " to " + getSquareName(to) + ".");
             }
         }
@@ -383,7 +382,6 @@ bool MoveGenerator::isKingSafe(const Board &board, bool king_is_white)
 void MoveGenerator::generateKingMoves(const Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
-    Piece piece = white_to_move ? WHITE_KING : BLACK_KING;
     Bitboard king = white_to_move ? board.white_king : board.black_king;
     Bitboard own_pieces = white_to_move ? board.white_pieces : board.black_pieces;
 
@@ -399,7 +397,7 @@ void MoveGenerator::generateKingMoves(const Board &board, MoveList &moves, bool 
         // move may not put king into check
         if (squareUnderAttack(board, to, !white_to_move))
             continue;
-        moves.append(Move{from, to, piece});
+        moves.append(Move{from, to});
         // log(KING_MOVE, "Found king move from " + getSquareName(from) + " to " + getSquareName(to) + ".");
     }
 
@@ -411,7 +409,6 @@ void MoveGenerator::generateKingMoves(const Board &board, MoveList &moves, bool 
 void MoveGenerator::generatePawnMoves(const Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
-    Piece piece = white_to_move ? WHITE_PAWN : BLACK_PAWN;
     Bitboard pawns = white_to_move ? board.white_pawns : board.black_pawns;
     Bitboard *attack_right = white_to_move ? white_pawn_attack_right : black_pawn_attack_right;
     Bitboard *attack_left = white_to_move ? white_pawn_attack_left : black_pawn_attack_left;
@@ -432,7 +429,7 @@ void MoveGenerator::generatePawnMoves(const Board &board, MoveList &moves, bool 
         if (interesting_only && to >= UP && to < NUM_SQUARES + DOWN)
             continue;
         Position from = to - direction;
-        addPawnMoveWithPossiblePromotion(moves, Move{from, to, piece}, board.white_to_move);
+        addPawnMoveWithPossiblePromotion(moves, Move{from, to}, board.white_to_move);
     }
 
     if (!interesting_only)
@@ -446,7 +443,7 @@ void MoveGenerator::generatePawnMoves(const Board &board, MoveList &moves, bool 
         {
             Position from = clearRightmostSetBit(double_moves);
             Position to = from + 2 * direction;
-            moves.append(Move{from, to, piece});
+            moves.append(Move{from, to});
             // log(PAWN_MOVE, "Found pawn move from " + getSquareName(from) + " to " + getSquareName(to) + ".");
         }
     }
@@ -461,9 +458,9 @@ void MoveGenerator::generatePawnMoves(const Board &board, MoveList &moves, bool 
         Bitboard attack = attack_right[from] & enemies;
         bool en_passant_right = (modPow2(from, 8) != COL_H && board.en_passant == to_right);
         if (attack)
-            addPawnMoveWithPossiblePromotion(moves, Move{from, to_right, piece}, board.white_to_move);
+            addPawnMoveWithPossiblePromotion(moves, Move{from, to_right}, board.white_to_move);
         else if (en_passant_right)
-            moves.append(Move{from, to_right, piece});
+            moves.append(Move{from, to_right});
         // log(PAWN_MOVE, "Found en passant move from " + getSquareName(from) + " to " + getSquareName(to_right) + ".");
 
         // attack left
@@ -471,9 +468,9 @@ void MoveGenerator::generatePawnMoves(const Board &board, MoveList &moves, bool 
         attack = attack_left[from] & enemies;
         bool en_passant_left = (modPow2(from, 8) != COL_A && board.en_passant == to_left);
         if (attack)
-            addPawnMoveWithPossiblePromotion(moves, Move{from, to_left, piece}, board.white_to_move);
+            addPawnMoveWithPossiblePromotion(moves, Move{from, to_left}, board.white_to_move);
         else if (en_passant_left)
-            moves.append(Move{from, to_left, piece});
+            moves.append(Move{from, to_left});
         // log(PAWN_MOVE, "Found en passant move from " + getSquareName(from) + " to " + getSquareName(to_left) + ".");
     }
 }
@@ -481,7 +478,6 @@ void MoveGenerator::generatePawnMoves(const Board &board, MoveList &moves, bool 
 void MoveGenerator::generateKnightMoves(const Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
-    Piece piece = white_to_move ? WHITE_KNIGHT : BLACK_KNIGHT;
     Bitboard knights = white_to_move ? board.white_knights : board.black_knights;
     Bitboard own_pieces = white_to_move ? board.white_pieces : board.black_pieces;
 
@@ -495,7 +491,7 @@ void MoveGenerator::generateKnightMoves(const Board &board, MoveList &moves, boo
             // focus only on captures for interesting_only
             if (interesting_only && !board.isSquareOccupied(to))
                 continue;
-            moves.append(Move{from, to, piece});
+            moves.append(Move{from, to});
             // log(KNIGHT_MOVE, "Found knight move from " + getSquareName(square) + " to " + getSquareName(to) + ".");
         }
     }
@@ -504,7 +500,6 @@ void MoveGenerator::generateKnightMoves(const Board &board, MoveList &moves, boo
 void MoveGenerator::generateBishopMoves(const Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
-    Piece piece = white_to_move ? WHITE_BISHOP : BLACK_BISHOP;
     Bitboard bishops = white_to_move ? board.white_bishops : board.black_bishops;
     Bitboard own_pieces = white_to_move ? board.white_pieces : board.black_pieces;
 
@@ -523,7 +518,7 @@ void MoveGenerator::generateBishopMoves(const Board &board, MoveList &moves, boo
             // focus only on captures for interesting_only
             if (interesting_only && !board.isSquareOccupied(to))
                 continue;
-            moves.append(Move{from, to, piece});
+            moves.append(Move{from, to});
             // log(BISHOP_MOVE, "Found bishop move from " + getSquareName(square) + " to " + getSquareName(to) + ".");
         }
     }
@@ -532,7 +527,6 @@ void MoveGenerator::generateBishopMoves(const Board &board, MoveList &moves, boo
 void MoveGenerator::generateRookMoves(const Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
-    Piece piece = white_to_move ? WHITE_ROOK : BLACK_ROOK;
     Bitboard rooks = white_to_move ? board.white_rooks : board.black_rooks;
     Bitboard own_pieces = white_to_move ? board.white_pieces : board.black_pieces;
 
@@ -548,7 +542,7 @@ void MoveGenerator::generateRookMoves(const Board &board, MoveList &moves, bool 
             // focus only on captures for interesting_only
             if (interesting_only && !board.isSquareOccupied(to))
                 continue;
-            moves.append(Move{from, to, piece});
+            moves.append(Move{from, to});
             // log(ROOK_MOVE, "Found rook move from " + getSquareName(square) + " to " + getSquareName(to) + ".");
         }
     }
@@ -557,7 +551,6 @@ void MoveGenerator::generateRookMoves(const Board &board, MoveList &moves, bool 
 void MoveGenerator::generateQueenMoves(const Board &board, MoveList &moves, bool interesting_only)
 {
     bool white_to_move = board.white_to_move;
-    Piece piece = white_to_move ? WHITE_QUEEN : BLACK_QUEEN;
 
     // for each queen add each attacked square to moves
     Bitboard queens = white_to_move ? board.white_queens : board.black_queens;
@@ -575,7 +568,7 @@ void MoveGenerator::generateQueenMoves(const Board &board, MoveList &moves, bool
             // focus only on captures for interesting_only
             if (interesting_only && !board.isSquareOccupied(to))
                 continue;
-            moves.append(Move{from, to, piece});
+            moves.append(Move{from, to});
             // log(QUEEN_MOVE, "Found queen move from " + getSquareName(square) + " to " + getSquareName(to) + ".");
         }
     }
@@ -683,7 +676,8 @@ UndoInfo MoveGenerator::makeMove(Board &board, Move move)
     }
 
     // handle en passant
-    if (move.piece == WHITE_PAWN || move.piece == BLACK_PAWN)
+    Piece moving_piece = board.getPieceAt(move.from);
+    if (moving_piece == WHITE_PAWN || moving_piece == BLACK_PAWN)
     {
         board.half_move_clock = HALF_MOVE_CLOCK_RESET;
         if (move.to == board.en_passant)
@@ -711,7 +705,7 @@ UndoInfo MoveGenerator::makeMove(Board &board, Move move)
         board.en_passant = NO_EN_PASSANT;
 
     // move piece <=> update moved piece, own pieces and occupied squares
-    Bitboard *piece = board.getBitboardByPiece(move.piece);
+    Bitboard *piece = board.getBitboardByPiece(moving_piece);
     BitBoard::movePiece(*piece, move.from, move.to);
     BitBoard::movePiece(board.white_to_move ? board.white_pieces : board.black_pieces, move.from, move.to);
     BitBoard::movePiece(board.occupied, move.from, move.to);
@@ -737,13 +731,15 @@ void MoveGenerator::unmakeMove(Board &board, Move move, UndoInfo undo)
     board.en_passant = undo.en_passant;
 
     bool white_to_move = board.white_to_move;
-    Bitboard *piece = board.getBitboardByPiece(move.piece);
+    Piece own_pawn = white_to_move ? WHITE_PAWN : BLACK_PAWN;
+    Piece moving_piece = move.isPromotion() ? own_pawn : board.getPieceAt(move.to);
     Bitboard *own_pieces = white_to_move ? &board.white_pieces : &board.black_pieces;
+    Bitboard *piece = board.getBitboardByPiece(moving_piece);
 
     // replace promoted piece with pawn
     if (move.isPromotion())
     {
-        Piece promotion_piece = getPromotionPiece(move.promotion_and_castling, white_to_move);
+        Piece promotion_piece = board.getPieceAt(move.to);
         Bitboard *promoted_piece = board.getBitboardByPiece(promotion_piece);
         BitBoard::clear(*promoted_piece, move.to);
         BitBoard::set(*piece, move.to);
@@ -760,7 +756,7 @@ void MoveGenerator::unmakeMove(Board &board, Move move, UndoInfo undo)
         Bitboard *captured_piece = board.getBitboardByPiece(undo.captured_piece);
         Bitboard *enemy_pieces = white_to_move ? &board.black_pieces : &board.white_pieces;
         Position position = move.to;
-        bool en_passant_move = (move.to == board.en_passant) && (move.piece == (white_to_move ? WHITE_PAWN : BLACK_PAWN));
+        bool en_passant_move = (move.to == board.en_passant) && (moving_piece == own_pawn);
         if (en_passant_move)
             position += (white_to_move ? DOWN : UP);
         BitBoard::set(*captured_piece, position);
@@ -818,7 +814,7 @@ void MoveGenerator::handleCastling(Board &board, Move move)
     Bitboard king_side_rook_start_position = board.white_to_move ? WHITE_KING_ROOK_START_POSITION : BLACK_KING_ROOK_START_POSITION;
     Bitboard queen_side_rook_start_position = board.white_to_move ? WHITE_QUEEN_ROOK_START_POSITION : BLACK_QUEEN_ROOK_START_POSITION;
 
-    bool king_moved = move.piece == (board.white_to_move ? WHITE_KING : BLACK_KING);
+    bool king_moved = board.getPieceAt(move.to) == (board.white_to_move ? WHITE_KING : BLACK_KING);
     bool own_king_side_rook_moved = !(*own_rooks & king_side_rook_start_position);
     bool own_queen_side_rook_moved = !(*own_rooks & queen_side_rook_start_position);
     if (king_moved)

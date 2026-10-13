@@ -6,7 +6,6 @@
     + fetch/create dataset from played games
     + setup training environment 
 + reduce sizeof(Move)
-    + remove piece type
     + maybe use single 16bit uint for from + to + promotion + castling
 + staged move generation/ordering/exploration
     + retrieve best previous move and check it

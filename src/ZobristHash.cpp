@@ -47,16 +47,17 @@ uint64 ZobristHash::computeInitialHash(Board &board)
 uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
 {
     uint64 &hash = board.hash;
-    bool white_to_move = move.piece <= WHITE_KING;
+    Piece moving_piece = board.getPieceAt(move.to); // assume move has already been made => piece is at destination square
+    bool white_to_move = moving_piece <= WHITE_KING;
 
     // toggle whose turn it is
     hash ^= whites_turn;
 
     // remove piece from previous position
-    hash ^= piece_at_square[move.from][move.piece];
+    hash ^= piece_at_square[move.from][moving_piece];
 
     // remove previous en passant
-    bool is_pawn_move = move.piece == (white_to_move ? WHITE_PAWN : BLACK_PAWN);
+    bool is_pawn_move = moving_piece == (white_to_move ? WHITE_PAWN : BLACK_PAWN);
     bool is_en_passant = is_pawn_move && (move.to == undo.en_passant);
     if (undo.en_passant != NO_EN_PASSANT)
     {
@@ -75,7 +76,7 @@ uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
         hash ^= piece_at_square[move.to][undo.captured_piece];
 
     // add piece to new position
-    Piece piece = move.isPromotion() ? getPromotionPiece(move.promotion_and_castling, white_to_move) : move.piece;
+    Piece piece = move.isPromotion() ? getPromotionPiece(move.promotion_and_castling, white_to_move) : moving_piece;
     hash ^= piece_at_square[move.to][piece];
 
     // additionally move rook if castling

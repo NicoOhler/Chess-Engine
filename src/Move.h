@@ -6,7 +6,6 @@ struct Move
 {
     Position from;
     Position to;
-    Piece piece;
     PromotionAndCastlingRights promotion_and_castling = NO_PROMOTION_OR_CASTLING;
 
     bool operator==(const Move &rhs);
@@ -19,8 +18,8 @@ struct Move
     std::string toString() const;
 };
 
-const Move UNDO_MOVE = Move{0, 0, EMPTY, UNDO};
-const Move NULL_MOVE = Move{0, 0, EMPTY, NO_PROMOTION_OR_CASTLING};
+const Move UNDO_MOVE = Move{0, 0, UNDO};
+const Move NULL_MOVE = Move{0, 0, NO_PROMOTION_OR_CASTLING};
 
 struct MoveList
 {

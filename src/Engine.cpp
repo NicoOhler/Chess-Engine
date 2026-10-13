@@ -62,7 +62,7 @@ void Engine::calculateMoveScores(MoveList &moves, TranspositionEntry *entry)
     for (int i = 0; i < moves.size; i++)
     {
         Move move = moves.moves[i];
-        // Piece moving_piece = board.getPieceAt(move.from);
+        Piece moving_piece = board.getPieceAt(move.from);
         Piece captured_piece = board.getPieceAt(move.to);
         // search previously best move first, which will likely cause a beta cutoff
         if (move == best_move)
@@ -73,8 +73,7 @@ void Engine::calculateMoveScores(MoveList &moves, TranspositionEntry *entry)
         // then captures according to Most Valuable Victim – Least Valuable Attacker
         // i.e., prioritize captures of high value with low value pieces
         else if (captured_piece != EMPTY)
-            // moves.scores[i] = getPieceValue(captured_piece) - getPieceValue(moving_piece) + CAPTURE_VALUE;
-            moves.scores[i] = getPieceValue(captured_piece) - getPieceValue(move.piece) + CAPTURE_VALUE;
+            moves.scores[i] = getPieceValue(captured_piece) - getPieceValue(moving_piece) + CAPTURE_VALUE;
         // then quiet non-capture moves
         else
             moves.scores[i] = 0;

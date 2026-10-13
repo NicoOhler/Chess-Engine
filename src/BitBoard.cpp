@@ -210,6 +210,8 @@ Piece BitBoard::Board::getPieceAt(Position position)
     Bitboard mask = 1ULL << position;
     if (white_pawns & mask)
         return WHITE_PAWN;
+    if (black_pawns & mask)
+        return BLACK_PAWN;
     if (white_rooks & mask)
         return WHITE_ROOK;
     if (white_knights & mask)
@@ -220,8 +222,6 @@ Piece BitBoard::Board::getPieceAt(Position position)
         return WHITE_QUEEN;
     if (white_king & mask)
         return WHITE_KING;
-    if (black_pawns & mask)
-        return BLACK_PAWN;
     if (black_rooks & mask)
         return BLACK_ROOK;
     if (black_knights & mask)
