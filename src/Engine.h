@@ -3,7 +3,7 @@
 #include "ZobristHash.h"
 #include "TranspositionTable.h"
 #include "Evaluation.h"
-#include "Timer.h"
+#include "TimeManagement.h"
 #include "definitions.h"
 #include <iostream>
 
@@ -25,10 +25,9 @@ public:
 
     // getter and setter
     Board getBoard();
+    TimeManagement &getTimeManagement();
     GameState getGameState(MoveList moves);
     MoveList getLegalMoves();
-    bool isIdle();
-    void setTimeLimit(Milliseconds time_limit);
     void setSearchDepth(int search_depth);
 
 private:
@@ -37,7 +36,7 @@ private:
     TranspositionTable transposition_table;
     ZobristHash zobrist;
     Evaluation eval;
-    Timer timer;
+    TimeManagement time_management;
     UndoHistory undo_history;
     uint64 evaluated_nodes;
     int search_depth;

@@ -78,7 +78,7 @@ namespace BitBoard
         Bitboard black_pieces;
         Position en_passant;
         CastlingRights castling_rights;
-        Clock half_move_clock;
+        HalfMoveClock half_move_clock;
         Hash hash;
 
         Bitboard *getBitboardByPiece(Piece piece);

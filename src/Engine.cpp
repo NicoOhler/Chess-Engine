@@ -5,7 +5,6 @@ Engine::Engine()
     board = generateBoardFromFEN(START_FEN);
     board.hash = zobrist.computeInitialHash(board);
     search_depth = DEFAULT_SEARCH_DEPTH;
-    timer.limit = POS_INFINITY;
 }
 
 void Engine::initializeBoard(std::string fen)
@@ -17,6 +16,8 @@ void Engine::initializeBoard(std::string fen)
 
 void Engine::reset()
 {
+    search_depth = DEFAULT_SEARCH_DEPTH;
+    time_management.reset();
     search_stopped = true;
     undo_history.clear();
     transposition_table.clear();
@@ -34,7 +35,7 @@ Move Engine::search()
     Move best_root_move = NULL_MOVE;
 
     search_stopped = false;
-    timer.start();
+    time_management.start(board.white_to_move);
     // iterative deepening
     for (int depth = 1; depth <= search_depth && !search_stopped; depth++)
     {
@@ -49,7 +50,6 @@ Move Engine::search()
             best_root_move = best_move_of_iteration;
         }
     }
-    timer.stop(SEARCH);
     transposition_table.printHitRate();
     // log(SEARCH, "Evaluated nodes: " + std::to_string(evaluated_nodes));
     return best_root_move;
@@ -254,6 +254,12 @@ uint64 Engine::perft(int remaining_depth, bool divide)
 Score Engine::evaluateBoard()
 {
     evaluated_nodes++;
+    if (evaluated_nodes % CLOCK_UPDATE_INTERVAL_NODES == 0 && !time_management.timeLeft())
+    {
+        search_stopped = true;
+        log(TIME, "Time limit reached. Stopping search after " + std::to_string(time_management.elapsedTime()) + " ms.");
+        return 0;
+    }
     return eval.evaluateBoard(board);
 }
 
@@ -287,12 +293,6 @@ void Engine::unmakeMove(Move move)
 }
 
 // getter and setter
-void Engine::setTimeLimit(Milliseconds time_limit)
-{
-    timer.limit = time_limit;
-    log(ENGINE_SETTINGS, "Set time limit to " + std::to_string(time_limit));
-}
-
 void Engine::setSearchDepth(int search_depth)
 {
     if (search_depth <= 0)
@@ -308,6 +308,11 @@ void Engine::setSearchDepth(int search_depth)
 Board Engine::getBoard()
 {
     return board;
+}
+
+TimeManagement &Engine::getTimeManagement()
+{
+    return time_management;
 }
 
 MoveList Engine::getLegalMoves()

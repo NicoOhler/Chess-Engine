@@ -105,36 +105,41 @@ void UCI::handleGo(std::string parameters)
 {
     engine.stop();
     ScopeLock lock(engine_mutex);
-    // parse parameters for time control, depth, etc. if needed
-    if (startsWith(parameters, " depth "))
+    TimeManagement &time_management = engine.getTimeManagement();
+    time_management.reset();
+    try
     {
-        try
-        {
+        // parse parameters for time control, depth, etc. if needed
+        if (startsWith(parameters, " depth "))
             engine.setSearchDepth(std::stoi(parameters.substr(6)));
-        }
-        catch (const std::invalid_argument &)
+        else if (startsWith(parameters, " movetime "))
+            time_management.configure(std::stol(parameters.substr(10)));
+        else if (startsWith(parameters, " wtime "))
         {
-            printInfo("Invalid depth parameter. Using default depth of " + std::to_string(DEFAULT_SEARCH_DEPTH));
-            engine.setSearchDepth(DEFAULT_SEARCH_DEPTH);
+            int start_of_white_time = 7;
+            int start_of_black_time = parameters.find(" btime ");
+            int start_of_white_increment = parameters.find(" winc ");
+            int start_of_black_increment = parameters.find(" binc ");
+            int length_of_white_time = start_of_black_time - start_of_white_time;
+            start_of_black_time += 7;
+            int length_of_black_time = start_of_white_increment - start_of_black_time;
+            start_of_white_increment += 6;
+            int length_of_white_increment = start_of_black_increment - start_of_white_increment;
+            start_of_black_increment += 6;
+            int length_of_black_increment = parameters.length() - start_of_black_increment;
+            Milliseconds white_time = std::stol(parameters.substr(start_of_white_time, length_of_white_time));
+            Milliseconds black_time = std::stol(parameters.substr(start_of_black_time, length_of_black_time));
+            Milliseconds white_increment = (start_of_white_increment != std::string::npos) ? std::stol(parameters.substr(start_of_white_increment, length_of_white_increment)) : 0;
+            Milliseconds black_increment = (start_of_black_increment != std::string::npos) ? std::stol(parameters.substr(start_of_black_increment, length_of_black_increment)) : 0;
+            time_management.configure(white_time, black_time, white_increment, black_increment);
         }
     }
-    else if (startsWith(parameters, " movetime "))
+    catch (const std::exception &e)
     {
-        try
-        {
-            engine.setTimeLimit(std::stoi(parameters.substr(9)));
-        }
-        catch (const std::invalid_argument &)
-        {
-            printInfo("Invalid movetime parameter. Using default time limit of " + std::to_string(DEFAULT_SEARCH_TIME) + "ms");
-            engine.setTimeLimit(DEFAULT_SEARCH_TIME);
-        }
+        printInfo("Error parsing 'go' command parameters: " + std::string(e.what()));
+        printInfo("Using default search parameters.");
     }
-    else if (startsWith(parameters, " wtime ") || startsWith(parameters, " btime "))
-    {
-        // todo implement time control for wtime and btime
-        printInfo("Time control parsing not yet implemented in UCI interface.");
-    }
+
     ScopeLock event_lock(event_queue_mutex);
     search_requested = true;
     event_cv.notify_one();

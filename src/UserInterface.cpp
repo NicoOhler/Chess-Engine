@@ -44,7 +44,6 @@ void UserInterface::startBenchmark()
 
     log(BENCHMARK, "Search for the best move with a depth of 7.");
     engine.setSearchDepth(7);
-    engine.setTimeLimit(POS_INFINITY);
     timer.start();
     engine.search();
     timer.stop(BENCHMARK);
@@ -283,7 +282,7 @@ void UserInterface::parseParameters(int argc, char *argv[])
         else if (std::string(argv[i]) == "-e" && i + 1 < argc)
             expected_perft = std::stoull(argv[++i]);
         else if (std::string(argv[i]) == "-t" && i + 1 < argc)
-            engine.setTimeLimit(std::stoull(argv[++i]));
+            engine.getTimeManagement().configure(std::stoull(argv[++i]));
         else if (std::string(argv[i]) == "-h")
         {
             printHelp(argv[0]);

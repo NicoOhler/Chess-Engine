@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine.h"
+#include "Timer.h"
 #include "UCI.h"
 #include <stack>
 

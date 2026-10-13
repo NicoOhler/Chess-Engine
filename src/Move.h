@@ -37,7 +37,7 @@ struct UndoInfo
     Piece captured_piece;
     Position en_passant;
     CastlingRights castling_rights;
-    Clock half_move_clock;
+    HalfMoveClock half_move_clock;
 };
 
 struct UndoHistory

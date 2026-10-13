@@ -18,8 +18,8 @@ typedef unsigned char Piece;
 typedef unsigned char PieceSymbol;
 typedef unsigned char Mode;
 typedef unsigned char GameState;
-typedef signed char Clock;
-typedef uint64 Milliseconds;
+typedef signed char HalfMoveClock;
+typedef int32_t Milliseconds;
 
 // basic constants
 const Position NUM_SQUARES = 64;
@@ -30,8 +30,8 @@ const int MAX_MOVES = 218;
 const Score POS_INFINITY = 2147483647;
 const Score NEG_INFINITY = -2147483648;
 const Score USED_MOVE = NEG_INFINITY;
-const Clock HALF_MOVE_CLOCK_RESET = -1;
-const Clock HALF_MOVE_CLOCK_LIMIT = 100;
+const HalfMoveClock HALF_MOVE_CLOCK_RESET = -1;
+const HalfMoveClock HALF_MOVE_CLOCK_LIMIT = 100;
 
 // directions
 const Position UP = 8;
@@ -45,11 +45,13 @@ const Position DOWN_RIGHT = -7;
 
 // engine
 const Milliseconds DEFAULT_SEARCH_TIME = 5000;
+const Milliseconds FRACTION_OF_TIME_TO_ALLOCATE = 30;
 const int TRANSPOSITION_TABLE_SIZE_MB = 256;
 const int DEFAULT_PERFT_DEPTH = 10;
-const int DEFAULT_SEARCH_DEPTH = 8;
+const int DEFAULT_SEARCH_DEPTH = 25;
 const int MAX_SEARCH_DEPTH = 40;
 const int MAX_QUIESCENCE_DEPTH = 30;
+const int CLOCK_UPDATE_INTERVAL_NODES = 1000;
 
 // promotion and castling rights can be stored within a single byte
 enum PROMOTION_AND_CASTLING_RIGHTS
