@@ -14,7 +14,11 @@ TranspositionEntry *TranspositionTable::probe(Hash hash)
     Hash index = modPow2(hash, table_size);
     TranspositionEntry &entry = table[index];
     if (entry.hash != hash)
+    {
+        cache_misses++;
         return nullptr;
+    }
+    cache_hits++;
     return &entry;
 }
 
@@ -55,6 +59,8 @@ BoundType TranspositionTable::determineBoundType(Score score, Score lower_bound,
 
 void TranspositionTable::clear()
 {
+    cache_hits = 0;
+    cache_misses = 0;
     for (uint64 i = 0; i < table_size; i++)
     {
         table[i].hash = 0;
@@ -63,6 +69,18 @@ void TranspositionTable::clear()
         table[i].remaining_depth = 0;
         table[i].type = EXACT;
     }
+}
+
+void TranspositionTable::printHitRate()
+{
+    uint64 total_accesses = cache_hits + cache_misses;
+    if (total_accesses == 0)
+    {
+        log(TRANSPOSITION_TABLE, "Transposition Table Hit Rate: No accesses yet.");
+        return;
+    }
+    double hit_rate = (double)cache_hits / total_accesses * 100.0;
+    log(TRANSPOSITION_TABLE, "Transposition Table Hits: " + std::to_string(cache_hits) + ", Misses: " + std::to_string(cache_misses) + ", Accesses: " + std::to_string(total_accesses) + ", Hit Rate: " + std::to_string(hit_rate) + "%");
 }
 
 Score computeTranspositionScore(Score score, int ply)

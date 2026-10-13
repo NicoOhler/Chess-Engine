@@ -35,8 +35,8 @@ void UserInterface::start()
 void UserInterface::startBenchmark()
 {
     log(BENCHMARK, "Starting benchmark of move generation, evaluation and search.");
-    log(BENCHMARK, "Generate legal moves recursively to a depth of 6.");
-    engine.setSearchDepth(6);
+    log(BENCHMARK, "Generate legal moves recursively to a depth of 5.");
+    engine.setSearchDepth(5);
     timer.start();
     uint64 nodes = engine.perft();
     timer.stop(BENCHMARK);
@@ -143,7 +143,7 @@ void UserInterface::startEngineVsEngine()
 
 void UserInterface::applyAndTrackMove(Move move, bool play_vs_engine)
 {
-    if (move.piece == UNDO)
+    if (move.isUndo())
     {
         assert(!move_history.empty(), "No move to undo");
         // additionally undo the AI's move if playing against the engine

@@ -5,38 +5,41 @@
     + define its input output formats
     + fetch/create dataset from played games
     + setup training environment 
-+ improve move ordering
-    + move ordering is typically staged
-        + retrieve best previous move and check it
-        + generate captures and promotions
-        + promotions
-        + good captures
-        + killer moves
-        + generate quiet moves
-        + quiet moves
-        + bad captures
-    + optionally Static Exchange Evaluation (SEE)
++ reduce sizeof(Move)
+    + remove piece type
+    + maybe use single 16bit uint for from + to + promotion + castling
++ staged move generation/ordering/exploration
+    + retrieve best previous move and check it
+    + generate captures and promotions
+    + promotions
+    + good captures
+    + killer moves
+    + generate quiet moves
+    + quiet moves
+    + bad captures
++ maybe improve move ordering via
+    + Static Exchange Evaluation (SEE)
         + read wiki
-    + optionally killer heuristic
+    + killer heuristic
         + orders quiet (non-capture) moves that cause beta cutoffs
         + reuse information from neighbor branches
         + read wiki
-    + optionally history heuristic
+    + history heuristic
         + track how often quiet moves cause cutoffs
         + prioritize those
         + requires decay mechanism
-+ quiescence search
-    + additions
-        + consider checks + en passant
-        + maybe make use of transposition table?
-        + may benefit from pruning
-            + e.g. SEE < 0
++ improve quiescence search
+    + consider checks + en passant
+    + maybe make use of transposition table?
+    + may benefit from pruning
+        + e.g. SEE < 0
 
 ### Nice-To-Haves for Later
 + time management
+    + wtime/btime/... 
     + cap the search time at remaining time/20 + increment/2
 + UCI support
-    + focus on subset required for playing, connecting to GUI and testing
+    + connect to GUI and test
 + setup Sequential Probability Ratio Test
     + evaluates whether a patch makes the engine stronger compared to live version
     + e.g. using fast-chess

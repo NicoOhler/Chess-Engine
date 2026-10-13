@@ -27,7 +27,6 @@ void Engine::stop()
     search_stopped = true;
 }
 
-// iterative deepening
 Move Engine::search()
 {
     evaluated_nodes = 0;
@@ -36,6 +35,7 @@ Move Engine::search()
 
     search_stopped = false;
     timer.start();
+    // iterative deepening
     for (int depth = 1; depth <= search_depth && !search_stopped; depth++)
     {
         Score best_score_of_iteration = pv_search(0, depth, NEG_INFINITY, POS_INFINITY);
@@ -50,6 +50,7 @@ Move Engine::search()
         }
     }
     timer.stop(SEARCH);
+    transposition_table.printHitRate();
     // log(SEARCH, "Evaluated nodes: " + std::to_string(evaluated_nodes));
     return best_root_move;
 }
@@ -61,6 +62,7 @@ void Engine::calculateMoveScores(MoveList &moves, TranspositionEntry *entry)
     for (int i = 0; i < moves.size; i++)
     {
         Move move = moves.moves[i];
+        // Piece moving_piece = board.getPieceAt(move.from);
         Piece captured_piece = board.getPieceAt(move.to);
         // search previously best move first, which will likely cause a beta cutoff
         if (move == best_move)
@@ -71,6 +73,7 @@ void Engine::calculateMoveScores(MoveList &moves, TranspositionEntry *entry)
         // then captures according to Most Valuable Victim – Least Valuable Attacker
         // i.e., prioritize captures of high value with low value pieces
         else if (captured_piece != EMPTY)
+            // moves.scores[i] = getPieceValue(captured_piece) - getPieceValue(moving_piece) + CAPTURE_VALUE;
             moves.scores[i] = getPieceValue(captured_piece) - getPieceValue(move.piece) + CAPTURE_VALUE;
         // then quiet non-capture moves
         else

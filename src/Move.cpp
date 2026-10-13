@@ -20,6 +20,11 @@ bool Move::isCastling() const
     return promotion_and_castling & (WHITE_KING_CASTLING | WHITE_QUEEN_CASTLING | BLACK_KING_CASTLING | BLACK_QUEEN_CASTLING);
 }
 
+bool Move::isUndo() const
+{
+    return promotion_and_castling & UNDO;
+}
+
 std::string Move::toString() const
 {
     std::string str = getSquareName(from) + getSquareName(to);

@@ -14,13 +14,12 @@ struct Move
 
     bool isPromotion() const;
     bool isCastling() const;
-    bool isKingSideCastling() const;
-    bool isQueenSideCastling() const;
+    bool isUndo() const;
 
     std::string toString() const;
 };
 
-const Move UNDO_MOVE = Move{0, 0, UNDO, NO_PROMOTION_OR_CASTLING};
+const Move UNDO_MOVE = Move{0, 0, EMPTY, UNDO};
 const Move NULL_MOVE = Move{0, 0, EMPTY, NO_PROMOTION_OR_CASTLING};
 
 struct MoveList
