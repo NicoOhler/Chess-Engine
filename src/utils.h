@@ -19,7 +19,7 @@ Position getSquareIndex(std::string square);
 Score getPieceValue(Piece piece);
 uint64 modPow2(uint64 n, uint64 m);
 void print(std::string message, bool newline = true);
-bool startsWith(const std::string &str, const std::string &prefix);
+bool contains(const std::string &str, const std::string &substr);
 
 class ScopeLock
 {

@@ -14,7 +14,7 @@ Piece getPromotionPiece(Promotion promotion, bool white_to_move)
     case PROMOTE_TO_KNIGHT:
         return white_to_move ? WHITE_KNIGHT : BLACK_KNIGHT;
     default:
-        assert(false, "Invalid promotion piece");
+        throw std::invalid_argument("Invalid promotion: " + std::to_string(promotion));
     }
 }
 
@@ -62,7 +62,7 @@ Score getPieceValue(Piece piece)
     case BLACK_KING:
         return KING_VALUE;
     default:
-        assert(false, "Invalid piece");
+        throw std::invalid_argument("Invalid piece: " + std::to_string(piece));
     }
 }
 
@@ -78,7 +78,7 @@ void print(std::string message, bool newline)
         std::cout << std::endl;
 }
 
-bool startsWith(const std::string &str, const std::string &prefix)
+bool contains(const std::string &str, const std::string &substr)
 {
-    return str.rfind(prefix, 0) == 0;
+    return str.find(substr) != std::string::npos;
 }

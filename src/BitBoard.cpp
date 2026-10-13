@@ -52,7 +52,6 @@ bool BitBoard::Board::isSquareOccupied(Position position) const
 BitBoard::Board BitBoard::generateBoardFromFEN(std::string fen)
 {
     Board board = Board(EMPTY);
-
     int i = 0;
     // parse board position
     for (int row = ROW_8; row >= ROW_1; row--)
@@ -166,9 +165,8 @@ Bitboard *BitBoard::Board::getBitboardByPiece(Piece piece)
     case BLACK_KING:
         return &black_king;
     default:
-        assert(false, "Invalid piece");
+        throw std::invalid_argument("Invalid piece: " + std::to_string(piece));
     }
-    return nullptr;
 }
 
 Bitboard *BitBoard::Board::getBitboardByPieceSymbol(Piece piece)
@@ -200,9 +198,8 @@ Bitboard *BitBoard::Board::getBitboardByPieceSymbol(Piece piece)
     case BLACK_KING_SYMBOL:
         return &black_king;
     default:
-        assert(false, "Invalid piece");
+        throw std::invalid_argument("Invalid piece symbol: " + std::to_string(piece));
     }
-    return nullptr;
 }
 
 Piece BitBoard::Board::getPieceAt(Position position)

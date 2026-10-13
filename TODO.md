@@ -34,11 +34,6 @@
         + e.g. SEE < 0
 
 ### Nice-To-Haves for Later
-+ time management
-    + wtime/btime/... 
-    + cap the search time at remaining time/20 + increment/2
-+ UCI support
-    + connect to GUI and test
 + setup Sequential Probability Ratio Test
     + evaluates whether a patch makes the engine stronger compared to live version
     + e.g. using fast-chess
@@ -46,7 +41,6 @@
     + requires UCI support
     + connect to lichess-bot api
     + https://anmols.bearblog.dev/how-to-determine-chess-bot-elo-lichess/
-+ connect engine to GUI via UCI
 + come up with a good name
 + opening book
     + play probabilistic book moves at first

@@ -35,5 +35,6 @@ private:
     void handleStop();
     void handleQuit();
 
-    void printInfo(std::string info);
+    std::string extractArgumentFromCommand(const std::string &command, const std::string &prefix, const std::string &suffix);
+    Milliseconds parseTimeString(const std::string &time_string);
 };

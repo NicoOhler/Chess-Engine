@@ -9,8 +9,17 @@ Engine::Engine()
 
 void Engine::initializeBoard(std::string fen)
 {
-    board = generateBoardFromFEN(fen);
-    log(CHESS_BOARD, "Initialized board with FEN: " + fen);
+    try
+    {
+        board = generateBoardFromFEN(fen);
+        log(FEN, "Initialized board with FEN: " + fen);
+    }
+    catch (const std::exception &e)
+    {
+        log(FEN, "Error initializing board with FEN: " + fen + " - " + e.what());
+        board = generateBoardFromFEN(START_FEN);
+        log(FEN, "Initialized board with default FEN: " + START_FEN);
+    }
     board.hash = zobrist.computeInitialHash(board);
 }
 
@@ -44,14 +53,12 @@ Move Engine::search()
 
         if (!search_stopped)
         {
-            log(SEARCH_DEPTHS, "Depth " + std::to_string(depth) + " best move " + best_move_of_iteration.toString() +
-                                   " score " + std::to_string(best_score_of_iteration));
             best_root_score = best_score_of_iteration;
             best_root_move = best_move_of_iteration;
+            print("info depth " + std::to_string(depth) + " score cp " + std::to_string(best_root_score) + " nodes " + std::to_string(evaluated_nodes));
         }
     }
-    transposition_table.printHitRate();
-    // log(SEARCH, "Evaluated nodes: " + std::to_string(evaluated_nodes));
+    // transposition_table.printHitRate();
     return best_root_move;
 }
 
@@ -257,7 +264,7 @@ Score Engine::evaluateBoard()
     if (evaluated_nodes % CLOCK_UPDATE_INTERVAL_NODES == 0 && !time_management.timeLeft())
     {
         search_stopped = true;
-        log(TIME, "Time limit reached. Stopping search after " + std::to_string(time_management.elapsedTime()) + " ms.");
+        log(SEARCH, "Time limit reached. Stopping search after " + std::to_string(time_management.elapsedTime()) + " ms.");
         return 0;
     }
     return eval.evaluateBoard(board);

@@ -49,12 +49,7 @@ bool TimeManagement::timeLeft()
 
 void TimeManagement::configure(Milliseconds move_time)
 {
-    if (move_time <= 0)
-    {
-        log(TIME, "Invalid move time. Please specify a positive integer for the move time.");
-        return;
-    }
-    this->move_time = move_time;
+    this->move_time = std::max(move_time, 0);
     configured = true;
 }
 
@@ -65,14 +60,9 @@ void TimeManagement::configure(Milliseconds white_time, Milliseconds black_time)
 
 void TimeManagement::configure(Milliseconds white_time, Milliseconds black_time, Milliseconds white_increment, Milliseconds black_increment)
 {
-    if (white_time <= 0 || black_time <= 0 || white_increment < 0 || black_increment < 0)
-    {
-        log(TIME, "Invalid time control. Please specify positive integers for the white and black times, and non-negative integers for the increments.");
-        return;
-    }
-    this->white_time = white_time;
-    this->black_time = black_time;
-    this->white_increment = white_increment;
-    this->black_increment = black_increment;
+    this->white_time = std::max(white_time, 0);
+    this->black_time = std::max(black_time, 0);
+    this->white_increment = std::max(white_increment, 0);
+    this->black_increment = std::max(black_increment, 0);
     configured = true;
 }

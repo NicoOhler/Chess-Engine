@@ -22,7 +22,7 @@ void UCI::start()
         else if (command.substr(0, 2) == "go")
             handleGo(command.substr(2));
         else
-            printInfo("Unknown command: '" + command + "'. Type help for more information.");
+            print("Unknown command: '" + command + "'. Type help for more information.");
     }
 }
 
@@ -78,21 +78,16 @@ void UCI::handlePosition(std::string parameters)
 
     // extract FEN and initialize board
     std::string fen = START_FEN;
-    if (startsWith(parameters, " startpos"))
+    if (contains(parameters, " startpos"))
         parameters = parameters.substr(9);
-    else if (startsWith(parameters, " fen"))
-    {
-        parameters = parameters.substr(4);
-        int end_of_fen = parameters.find(" moves");
-        fen = parameters.substr(1, end_of_fen);
-        parameters = parameters.substr(end_of_fen);
-    }
+    else if (contains(parameters, " fen"))
+        fen = extractArgumentFromCommand(parameters, " fen ", " moves");
     engine.initializeBoard(fen);
 
     // todo extract moves and apply them
-    if (startsWith(parameters, " moves"))
+    if (contains(parameters, " moves"))
     {
-        printInfo("Move parsing not yet implemented in UCI interface.");
+        print("Move parsing not yet implemented in UCI interface.");
         return;
     }
 
@@ -110,34 +105,23 @@ void UCI::handleGo(std::string parameters)
     try
     {
         // parse parameters for time control, depth, etc. if needed
-        if (startsWith(parameters, " depth "))
+        if (contains(parameters, " depth "))
             engine.setSearchDepth(std::stoi(parameters.substr(6)));
-        else if (startsWith(parameters, " movetime "))
-            time_management.configure(std::stol(parameters.substr(10)));
-        else if (startsWith(parameters, " wtime "))
+        else if (contains(parameters, " movetime "))
+            time_management.configure(parseTimeString(parameters.substr(10)));
+        else if (contains(parameters, "time"))
         {
-            int start_of_white_time = 7;
-            int start_of_black_time = parameters.find(" btime ");
-            int start_of_white_increment = parameters.find(" winc ");
-            int start_of_black_increment = parameters.find(" binc ");
-            int length_of_white_time = start_of_black_time - start_of_white_time;
-            start_of_black_time += 7;
-            int length_of_black_time = start_of_white_increment - start_of_black_time;
-            start_of_white_increment += 6;
-            int length_of_white_increment = start_of_black_increment - start_of_white_increment;
-            start_of_black_increment += 6;
-            int length_of_black_increment = parameters.length() - start_of_black_increment;
-            Milliseconds white_time = std::stol(parameters.substr(start_of_white_time, length_of_white_time));
-            Milliseconds black_time = std::stol(parameters.substr(start_of_black_time, length_of_black_time));
-            Milliseconds white_increment = (start_of_white_increment != std::string::npos) ? std::stol(parameters.substr(start_of_white_increment, length_of_white_increment)) : 0;
-            Milliseconds black_increment = (start_of_black_increment != std::string::npos) ? std::stol(parameters.substr(start_of_black_increment, length_of_black_increment)) : 0;
+            Milliseconds white_time = parseTimeString(extractArgumentFromCommand(parameters, " wtime ", " "));
+            Milliseconds black_time = parseTimeString(extractArgumentFromCommand(parameters, " btime ", " "));
+            Milliseconds white_increment = parseTimeString(extractArgumentFromCommand(parameters, " winc ", " "));
+            Milliseconds black_increment = parseTimeString(extractArgumentFromCommand(parameters, " binc ", " "));
             time_management.configure(white_time, black_time, white_increment, black_increment);
         }
     }
     catch (const std::exception &e)
     {
-        printInfo("Error parsing 'go' command parameters: " + std::string(e.what()));
-        printInfo("Using default search parameters.");
+        print("Error parsing 'go' command parameters: " + std::string(e.what()));
+        print("Using default search parameters.");
     }
 
     ScopeLock event_lock(event_queue_mutex);
@@ -161,7 +145,21 @@ void UCI::handleQuit()
     exit(0);
 }
 
-void UCI::printInfo(std::string info)
+std::string UCI::extractArgumentFromCommand(const std::string &command, const std::string &prefix, const std::string &suffix)
 {
-    print("info string " + info);
+    size_t start = command.find(prefix);
+    if (start == std::string::npos)
+        return "";
+    start += prefix.length();
+    size_t end = command.find(suffix, start);
+    if (end == std::string::npos)
+        return command.substr(start);
+    return command.substr(start, end - start);
+}
+
+Milliseconds UCI::parseTimeString(const std::string &time_string)
+{
+    if (time_string.empty())
+        return 0;
+    return std::stol(time_string);
 }

@@ -5,13 +5,13 @@
             "name": "UCI Mode",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "u"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -29,7 +29,7 @@
             "name": "Benchmark",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "b",
@@ -37,7 +37,7 @@
                 "10"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -55,13 +55,13 @@
             "name": "Local PvP w/ Default Board",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "l",
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -79,7 +79,7 @@
             "name": "Local PvP w/ Custom Board",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "l",
@@ -87,7 +87,7 @@
                 "rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/8/P1PPPPPP/RNBQKBNR w KQkq c6 0 3"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -105,13 +105,13 @@
             "name": "PvE w/ Default Board",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "r",
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -129,7 +129,7 @@
             "name": "Perft 5 w/ Divide",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "p",
@@ -139,7 +139,7 @@
                 "4865609"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -157,7 +157,7 @@
             "name": "Perft 6 w/ Divide",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "p",
@@ -167,7 +167,7 @@
                 "119060324"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -185,7 +185,7 @@
             "name": "Perft 7 w/ Divide",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "p",
@@ -195,7 +195,7 @@
                 "3195901860"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -213,7 +213,7 @@
             "name": "Custom FEN Perft",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "p",
@@ -225,7 +225,7 @@
                 "119060324"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -243,7 +243,7 @@
             "name": "Hard Custom Perft",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "p",
@@ -255,7 +255,7 @@
                 "89941194"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -273,7 +273,7 @@
             "name": "Hard Kiwipete Perft",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "p",
@@ -285,7 +285,7 @@
                 "8031647685"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -303,7 +303,7 @@
             "name": "Custom Search 1",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "s",
@@ -313,7 +313,7 @@
                 "5000"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -331,7 +331,7 @@
             "name": "Custom Search 2",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/engine",
+            "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "s",
@@ -341,7 +341,7 @@
                 "10000"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -372,7 +372,7 @@
                 "6",
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -395,7 +395,7 @@
                 "-c",
                 "perf report"
             ],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "stopAtEntry": false,
             "externalConsole": false,
             "MIMode": "gdb",
@@ -411,7 +411,7 @@
                 "-c",
                 "\"valgrind -s --leak-check=full --show-leak-kinds=all ./engine -m b -p 3\"",
             ],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/output",
             "stopAtEntry": false,
             "externalConsole": false,
             "MIMode": "gdb",

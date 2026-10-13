@@ -1,6 +1,3 @@
-temp
-engine
+/fastchess
+/output
 log.txt
-profiling.txt
-gmon.out
-perf.data

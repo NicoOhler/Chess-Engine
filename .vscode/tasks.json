@@ -9,7 +9,7 @@
                 "-g",
                 "${workspaceFolder}/src/*.cpp",
                 "-o",
-                "${workspaceFolder}/engine"
+                "${workspaceFolder}/output/engine"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -32,7 +32,7 @@
                 "-g",
                 "${workspaceFolder}/src/*.cpp",
                 "-o",
-                "${workspaceFolder}/engine"
+                "${workspaceFolder}/output/engine"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
