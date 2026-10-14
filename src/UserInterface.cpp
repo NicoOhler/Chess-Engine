@@ -35,23 +35,23 @@ void UserInterface::start()
 void UserInterface::startBenchmark()
 {
     log(BENCHMARK, "Starting benchmark of move generation, evaluation and search.");
-    log(BENCHMARK, "Generate legal moves recursively to a depth of 5.");
-    engine.setSearchDepth(5);
+    log(BENCHMARK, "Generate all legal moves recursively to a depth of " + std::to_string(BENCHMARK_PERFT_DEPTH) + ".");
+    engine.setSearchDepth(BENCHMARK_PERFT_DEPTH);
     timer.start();
     uint64 nodes = engine.perft();
     timer.stop(BENCHMARK);
     log(BENCHMARK, "Nodes searched: " + std::to_string(nodes));
 
-    log(BENCHMARK, "Search for the best move with a depth of 7.");
-    engine.setSearchDepth(7);
+    log(BENCHMARK, "Search for the best move with a depth of " + std::to_string(BENCHMARK_SEARCH_DEPTH) + ".");
+    engine.setSearchDepth(BENCHMARK_SEARCH_DEPTH);
     timer.start();
     engine.search();
     timer.stop(BENCHMARK);
 
-    log(BENCHMARK, "Evaluation of the current board state 10,000 times.");
+    log(BENCHMARK, "Evaluation of the current board state " + std::to_string(BENCHMARK_EVALUATION_COUNT) + " times.");
     timer.start();
-    for (int i = 0; i < 10000; i++)
-        engine.evaluateBoard();
+    for (int i = 0; i < BENCHMARK_EVALUATION_COUNT; i++)
+        engine.evaluatePosition();
     timer.stop(BENCHMARK);
 }
 
@@ -97,8 +97,8 @@ void UserInterface::startPlayerVsPlayer()
         applyAndTrackMove(move);
         printGameState();
         moves = engine.getLegalMoves();
-    } while (engine.getGameState(moves) == IN_PROGRESS);
-    log(UI, (engine.getGameState(moves) == CHECKMATE ? "Checkmate" : "Draw"));
+    } while (!engine.isGameOver());
+    log(UI, engine.getGameState());
 }
 
 void UserInterface::startPlayerVsEngine()
@@ -117,8 +117,8 @@ void UserInterface::startPlayerVsEngine()
         applyAndTrackMove(move, true);
         printGameState();
         moves = engine.getLegalMoves();
-    } while (engine.getGameState(moves) == IN_PROGRESS);
-    log(UI, (engine.getGameState(moves) == CHECKMATE ? "Checkmate" : "Draw"));
+    } while (!engine.isGameOver());
+    log(UI, engine.getGameState());
 }
 
 void UserInterface::startEngineVsEngine()
@@ -132,12 +132,12 @@ void UserInterface::startEngineVsEngine()
     {
         Move move = engine.search();
         log(UI, "Press Enter to apply the chosen move.");
-        std::getline(std::cin, input);
+        input = readLineFromStdin();
         applyAndTrackMove(move);
         printGameState();
         moves = engine.getLegalMoves();
-    } while (engine.getGameState(moves) == IN_PROGRESS);
-    log(UI, (engine.getGameState(moves) == CHECKMATE ? "Checkmate" : "Draw"));
+    } while (!engine.isGameOver());
+    log(UI, engine.getGameState());
 }
 
 void UserInterface::applyAndTrackMove(Move move, bool play_vs_engine)
@@ -168,7 +168,7 @@ Move UserInterface::promptForLegalMove(MoveList legal_moves)
     while (true)
     {
         std::cout << "Enter your move: ";
-        std::getline(std::cin, input);
+        input = readLineFromStdin();
 
         // print legal moves
         if (input[0] == 'p')
@@ -218,7 +218,7 @@ bool UserInterface::promptForPlayerColor()
     while (true)
     {
         print("Enter your color: ", false);
-        std::getline(std::cin, input);
+        input = readLineFromStdin();
 
         if (input[0] == 'b' || input[0] == 'B')
         {
@@ -276,7 +276,7 @@ void UserInterface::parseParameters(int argc, char *argv[])
         if (std::string(argv[i]) == "-m" && i + 1 < argc)
             mode = argv[++i][0];
         else if (std::string(argv[i]) == "-f" && i + 1 < argc)
-            engine.initializeBoard(argv[++i]);
+            engine.setPosition(argv[++i]);
         else if (std::string(argv[i]) == "-p" && i + 1 < argc)
             engine.setSearchDepth(std::stoi(argv[++i]));
         else if (std::string(argv[i]) == "-e" && i + 1 < argc)
@@ -309,7 +309,7 @@ void UserInterface::printHelp(std::string executable_name)
 
 void UserInterface::printGameState()
 {
-    Score score = engine.evaluateBoard();
+    Score score = engine.evaluatePosition();
     log(UI, "Board Evaluation: " + std::to_string(score));
     BitBoard::printGameState(engine.getBoard());
 }

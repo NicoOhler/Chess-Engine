@@ -42,7 +42,7 @@ struct UndoInfo
 
 struct UndoHistory
 {
-    UndoInfo undo_info[MAX_SEARCH_DEPTH + MAX_QUIESCENCE_DEPTH];
+    UndoInfo undo_infos[MAX_SEARCH_DEPTH + MAX_QUIESCENCE_DEPTH];
     int size = 0;
 
     void push(UndoInfo undo);

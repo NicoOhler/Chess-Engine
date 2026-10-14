@@ -17,24 +17,24 @@ public:
 private:
     Engine &engine;
 
-    // engine worker thread and synchronization
-    std::thread engine_worker_thread;
-    std::condition_variable event_cv;
-    std::mutex event_queue_mutex;
+    // background thread and synchronization
+    std::thread background_thread;
+    std::condition_variable background_request_cv;
+    std::mutex background_request_mutex;
     std::mutex engine_mutex;
     std::atomic<bool> quit_requested{false};
     std::atomic<bool> search_requested{false};
-    void workerLoop();
+    void handleBackgroundRequests();
 
     // UCI command handlers
     void handleUCI();
     void handleIsReady();
     void handleUCINewGame();
-    void handlePosition(std::string parameters);
-    void handleGo(std::string parameters);
+    void handlePosition(std::string command);
+    void handleGo(std::string command);
     void handleStop();
     void handleQuit();
 
-    std::string extractArgumentFromCommand(const std::string &command, const std::string &prefix, const std::string &suffix);
-    Milliseconds parseTimeString(const std::string &time_string);
+    std::string extractArgumentFromCommand(const std::string &command, const std::string &prefix, const std::string &suffix = " ");
+    Milliseconds extractMillisecondsFromString(const std::string &string);
 };

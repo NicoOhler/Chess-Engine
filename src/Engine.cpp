@@ -7,7 +7,7 @@ Engine::Engine()
     search_depth = DEFAULT_SEARCH_DEPTH;
 }
 
-void Engine::initializeBoard(std::string fen)
+void Engine::setPosition(std::string fen)
 {
     try
     {
@@ -40,8 +40,8 @@ void Engine::stop()
 Move Engine::search()
 {
     evaluated_nodes = 0;
-    Score best_root_score = NEG_INFINITY;
-    Move best_root_move = NULL_MOVE;
+    Move best_move = NULL_MOVE;
+    Milliseconds iteration_time = 0;
 
     search_stopped = false;
     time_management.start(board.white_to_move);
@@ -53,13 +53,25 @@ Move Engine::search()
 
         if (!search_stopped)
         {
-            best_root_score = best_score_of_iteration;
-            best_root_move = best_move_of_iteration;
-            print("info depth " + std::to_string(depth) + " score cp " + std::to_string(best_root_score) + " nodes " + std::to_string(evaluated_nodes));
+            best_move = best_move_of_iteration;
+            iteration_time = std::max(time_management.getElapsedTime() - iteration_time, 1);
+            std::string info = "info depth " + std::to_string(depth);
+            info += " score cp " + std::to_string(best_score_of_iteration);
+            info += " pv " + best_move.toString();
+            info += " nodes " + std::to_string(evaluated_nodes);
+            info += " time " + std::to_string(iteration_time);
+            info += " nps " + std::to_string(1000 * evaluated_nodes / iteration_time);
+            print(info);
+        }
+
+        if (!time_management.sufficientTimeForNextIterationLeft())
+        {
+            log(SEARCH, "Insufficient time for next iteration. Stopping search after " + std::to_string(depth) + " iterations.");
+            search_stopped = true;
         }
     }
     // transposition_table.printHitRate();
-    return best_root_move;
+    return best_move;
 }
 
 void Engine::calculateMoveScores(MoveList &moves, TranspositionEntry *entry)
@@ -118,7 +130,7 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
 
     // return evaluation for leaf nodes (max depth reached)
     if (remaining_depth == 0)
-        return quiescence(lower_bound, upper_bound, ply);
+        return quiescence(lower_bound, upper_bound, ply); // ? why ply?
 
     // generate and evaluate moves until pruning possible
     MoveList pseudo_legal_moves = move_generator.generatePseudoLegalMoves(board);
@@ -183,7 +195,7 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
             return -MATE_VALUE + ply; // add ply to prefer fast games
 
     // store best move in transposition table
-    BoundType type = transposition_table.determineBoundType(best_score, original_lower_bound, original_upper_bound);
+    BoundType type = transposition_table.getBoundType(best_score, original_lower_bound, original_upper_bound);
     Score transposition_score = computeTranspositionScore(best_score, ply);
     transposition_table.store(board.hash, transposition_score, best_move, remaining_depth, type);
     return best_score;
@@ -193,7 +205,7 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
 {
     // use static evaluation as baseline
     // in case no further captures are possible
-    Score best_score = evaluateBoard();
+    Score best_score = evaluatePosition();
     if (best_score >= upper_bound)
         return best_score;
     if (best_score > lower_bound)
@@ -258,16 +270,16 @@ uint64 Engine::perft(int remaining_depth, bool divide)
     return total_nodes;
 }
 
-Score Engine::evaluateBoard()
+Score Engine::evaluatePosition()
 {
     evaluated_nodes++;
     if (evaluated_nodes % CLOCK_UPDATE_INTERVAL_NODES == 0 && !time_management.timeLeft())
     {
         search_stopped = true;
-        log(SEARCH, "Time limit reached. Stopping search after " + std::to_string(time_management.elapsedTime()) + " ms.");
+        log(SEARCH, "Time limit reached. Stopping search after " + std::to_string(time_management.getElapsedTime()) + " ms.");
         return 0;
     }
-    return eval.evaluateBoard(board);
+    return eval.evaluate(board);
 }
 
 bool Engine::makeMoveIfLegal(Move move)
@@ -327,11 +339,16 @@ MoveList Engine::getLegalMoves()
     return move_generator.generateLegalMoves(board);
 }
 
-GameState Engine::getGameState(MoveList moves)
+GameState Engine::getGameState()
 {
     if (board.half_move_clock >= HALF_MOVE_CLOCK_LIMIT)
         return DRAW;
-    if (!moves.empty())
+    if (!getLegalMoves().empty())
         return IN_PROGRESS;
     return move_generator.isKingSafe(board, board.white_to_move) ? DRAW : CHECKMATE;
+}
+
+bool Engine::isGameOver()
+{
+    return getGameState() != IN_PROGRESS;
 }

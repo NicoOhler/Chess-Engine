@@ -20,8 +20,8 @@ public:
     void start(bool white_to_move);
     void reset();
     bool timeLeft();
-    Milliseconds elapsedTime();
+    bool sufficientTimeForNextIterationLeft();
+    Milliseconds getElapsedTime();
     void configure(Milliseconds move_time);
-    void configure(Milliseconds white_time, Milliseconds black_time);
     void configure(Milliseconds white_time, Milliseconds black_time, Milliseconds white_increment, Milliseconds black_increment);
 };

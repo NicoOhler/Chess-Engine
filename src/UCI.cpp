@@ -2,11 +2,11 @@
 
 void UCI::start()
 {
-    engine_worker_thread = std::thread(&UCI::workerLoop, this);
+    background_thread = std::thread(&UCI::handleBackgroundRequests, this);
     std::string command;
     while (true)
     {
-        std::getline(std::cin, command);
+        command = readLineFromStdin();
         if (command == "uci")
             handleUCI();
         else if (command == "isready")
@@ -18,22 +18,23 @@ void UCI::start()
         else if (command == "quit")
             handleQuit();
         else if (command.substr(0, 8) == "position")
-            handlePosition(command.substr(8));
+            handlePosition(command);
         else if (command.substr(0, 2) == "go")
-            handleGo(command.substr(2));
+            handleGo(command);
         else
             print("Unknown command: '" + command + "'. Type help for more information.");
     }
 }
 
-void UCI::workerLoop()
+// worker thread loop that handles search and quit requests
+void UCI::handleBackgroundRequests()
 {
     while (!quit_requested)
     {
         // wait for a search request or quit request
-        std::unique_lock<std::mutex> lock(event_queue_mutex);
-        event_cv.wait(lock, [this]
-                      { return search_requested.load() || quit_requested.load(); });
+        std::unique_lock<std::mutex> lock(background_request_mutex);
+        background_request_cv.wait(lock, [this]
+                                   { return search_requested.load() || quit_requested.load(); });
 
         // handle quit or search request
         if (quit_requested)
@@ -70,7 +71,7 @@ void UCI::handleUCINewGame()
     engine.reset();
 }
 
-void UCI::handlePosition(std::string parameters)
+void UCI::handlePosition(std::string command)
 {
     // wait for engine to fully stop before changing the board state
     engine.stop();
@@ -78,14 +79,13 @@ void UCI::handlePosition(std::string parameters)
 
     // extract FEN and initialize board
     std::string fen = START_FEN;
-    if (contains(parameters, " startpos"))
-        parameters = parameters.substr(9);
-    else if (contains(parameters, " fen"))
-        fen = extractArgumentFromCommand(parameters, " fen ", " moves");
-    engine.initializeBoard(fen);
+    // no need to check for "startpos" since it is the default FEN
+    if (contains(command, " fen"))
+        fen = extractArgumentFromCommand(command, " fen ", " moves");
+    engine.setPosition(fen);
 
     // todo extract moves and apply them
-    if (contains(parameters, " moves"))
+    if (contains(command, " moves"))
     {
         print("Move parsing not yet implemented in UCI interface.");
         return;
@@ -96,7 +96,7 @@ void UCI::handlePosition(std::string parameters)
         engine.makeMove(moves.moves[i], false);
 }
 
-void UCI::handleGo(std::string parameters)
+void UCI::handleGo(std::string command)
 {
     engine.stop();
     ScopeLock lock(engine_mutex);
@@ -105,16 +105,16 @@ void UCI::handleGo(std::string parameters)
     try
     {
         // parse parameters for time control, depth, etc. if needed
-        if (contains(parameters, " depth "))
-            engine.setSearchDepth(std::stoi(parameters.substr(6)));
-        else if (contains(parameters, " movetime "))
-            time_management.configure(parseTimeString(parameters.substr(10)));
-        else if (contains(parameters, "time"))
+        if (contains(command, " depth "))
+            engine.setSearchDepth(std::stoi(extractArgumentFromCommand(command, " depth ")));
+        else if (contains(command, " movetime "))
+            time_management.configure(extractMillisecondsFromString(extractArgumentFromCommand(command, " movetime ")));
+        else if (contains(command, "time"))
         {
-            Milliseconds white_time = parseTimeString(extractArgumentFromCommand(parameters, " wtime ", " "));
-            Milliseconds black_time = parseTimeString(extractArgumentFromCommand(parameters, " btime ", " "));
-            Milliseconds white_increment = parseTimeString(extractArgumentFromCommand(parameters, " winc ", " "));
-            Milliseconds black_increment = parseTimeString(extractArgumentFromCommand(parameters, " binc ", " "));
+            Milliseconds white_time = extractMillisecondsFromString(extractArgumentFromCommand(command, " wtime "));
+            Milliseconds black_time = extractMillisecondsFromString(extractArgumentFromCommand(command, " btime "));
+            Milliseconds white_increment = extractMillisecondsFromString(extractArgumentFromCommand(command, " winc "));
+            Milliseconds black_increment = extractMillisecondsFromString(extractArgumentFromCommand(command, " binc "));
             time_management.configure(white_time, black_time, white_increment, black_increment);
         }
     }
@@ -124,9 +124,10 @@ void UCI::handleGo(std::string parameters)
         print("Using default search parameters.");
     }
 
-    ScopeLock event_lock(event_queue_mutex);
+    // notify background thread to start search
+    ScopeLock background_request_lock(background_request_mutex);
     search_requested = true;
-    event_cv.notify_one();
+    background_request_cv.notify_one();
 }
 
 void UCI::handleStop()
@@ -136,12 +137,13 @@ void UCI::handleStop()
 
 void UCI::handleQuit()
 {
+    // notify background thread to quit and wait for it to finish
     engine.stop();
-    std::unique_lock<std::mutex> event_lock(event_queue_mutex);
+    std::unique_lock<std::mutex> background_request_lock(background_request_mutex);
     quit_requested = true;
-    event_cv.notify_one();
-    event_lock.unlock();
-    engine_worker_thread.join();
+    background_request_cv.notify_one();
+    background_request_lock.unlock();
+    background_thread.join();
     exit(0);
 }
 
@@ -157,9 +159,9 @@ std::string UCI::extractArgumentFromCommand(const std::string &command, const st
     return command.substr(start, end - start);
 }
 
-Milliseconds UCI::parseTimeString(const std::string &time_string)
+Milliseconds UCI::extractMillisecondsFromString(const std::string &string)
 {
-    if (time_string.empty())
+    if (string.empty())
         return 0;
-    return std::stol(time_string);
+    return std::stol(string);
 }

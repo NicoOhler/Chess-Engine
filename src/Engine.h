@@ -14,21 +14,22 @@ class Engine
 {
 public:
     Engine();
-    void initializeBoard(std::string fen);
     Move search();
-    void reset();
     void stop();
+    void reset();
     uint64 perft();
-    Score evaluateBoard();
+    void setPosition(std::string fen);
+    Score evaluatePosition();
     void makeMove(Move move, bool store_in_history = true);
     void unmakeMove(Move move);
 
     // getter and setter
     Board getBoard();
     TimeManagement &getTimeManagement();
-    GameState getGameState(MoveList moves);
+    GameState getGameState();
     MoveList getLegalMoves();
     void setSearchDepth(int search_depth);
+    bool isGameOver();
 
 private:
     Board board = generateBoardFromFEN(START_FEN);

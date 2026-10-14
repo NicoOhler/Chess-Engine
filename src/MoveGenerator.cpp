@@ -198,7 +198,7 @@ void MoveGenerator::addCastlingMoves(const Board &board, MoveList &moves)
         Bitboard king_side_blocked = board.occupied & free_king_squares;
         if (!king_side_blocked) // all squares between king and rook must be empty
         {
-            bool king_side_attacked = squaresUnderAttack(board, free_king_squares, !white_to_move);
+            bool king_side_attacked = areSquaresUnderAttack(board, free_king_squares, !white_to_move);
             if (!king_side_attacked) // squares that the king passes through must not be attacked
             {
                 Position to = king_start + RIGHT * 2;
@@ -217,7 +217,7 @@ void MoveGenerator::addCastlingMoves(const Board &board, MoveList &moves)
         if (!queen_side_blocked) // all squares between king and rook must be empty
         {
             Bitboard safe_squares = white_to_move ? WHITE_QUEEN_CASTLING_SAFE_SQUARES : BLACK_QUEEN_CASTLING_SAFE_SQUARES;
-            bool queen_side_attacked = squaresUnderAttack(board, safe_squares, !white_to_move);
+            bool queen_side_attacked = areSquaresUnderAttack(board, safe_squares, !white_to_move);
             if (!queen_side_attacked) // squares that the king passes through must not be attacked
             {
                 Position to = king_start + LEFT * 2;
@@ -376,7 +376,7 @@ MoveList MoveGenerator::generatePseudoLegalMoves(Board &board, bool interesting_
 bool MoveGenerator::isKingSafe(const Board &board, bool king_is_white)
 {
     Position king_square = getRightmostSetBit(king_is_white ? board.white_king : board.black_king);
-    return !squareUnderAttack(board, king_square, !king_is_white);
+    return !isSquareUnderAttack(board, king_square, !king_is_white);
 }
 
 void MoveGenerator::generateKingMoves(const Board &board, MoveList &moves, bool interesting_only)
@@ -395,14 +395,14 @@ void MoveGenerator::generateKingMoves(const Board &board, MoveList &moves, bool 
         if (interesting_only && !board.isSquareOccupied(to))
             continue;
         // move may not put king into check
-        if (squareUnderAttack(board, to, !white_to_move))
+        if (isSquareUnderAttack(board, to, !white_to_move))
             continue;
         moves.append(Move{from, to});
         // log(KING_MOVE, "Found king move from " + getSquareName(from) + " to " + getSquareName(to) + ".");
     }
 
     // castling moves
-    if (!interesting_only && !squareUnderAttack(board, from, !white_to_move))
+    if (!interesting_only && !isSquareUnderAttack(board, from, !white_to_move))
         addCastlingMoves(board, moves);
 }
 
@@ -574,7 +574,7 @@ void MoveGenerator::generateQueenMoves(const Board &board, MoveList &moves, bool
     }
 }
 
-bool MoveGenerator::squareUnderAttack(const Board &board, Position square, bool white_is_attacker)
+bool MoveGenerator::isSquareUnderAttack(const Board &board, Position square, bool white_is_attacker)
 {
     // pretend that the piece on this square could move like a knight/bishop/...
     // could it attack an enemy piece of the corresponding type?
@@ -608,10 +608,10 @@ bool MoveGenerator::squareUnderAttack(const Board &board, Position square, bool 
     return white_pawn_attack_right[square] & board.black_pawns || white_pawn_attack_left[square] & board.black_pawns;
 }
 
-bool MoveGenerator::squaresUnderAttack(const Board &board, Bitboard squares, bool white_is_attacker)
+bool MoveGenerator::areSquaresUnderAttack(const Board &board, Bitboard squares, bool white_is_attacker)
 {
     while (squares)
-        if (squareUnderAttack(board, clearRightmostSetBit(squares), white_is_attacker))
+        if (isSquareUnderAttack(board, clearRightmostSetBit(squares), white_is_attacker))
             return true;
     return false;
 }

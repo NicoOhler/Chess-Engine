@@ -31,13 +31,16 @@ private:
     Mode mode = UCI_MODE;
     uint64 expected_perft = 0;
 
+    // mode handlers
+    void startUCI();
+    void startPerft();
+    void startSearch();
+    void startBenchmark();
     void startPlayerVsPlayer();
     void startPlayerVsEngine();
     void startEngineVsEngine();
-    void startPerft();
-    void startUCI();
-    void startSearch();
-    void startBenchmark();
+
+    // utility functions
     void applyAndTrackMove(Move move, bool play_vs_engine = false);
     void printHelp(std::string executable_name);
     void printGameState();

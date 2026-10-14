@@ -56,12 +56,12 @@ bool MoveList::empty()
 
 void UndoHistory::push(UndoInfo undo)
 {
-    undo_info[size++] = undo;
+    undo_infos[size++] = undo;
 }
 
 UndoInfo UndoHistory::pop()
 {
-    return undo_info[--size];
+    return undo_infos[--size];
 }
 
 void UndoHistory::clear()

@@ -78,6 +78,13 @@ void print(std::string message, bool newline)
         std::cout << std::endl;
 }
 
+std::string readLineFromStdin()
+{
+    std::string line;
+    std::getline(std::cin, line);
+    return line;
+}
+
 bool contains(const std::string &str, const std::string &substr)
 {
     return str.find(substr) != std::string::npos;

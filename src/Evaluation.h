@@ -28,5 +28,5 @@ private:
     Score evaluatePawnStructure(Board board);
 
 public:
-    Score evaluateBoard(Board board);
+    Score evaluate(Board board);
 };

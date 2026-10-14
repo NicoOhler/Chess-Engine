@@ -6,10 +6,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/output/engine",
-            "args": [
-                "-m",
-                "u"
-            ],
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/output",
             "environment": [],
@@ -33,32 +30,6 @@
             "args": [
                 "-m",
                 "b",
-                "-p",
-                "10"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/output",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build Chess Engine",
-            "miDebuggerPath": "/usr/bin/gdb",
-        },
-        {
-            "name": "Local PvP w/ Default Board",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
-            "args": [
-                "-m",
-                "l",
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/output",
@@ -83,8 +54,8 @@
             "args": [
                 "-m",
                 "l",
-                "-f",
-                "rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/8/P1PPPPPP/RNBQKBNR w KQkq c6 0 3"
+                // "-f",
+                // "rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/8/P1PPPPPP/RNBQKBNR w KQkq c6 0 3"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/output",
@@ -102,69 +73,15 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "PvE w/ Default Board",
+            "name": "PvE w/ Custom Board",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "r",
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/output",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build Chess Engine",
-            "miDebuggerPath": "/usr/bin/gdb",
-        },
-        {
-            "name": "Perft 5 w/ Divide",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
-            "args": [
-                "-m",
-                "p",
-                "-p",
-                "5",
-                "-e",
-                "4865609"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/output",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build Chess Engine",
-            "miDebuggerPath": "/usr/bin/gdb",
-        },
-        {
-            "name": "Perft 6 w/ Divide",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
-            "args": [
-                "-m",
-                "p",
-                "-p",
-                "6",
-                "-e",
-                "119060324"
+                // "-f",
+                // "rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/8/P1PPPPPP/RNBQKBNR w KQkq c6 0 3"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/output",
@@ -193,36 +110,6 @@
                 "7",
                 "-e",
                 "3195901860"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/output",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build Chess Engine",
-            "miDebuggerPath": "/usr/bin/gdb",
-        },
-        {
-            "name": "Custom FEN Perft",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
-            "args": [
-                "-m",
-                "p",
-                "-f",
-                "rnbqkbnr/1pp1pppp/3p4/p7/8/4P2N/PPPPBPPP/RNBQK2R w KQkq - 0 4",
-                "-p",
-                "2",
-                "-e",
-                "119060324"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/output",
@@ -328,34 +215,6 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "Custom Search 2",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
-            "args": [
-                "-m",
-                "s",
-                "-f",
-                "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10",
-                "-t",
-                "10000"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/output",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "Build Chess Engine",
-            "miDebuggerPath": "/usr/bin/gdb",
-        },
-        {
             "name": "Search w/ Profiling",
             "type": "cppdbg",
             "request": "launch",
@@ -409,7 +268,7 @@
             "program": "/bin/bash",
             "args": [
                 "-c",
-                "\"valgrind -s --leak-check=full --show-leak-kinds=all ./engine -m b -p 3\"",
+                "\"valgrind -s --leak-check=full --show-leak-kinds=all ./engine -m b\"",
             ],
             "cwd": "${workspaceFolder}/output",
             "stopAtEntry": false,

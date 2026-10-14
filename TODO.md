@@ -1,4 +1,4 @@
-### Important Features
+### Engine Strength Improvements
 + evaluation using NNUE
     + read up on them
     + check for state of the art alternatives

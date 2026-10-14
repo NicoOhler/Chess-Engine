@@ -62,8 +62,8 @@ public:
     MoveList generateLegalMoves(Board &board, bool interesting_only = false);
     MoveList generatePseudoLegalMoves(Board &board, bool interesting_only = false);
     bool isKingSafe(const Board &board, bool king_is_white);
-    bool squareUnderAttack(const Board &board, Position square, bool white_is_attacker);
-    bool squaresUnderAttack(const Board &board, Bitboard squares, bool white_is_attacker);
+    bool isSquareUnderAttack(const Board &board, Position square, bool white_is_attacker);
+    bool areSquaresUnderAttack(const Board &board, Bitboard squares, bool white_is_attacker);
     Move pickBestMove(MoveList &moves);
     bool markMoveAsUsed(MoveList &moves, Move move);
 };

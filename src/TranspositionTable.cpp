@@ -47,7 +47,7 @@ void TranspositionTable::store(Hash hash, Score score, Move best_move, int remai
     entry.type = type;
 }
 
-BoundType TranspositionTable::determineBoundType(Score score, Score lower_bound, Score upper_bound)
+BoundType TranspositionTable::getBoundType(Score score, Score lower_bound, Score upper_bound)
 {
     BoundType type = EXACT;
     if (score <= lower_bound)

@@ -1,13 +1,15 @@
 #include "Evaluation.h"
 
 // todo replace with actual NNUE evaluation
-Score Evaluation::evaluateBoard(Board board)
+Score Evaluation::evaluate(Board board)
 {
-    Score material = evaluateMaterial(board);
-    Score mobility = evaluateMobility(board);
-    Score pawn_structure = evaluatePawnStructure(board);
-    Score perspective = board.white_to_move ? 1 : -1;
-    return perspective * (material + mobility + pawn_structure);
+    Score score = 0;
+    score += evaluateMaterial(board);
+    // score += evaluateMobility(board); // mobility evaluation is too slow for now
+    score += evaluatePawnStructure(board);
+    if (!board.white_to_move)
+        score = -score;
+    return score;
 }
 
 Score Evaluation::evaluateMaterial(Board board)
@@ -42,9 +44,9 @@ Score Evaluation::evaluateMobility(Board board)
 
 Score Evaluation::evaluatePawnStructure(Board board)
 {
+    Direction direction = board.white_to_move ? UP : DOWN;
     Bitboard own_pawns = board.white_to_move ? board.white_pawns : board.black_pawns;
     Bitboard enemy_pawns = board.white_to_move ? board.black_pawns : board.white_pawns;
-    Direction direction = board.white_to_move ? UP : DOWN;
     Bitboard enemy_pawns_editable = enemy_pawns;
     Bitboard own_pawns_editable = own_pawns;
 

@@ -7,7 +7,7 @@ void TimeManagement::start(bool white_to_move)
     start_time = getMilliseconds();
 }
 
-Milliseconds TimeManagement::elapsedTime()
+Milliseconds TimeManagement::getElapsedTime()
 {
     return getMilliseconds() - start_time;
 }
@@ -44,18 +44,20 @@ bool TimeManagement::timeLeft()
     if (!configured)
         return true;
 
-    return elapsedTime() < allocated_time;
+    return getElapsedTime() < allocated_time;
+}
+
+bool TimeManagement::sufficientTimeForNextIterationLeft()
+{
+    if (!configured)
+        return true;
+    return getElapsedTime() * SUFFICIENT_TIME_FOR_NEXT_ITERATION_FACTOR < allocated_time;
 }
 
 void TimeManagement::configure(Milliseconds move_time)
 {
     this->move_time = std::max(move_time, 0);
     configured = true;
-}
-
-void TimeManagement::configure(Milliseconds white_time, Milliseconds black_time)
-{
-    configure(white_time, black_time, 0, 0);
 }
 
 void TimeManagement::configure(Milliseconds white_time, Milliseconds black_time, Milliseconds white_increment, Milliseconds black_increment)

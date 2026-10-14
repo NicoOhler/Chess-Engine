@@ -2,8 +2,8 @@
 #include <string>
 #include <inttypes.h>
 
+// useful data types
 typedef unsigned long long uint64;
-// typedef signed long Score;
 typedef int32_t Score;
 typedef uint64 Bitboard;
 typedef uint64 Hash;
@@ -17,7 +17,7 @@ typedef unsigned char PromotionAndCastlingRights;
 typedef unsigned char Piece;
 typedef unsigned char PieceSymbol;
 typedef unsigned char Mode;
-typedef unsigned char GameState;
+typedef std::string GameState;
 typedef signed char HalfMoveClock;
 typedef int32_t Milliseconds;
 
@@ -44,14 +44,27 @@ const Position DOWN_LEFT = -9;
 const Position DOWN_RIGHT = -7;
 
 // engine
-const Milliseconds DEFAULT_SEARCH_TIME = 5000;
-const Milliseconds FRACTION_OF_TIME_TO_ALLOCATE = 30;
-const int TRANSPOSITION_TABLE_SIZE_MB = 256;
 const int DEFAULT_PERFT_DEPTH = 10;
 const int DEFAULT_SEARCH_DEPTH = 25;
 const int MAX_SEARCH_DEPTH = 40;
 const int MAX_QUIESCENCE_DEPTH = 30;
+const int TRANSPOSITION_TABLE_SIZE_MB = 256;
+
+// time management
 const int CLOCK_UPDATE_INTERVAL_NODES = 1000;
+const Milliseconds DEFAULT_SEARCH_TIME = 5000;
+const Milliseconds FRACTION_OF_TIME_TO_ALLOCATE = 30;
+const Milliseconds SUFFICIENT_TIME_FOR_NEXT_ITERATION_FACTOR = 3; // 15;
+
+// benchmark
+const int BENCHMARK_PERFT_DEPTH = 6;
+const int BENCHMARK_SEARCH_DEPTH = 9;
+const int BENCHMARK_EVALUATION_COUNT = 100000;
+
+// game state
+const std::string IN_PROGRESS = "In Progress";
+const std::string CHECKMATE = "Checkmate";
+const std::string DRAW = "Draw"; // equivalent to stalemate
 
 // promotion and castling rights can be stored within a single byte
 enum PROMOTION_AND_CASTLING_RIGHTS
@@ -126,11 +139,4 @@ enum COLUMNS
     COL_F,
     COL_G,
     COL_H
-};
-
-enum GAME_STATE
-{
-    IN_PROGRESS,
-    CHECKMATE,
-    DRAW // equivalent to stalemate
 };
