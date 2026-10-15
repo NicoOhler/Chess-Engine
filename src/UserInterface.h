@@ -42,7 +42,7 @@ private:
 
     // utility functions
     void applyAndTrackMove(Move move, bool play_vs_engine = false);
-    void printHelp(std::string executable_name);
+    void printHelp(const std::string &executable_name);
     void printGameState();
     Move promptForLegalMove(MoveList legal_moves);
     bool promptForPlayerColor();

@@ -71,7 +71,7 @@ void UCI::handleUCINewGame()
     engine.reset();
 }
 
-void UCI::handlePosition(std::string command)
+void UCI::handlePosition(const std::string &command)
 {
     // wait for engine to fully stop before changing the board state
     engine.stopSearch();
@@ -96,7 +96,7 @@ void UCI::handlePosition(std::string command)
         engine.makeMove(moves.moves[i], false);
 }
 
-void UCI::handleGo(std::string command)
+void UCI::handleGo(const std::string &command)
 {
     engine.stopSearch();
     ScopeLock lock(engine_mutex);

@@ -30,8 +30,8 @@ private:
     void handleUCI();
     void handleIsReady();
     void handleUCINewGame();
-    void handlePosition(std::string command);
-    void handleGo(std::string command);
+    void handlePosition(const std::string &command);
+    void handleGo(const std::string &command);
     void handleStop();
     void handleQuit();
 

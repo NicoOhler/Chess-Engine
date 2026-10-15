@@ -14,10 +14,10 @@ class Engine
 public:
     Engine();
     Move search();
-    void stopSearch(std::string reason = "");
+    void stopSearch(const std::string &reason = "");
     void reset();
     uint64 perft();
-    void setPosition(std::string fen);
+    void setPosition(const std::string &fen);
     Score evaluatePosition();
     void makeMove(Move move, bool store_in_history = true);
     void unmakeMove(Move move);

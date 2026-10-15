@@ -297,7 +297,7 @@ void UserInterface::parseParameters(int argc, char *argv[])
     }
 }
 
-void UserInterface::printHelp(std::string executable_name)
+void UserInterface::printHelp(const std::string &executable_name)
 {
     std::cout << "Usage: " << executable_name << " [-m mode] [-f FEN] [-p ply] [-h]\n"
               << "  -m mode: Set the engine mode (" << AVAILABLE_MODES << ")\n"

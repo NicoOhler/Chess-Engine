@@ -48,4 +48,4 @@ std::vector<bool> getBits(const Bitboard &board);
 int8 countSetBits(const Bitboard &board);
 Position clearRightmostSetBit(Bitboard &board); // sets the rightmost set bit to 0 and returns its index
 Position getRightmostSetBit(const Bitboard &board);
-void printBitboard(const Bitboard &board, std::string title = "");
+void printBitboard(const Bitboard &board, const std::string &title = "");

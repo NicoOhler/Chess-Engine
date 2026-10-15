@@ -17,7 +17,7 @@ std::string getSquareName(Position square)
     return char('a' + getCol(square)) + std::to_string(getRow(square) + 1);
 }
 
-Position getSquareIndex(std::string square)
+Position getSquareIndex(const std::string &square)
 {
     assert(square.length() == 2, "Invalid square");
     char col = square[0];
@@ -64,7 +64,7 @@ uint64 modPow2(uint64 n, uint64 m)
     return n & (m - 1); // fast modulo for power of 2
 }
 
-void print(std::string message, bool newline)
+void print(const std::string &message, bool newline)
 {
     std::cout << message;
     if (newline)

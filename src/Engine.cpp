@@ -7,7 +7,7 @@ Engine::Engine()
     search_depth = DEFAULT_SEARCH_DEPTH;
 }
 
-void Engine::setPosition(std::string fen)
+void Engine::setPosition(const std::string &fen)
 {
     try
     {
@@ -32,7 +32,7 @@ void Engine::reset()
     transposition_table.clear();
 }
 
-void Engine::stopSearch(std::string reason)
+void Engine::stopSearch(const std::string &reason)
 {
     search_stopped = true;
     if (!reason.empty())

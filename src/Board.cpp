@@ -1,6 +1,6 @@
 #include "Board.h"
 
-Board Board::generateBoardFromFEN(std::string fen)
+Board Board::generateBoardFromFEN(const std::string &fen)
 {
     Board board = Board(EMPTY);
     int i = 0;

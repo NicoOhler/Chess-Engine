@@ -48,7 +48,7 @@ struct Board // represents game state
     bool isSquareOccupied(Position position) const;
 
     // static methods
-    static Board generateBoardFromFEN(std::string fen);
+    static Board generateBoardFromFEN(const std::string &fen);
     static void printGameState(const Board &board);
     static void printBoard(const Board &board);
     static void printCastlingRights(const Board &board);

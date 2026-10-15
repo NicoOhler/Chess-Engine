@@ -44,7 +44,7 @@ Position getRightmostSetBit(const Bitboard &board)
     return __builtin_ctzll(board);
 }
 
-void printBitboard(const Bitboard &board, std::string title)
+void printBitboard(const Bitboard &board, const std::string &title)
 {
     std::vector<bool> bits = getBits(board);
     std::cout << title << std::endl;

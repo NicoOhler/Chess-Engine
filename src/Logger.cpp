@@ -25,7 +25,7 @@ Logger *Logger::GetInstance()
     return instance;
 }
 
-void Logger::log(LogType logType, std::string message)
+void Logger::log(LogType logType, const std::string &message)
 {
     if (print_to_console)
         std::cout << message << std::endl;
@@ -34,7 +34,7 @@ void Logger::log(LogType logType, std::string message)
         file << message << std::endl;
 }
 
-void log(LogType logType, std::string message)
+void log(LogType logType, const std::string &message)
 {
     if (logType & LOG_TYPE_ENABLED)
         Logger::GetInstance()->log(logType, message);
