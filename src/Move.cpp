@@ -20,6 +20,24 @@ bool Move::isCastling() const
     return promotion_and_castling & (WHITE_KING_CASTLING | WHITE_QUEEN_CASTLING | BLACK_KING_CASTLING | BLACK_QUEEN_CASTLING);
 }
 
+bool Move::isCastlingCandidate() const
+{
+    if (from == WHITE_KING_START_POSITION && to == WHITE_KING_START_POSITION + 2)
+        return true;
+    if (from == WHITE_KING_START_POSITION && to == WHITE_KING_START_POSITION - 2)
+        return true;
+    if (from == BLACK_KING_START_POSITION && to == BLACK_KING_START_POSITION + 2)
+        return true;
+    if (from == BLACK_KING_START_POSITION && to == BLACK_KING_START_POSITION - 2)
+        return true;
+    return false;
+}
+
+bool Move::isCastling(const Board &board) const
+{
+    return isCastlingCandidate() && (board.getPieceAt(from) == (board.white_to_move ? WHITE_KING : BLACK_KING));
+}
+
 bool Move::isUndo() const
 {
     return promotion_and_castling & UNDO;

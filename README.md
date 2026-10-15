@@ -48,7 +48,7 @@ Example:
 
 ## Repository Layout
 
-- `src/BitBoard.*` board state, bitboard helpers, and FEN handling
+- `src/Bitboard.*` board state, bitboard helpers, and FEN handling
 - `src/MoveGenerator.*` pseudo-legal and legal move generation
 - `src/Engine.*` search, perft, and game-state logic
 - `src/Evaluation.*` static evaluation

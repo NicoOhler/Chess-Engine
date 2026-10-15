@@ -1,55 +1,6 @@
-#include "BitBoard.h"
+#include "Board.h"
 
-void BitBoard::movePiece(Bitboard &board, Position from, Position to)
-{
-    board ^= (1ULL << from | 1ULL << to);
-}
-
-void BitBoard::set(Bitboard &board, Position position)
-{
-    board |= 1ULL << position;
-}
-
-void BitBoard::clear(Bitboard &board, Position position)
-{
-    board ^= 1ULL << position;
-}
-
-bool BitBoard::isSet(const Bitboard &board, Position position)
-{
-    return board & (1ULL << position);
-}
-
-std::vector<bool> BitBoard::getBits(const Bitboard &board)
-{
-    std::vector<bool> bits(NUM_SQUARES);
-    for (int i = 0; i < NUM_SQUARES; i++)
-        bits[i] = board & (1ULL << i);
-    return bits;
-}
-
-int8 BitBoard::countSetBits(const Bitboard &board)
-{
-    return __builtin_popcountll(board);
-}
-Position BitBoard::clearRightmostSetBit(Bitboard &board)
-{
-    Position index_of_LSB = __builtin_ctzll(board);
-    board &= board - 1;
-    return index_of_LSB;
-}
-
-Position BitBoard::getRightmostSetBit(const Bitboard &board)
-{
-    return __builtin_ctzll(board);
-}
-
-bool BitBoard::Board::isSquareOccupied(Position position) const
-{
-    return occupied & (1ULL << position);
-}
-
-BitBoard::Board BitBoard::generateBoardFromFEN(std::string fen)
+Board Board::generateBoardFromFEN(std::string fen)
 {
     Board board = Board(EMPTY);
     int i = 0;
@@ -68,9 +19,9 @@ BitBoard::Board BitBoard::generateBoardFromFEN(std::string fen)
             }
 
             Bitboard *piece = board.getBitboardByPieceSymbol(c);
-            BitBoard::set(*piece, square);
-            BitBoard::set(board.occupied, square);
-            BitBoard::set(isupper(c) ? board.white_pieces : board.black_pieces, square);
+            set(*piece, square);
+            set(board.occupied, square);
+            set(isupper(c) ? board.white_pieces : board.black_pieces, square);
         }
         assert(fen[i++] == (row != ROW_1 ? '/' : ' '), "Invalid FEN");
     }
@@ -136,7 +87,12 @@ BitBoard::Board BitBoard::generateBoardFromFEN(std::string fen)
     return board;
 }
 
-Bitboard *BitBoard::Board::getBitboardByPiece(Piece piece)
+bool Board::isSquareOccupied(Position position) const
+{
+    return occupied & (1ULL << position);
+}
+
+Bitboard *Board::getBitboardByPiece(Piece piece)
 {
     switch (piece)
     {
@@ -169,7 +125,7 @@ Bitboard *BitBoard::Board::getBitboardByPiece(Piece piece)
     }
 }
 
-Bitboard *BitBoard::Board::getBitboardByPieceSymbol(Piece piece)
+Bitboard *Board::getBitboardByPieceSymbol(Piece piece)
 {
     switch (piece)
     {
@@ -202,7 +158,7 @@ Bitboard *BitBoard::Board::getBitboardByPieceSymbol(Piece piece)
     }
 }
 
-Piece BitBoard::Board::getPieceAt(Position position)
+Piece Board::getPieceAt(Position position) const
 {
     Bitboard mask = 1ULL << position;
     if (white_pawns & mask)
@@ -232,39 +188,21 @@ Piece BitBoard::Board::getPieceAt(Position position)
     return EMPTY;
 }
 
-void BitBoard::printBitboard(const Bitboard &board, std::string title)
+void Board::printGameState(const Board &board)
 {
-    std::vector<bool> bits = getBits(board);
-    std::cout << title << std::endl;
-    for (Position row = NUM_ROWS - 1; row >= 0; row--)
-    {
-        std::cout << row + 1 << " ";
-        for (Position col = 0; col < NUM_COLS; col++)
-            std::cout << bits[row * NUM_COLS + col] ? "1" : "0";
-        std::cout << std::endl;
-    }
-    std::cout << "  ";
-    for (Position col = 0; col < NUM_COLS; col++)
-        std::cout << (char)('a' + col);
-    std::cout << std::endl
-              << std::endl;
-}
-
-void BitBoard::printGameState(const Board &board)
-{
-    printBoard(board);
+    Board::printBoard(board);
     if (board.en_passant != NO_EN_PASSANT)
         std::cout << "En passant square: " << getSquareName(board.en_passant) << std::endl;
     std::cout << "Half move counter: " << std::to_string(board.half_move_clock) << std::endl;
-    printCastlingRights(board);
+    Board::printCastlingRights(board);
     std::cout << (board.white_to_move ? "White" : "Black") << "'s turn" << std::endl
               << std::endl;
 }
 
-void BitBoard::printBoard(const Board &board)
+void Board::printBoard(const Board &board)
 {
     char board_to_print[8][8];
-    placePiecesOnBoard(board, board_to_print);
+    Board::placePiecesOnBoard(board, board_to_print);
     std::cout << std::endl
               << "  a b c d e f g h" << std::endl;
     for (char i = 0; i < 8; i++)
@@ -278,7 +216,7 @@ void BitBoard::printBoard(const Board &board)
               << std::endl;
 }
 
-void BitBoard::printCastlingRights(const Board &board)
+void Board::printCastlingRights(const Board &board)
 {
     std::cout << "Castling rights: ";
     if (board.castling_rights & WHITE_KING_CASTLING)
@@ -292,7 +230,7 @@ void BitBoard::printCastlingRights(const Board &board)
     std::cout << std::endl;
 }
 
-void BitBoard::placePiecesOnBoard(const Board &board, char board_to_print[8][8])
+void Board::placePiecesOnBoard(const Board &board, char board_to_print[8][8])
 {
     Bitboard pieces[12] = {board.white_pawns, board.white_rooks, board.white_knights, board.white_bishops, board.white_queens, board.white_king,
                            board.black_pawns, board.black_rooks, board.black_knights, board.black_bishops, board.black_queens, board.black_king};
@@ -306,7 +244,7 @@ void BitBoard::placePiecesOnBoard(const Board &board, char board_to_print[8][8])
     {
         while (pieces[i])
         {
-            Position position = BitBoard::clearRightmostSetBit(pieces[i]);
+            Position position = clearRightmostSetBit(pieces[i]);
             board_to_print[7 - position / 8][modPow2(position, 8)] = piece_types[i];
         }
     }

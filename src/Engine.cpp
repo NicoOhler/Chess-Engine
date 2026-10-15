@@ -2,7 +2,7 @@
 
 Engine::Engine()
 {
-    board = generateBoardFromFEN(START_FEN);
+    board = Board::generateBoardFromFEN(START_FEN);
     board.hash = zobrist.computeInitialHash(board);
     search_depth = DEFAULT_SEARCH_DEPTH;
 }
@@ -11,13 +11,13 @@ void Engine::setPosition(std::string fen)
 {
     try
     {
-        board = generateBoardFromFEN(fen);
+        board = Board::generateBoardFromFEN(fen);
         log(FEN, "Initialized board with FEN: " + fen);
     }
     catch (const std::exception &e)
     {
         log(FEN, "Error initializing board with FEN: " + fen + " - " + e.what());
-        board = generateBoardFromFEN(START_FEN);
+        board = Board::generateBoardFromFEN(START_FEN);
         log(FEN, "Initialized board with default FEN: " + START_FEN);
     }
     board.hash = zobrist.computeInitialHash(board);

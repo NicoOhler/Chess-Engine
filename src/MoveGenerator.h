@@ -1,11 +1,9 @@
 #pragma once
 #include "definitions.h"
 #include "Move.h"
-#include "BitBoard.h"
+#include "Board.h"
 #include "Logger.h"
 #include "Magics.h"
-
-using namespace BitBoard;
 
 class MoveGenerator
 {

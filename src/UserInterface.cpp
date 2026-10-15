@@ -311,7 +311,7 @@ void UserInterface::printGameState()
 {
     Score score = engine.evaluatePosition();
     log(UI, "Board Evaluation: " + std::to_string(score));
-    BitBoard::printGameState(engine.getBoard());
+    Board::printGameState(engine.getBoard());
 }
 
 int main(int argc, char *argv[])

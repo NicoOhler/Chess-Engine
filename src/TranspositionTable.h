@@ -4,9 +4,7 @@
 #include "Evaluation.h"
 #include "MoveGenerator.h"
 #include "ZobristHash.h"
-#include "BitBoard.h"
-
-using namespace BitBoard;
+#include "Bitboard.h"
 
 typedef enum
 {

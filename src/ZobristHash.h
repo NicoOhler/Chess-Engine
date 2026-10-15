@@ -2,10 +2,7 @@
 #include "definitions.h"
 #include "MoveGenerator.h"
 #include "utils.h"
-#include "BitBoard.h"
 #include <random>
-
-using namespace BitBoard;
 
 const uint64 RAND_SEED = 42; // for reproducibility
 

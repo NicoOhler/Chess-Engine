@@ -1,5 +1,6 @@
 #pragma once
 #include "utils.h"
+#include "Board.h"
 #include <vector>
 
 struct Move
@@ -13,6 +14,8 @@ struct Move
 
     bool isPromotion() const;
     bool isCastling() const;
+    bool isCastling(const Board &board) const;
+    bool isCastlingCandidate() const;
     bool isUndo() const;
 
     std::string toString() const;

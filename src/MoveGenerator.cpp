@@ -277,30 +277,30 @@ Bitboard MoveGenerator::precomputeSlidingRookAttacks(Position square, Bitboard o
     Bitboard attacks = 0;
     for (Position i = square + RIGHT; (modPow2(i, 8)) != COL_A; i += RIGHT)
     {
-        BitBoard::set(attacks, i);
-        if (BitBoard::isSet(occupied, i))
+        set(attacks, i);
+        if (isSet(occupied, i))
             break;
     }
 
     // need 1 >= 0 since modulo of negative numbers are negative in C
     for (Position i = square + LEFT; i >= 0 && (modPow2(i, 8)) != COL_H; i += LEFT)
     {
-        BitBoard::set(attacks, i);
-        if (BitBoard::isSet(occupied, i))
+        set(attacks, i);
+        if (isSet(occupied, i))
             break;
     }
 
     for (Position i = square + UP; i < NUM_SQUARES; i += UP)
     {
-        BitBoard::set(attacks, i);
-        if (BitBoard::isSet(occupied, i))
+        set(attacks, i);
+        if (isSet(occupied, i))
             break;
     }
 
     for (Position i = square + DOWN; i >= ROW_1; i += DOWN)
     {
-        BitBoard::set(attacks, i);
-        if (BitBoard::isSet(occupied, i))
+        set(attacks, i);
+        if (isSet(occupied, i))
             break;
     }
 
@@ -706,16 +706,16 @@ UndoInfo MoveGenerator::makeMove(Board &board, Move move)
 
     // move piece <=> update moved piece, own pieces and occupied squares
     Bitboard *piece = board.getBitboardByPiece(moving_piece);
-    BitBoard::movePiece(*piece, move.from, move.to);
-    BitBoard::movePiece(board.white_to_move ? board.white_pieces : board.black_pieces, move.from, move.to);
-    BitBoard::movePiece(board.occupied, move.from, move.to);
+    movePiece(*piece, move.from, move.to);
+    movePiece(board.white_to_move ? board.white_pieces : board.black_pieces, move.from, move.to);
+    movePiece(board.occupied, move.from, move.to);
 
     handleCastling(board, move);
     if (move.isPromotion())
     {
         Piece promotion_piece = getPromotionPiece(move.promotion_and_castling, board.white_to_move);
-        BitBoard::clear(*piece, move.to);
-        BitBoard::set(*board.getBitboardByPiece(promotion_piece), move.to);
+        clear(*piece, move.to);
+        set(*board.getBitboardByPiece(promotion_piece), move.to);
     }
     board.white_to_move = !board.white_to_move;
     board.half_move_clock++;
@@ -741,14 +741,14 @@ void MoveGenerator::unmakeMove(Board &board, Move move, UndoInfo undo)
     {
         Piece promotion_piece = board.getPieceAt(move.to);
         Bitboard *promoted_piece = board.getBitboardByPiece(promotion_piece);
-        BitBoard::clear(*promoted_piece, move.to);
-        BitBoard::set(*piece, move.to);
+        clear(*promoted_piece, move.to);
+        set(*piece, move.to);
     }
 
     // move piece
-    BitBoard::movePiece(*piece, move.to, move.from);
-    BitBoard::movePiece(*own_pieces, move.to, move.from);
-    BitBoard::movePiece(board.occupied, move.to, move.from);
+    movePiece(*piece, move.to, move.from);
+    movePiece(*own_pieces, move.to, move.from);
+    movePiece(board.occupied, move.to, move.from);
 
     // place captured piece at its original position (to or en_passant)
     if (undo.captured_piece != EMPTY)
@@ -759,9 +759,9 @@ void MoveGenerator::unmakeMove(Board &board, Move move, UndoInfo undo)
         bool en_passant_move = (move.to == board.en_passant) && (moving_piece == own_pawn);
         if (en_passant_move)
             position += (white_to_move ? DOWN : UP);
-        BitBoard::set(*captured_piece, position);
-        BitBoard::set(*enemy_pieces, position);
-        BitBoard::set(board.occupied, position);
+        set(*captured_piece, position);
+        set(*enemy_pieces, position);
+        set(board.occupied, position);
     }
 
     // place rook where it was before castling
@@ -771,9 +771,9 @@ void MoveGenerator::unmakeMove(Board &board, Move move, UndoInfo undo)
         bool king_side_castling = move.promotion_and_castling & (white_to_move ? WHITE_KING_CASTLING : BLACK_KING_CASTLING);
         move.from += king_side_castling ? RIGHT : LEFT;
         move.to += king_side_castling ? RIGHT : 2 * LEFT;
-        BitBoard::movePiece(*rooks, move.from, move.to);
-        BitBoard::movePiece(*own_pieces, move.from, move.to);
-        BitBoard::movePiece(board.occupied, move.from, move.to);
+        movePiece(*rooks, move.from, move.to);
+        movePiece(*own_pieces, move.from, move.to);
+        movePiece(board.occupied, move.from, move.to);
     }
 }
 
@@ -790,6 +790,7 @@ void MoveGenerator::handleCastling(Board &board, Move move)
     Bitboard *own_rooks = board.white_to_move ? &board.white_rooks : &board.black_rooks;
     Bitboard *own_pieces = board.white_to_move ? &board.white_pieces : &board.black_pieces;
     Bitboard *occupied = &board.occupied;
+    Piece moving_piece = board.getPieceAt(move.to);
 
     // apply castling move
     if (move.isCastling())
@@ -803,9 +804,9 @@ void MoveGenerator::handleCastling(Board &board, Move move)
         bool queen_side_castling = move.promotion_and_castling & queen_side_castling_rights;
         rook_from += queen_side_castling ? 4 * LEFT : 3 * RIGHT;
         rook_to += queen_side_castling ? LEFT : RIGHT;
-        BitBoard::movePiece(*own_rooks, rook_from, rook_to);
-        BitBoard::movePiece(*own_pieces, rook_from, rook_to);
-        BitBoard::movePiece(*occupied, rook_from, rook_to);
+        movePiece(*own_rooks, rook_from, rook_to);
+        movePiece(*own_pieces, rook_from, rook_to);
+        movePiece(*occupied, rook_from, rook_to);
         return;
     }
 
@@ -814,7 +815,7 @@ void MoveGenerator::handleCastling(Board &board, Move move)
     Bitboard king_side_rook_start_position = board.white_to_move ? WHITE_KING_ROOK_START_POSITION : BLACK_KING_ROOK_START_POSITION;
     Bitboard queen_side_rook_start_position = board.white_to_move ? WHITE_QUEEN_ROOK_START_POSITION : BLACK_QUEEN_ROOK_START_POSITION;
 
-    bool king_moved = board.getPieceAt(move.to) == (board.white_to_move ? WHITE_KING : BLACK_KING);
+    bool king_moved = moving_piece == (board.white_to_move ? WHITE_KING : BLACK_KING);
     bool own_king_side_rook_moved = !(*own_rooks & king_side_rook_start_position);
     bool own_queen_side_rook_moved = !(*own_rooks & queen_side_rook_start_position);
     if (king_moved)
