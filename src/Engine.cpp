@@ -26,49 +26,41 @@ void Engine::setPosition(std::string fen)
 void Engine::reset()
 {
     search_depth = DEFAULT_SEARCH_DEPTH;
+    stopSearch();
     time_management.reset();
-    search_stopped = true;
     undo_history.clear();
     transposition_table.clear();
 }
 
-void Engine::stop()
+void Engine::stopSearch(std::string reason)
 {
     search_stopped = true;
+    if (!reason.empty())
+        log(SEARCH, "Stopping search: " + reason);
 }
 
 Move Engine::search()
 {
     evaluated_nodes = 0;
-    Move best_move = NULL_MOVE;
-    Milliseconds iteration_time = 0;
-
     search_stopped = false;
+    Move best_move = NULL_MOVE;
     time_management.start(board.white_to_move);
+
     // iterative deepening
     for (int depth = 1; depth <= search_depth && !search_stopped; depth++)
     {
-        Score best_score_of_iteration = pv_search(0, depth, NEG_INFINITY, POS_INFINITY);
-        Move best_move_of_iteration = transposition_table.probe(board.hash)->best_move;
+        Score score = pv_search(0, depth, NEG_INFINITY, POS_INFINITY);
 
-        if (!search_stopped)
-        {
-            best_move = best_move_of_iteration;
-            iteration_time = std::max(time_management.getElapsedTime() - iteration_time, 1);
-            std::string info = "info depth " + std::to_string(depth);
-            info += " score cp " + std::to_string(best_score_of_iteration);
-            info += " pv " + best_move.toString();
-            info += " nodes " + std::to_string(evaluated_nodes);
-            info += " time " + std::to_string(iteration_time);
-            info += " nps " + std::to_string(1000 * evaluated_nodes / iteration_time);
-            print(info);
-        }
+        // discard incomplete results if search was stopped
+        if (search_stopped)
+            break;
+
+        // update best move and continue search
+        best_move = transposition_table.probe(board.hash)->best_move;
+        printSearchInfo(depth, score, best_move);
 
         if (!time_management.sufficientTimeForNextIterationLeft())
-        {
-            log(SEARCH, "Insufficient time for next iteration. Stopping search after " + std::to_string(depth) + " iterations.");
-            search_stopped = true;
-        }
+            stopSearch("Insufficient time for next iteration after " + convertMillisecondsToTimeString(time_management.getElapsedTime()));
     }
     // transposition_table.printHitRate();
     return best_move;
@@ -139,11 +131,8 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
     Move move, best_move = NULL_MOVE;
     Score score, best_score = NEG_INFINITY;
     bool null_window = false;
-    for (int i = 0; i < pseudo_legal_moves.size; i++)
+    for (int i = 0; i < pseudo_legal_moves.size && !search_stopped; i++)
     {
-        if (search_stopped)
-            return best_score;
-
         // explore retrieved move first if available, then explore moves in order of score
         if (i == 0 && entry != nullptr)
         {
@@ -219,11 +208,8 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
     MoveList pseudo_legal_moves = move_generator.generatePseudoLegalMoves(board, true);
     TranspositionEntry *entry = transposition_table.probe(board.hash);
     calculateMoveScores(pseudo_legal_moves, entry);
-    for (int i = 0; i < pseudo_legal_moves.size; i++)
+    for (int i = 0; i < pseudo_legal_moves.size && !search_stopped; i++)
     {
-        if (search_stopped)
-            return lower_bound;
-
         Move move = move_generator.pickBestMove(pseudo_legal_moves);
         Piece captured_piece = board.getPieceAt(move.to);
         if (captured_piece == EMPTY && move.isPromotion())
@@ -243,6 +229,21 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
     }
 
     return best_score;
+}
+
+void Engine::printSearchInfo(int depth, Score score, Move pv_move)
+{
+    std::string info = "info depth " + std::to_string(depth);
+    info += " score cp " + std::to_string(score);
+    info += " pv " + pv_move.toString();
+    info += " nodes " + std::to_string(evaluated_nodes);
+    Milliseconds iteration_time = time_management.getElapsedTime() - iteration_time;
+    if (iteration_time > 0)
+    {
+        info += " time " + std::to_string(iteration_time);
+        info += " nps " + std::to_string(1000 * evaluated_nodes / iteration_time);
+    }
+    print(info);
 }
 
 uint64 Engine::perft()
@@ -274,11 +275,7 @@ Score Engine::evaluatePosition()
 {
     evaluated_nodes++;
     if (evaluated_nodes % CLOCK_UPDATE_INTERVAL_NODES == 0 && !time_management.timeLeft())
-    {
-        search_stopped = true;
-        log(SEARCH, "Time limit reached. Stopping search after " + std::to_string(time_management.getElapsedTime()) + " ms.");
-        return 0;
-    }
+        stopSearch("Time limit reached after " + convertMillisecondsToTimeString(time_management.getElapsedTime()));
     return eval.evaluate(board);
 }
 

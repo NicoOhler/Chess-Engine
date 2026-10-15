@@ -51,10 +51,10 @@ const int MAX_QUIESCENCE_DEPTH = 30;
 const int TRANSPOSITION_TABLE_SIZE_MB = 256;
 
 // time management
-const int CLOCK_UPDATE_INTERVAL_NODES = 1000;
+const int CLOCK_UPDATE_INTERVAL_NODES = 10000;
 const Milliseconds DEFAULT_SEARCH_TIME = 5000;
 const Milliseconds FRACTION_OF_TIME_TO_ALLOCATE = 30;
-const Milliseconds SUFFICIENT_TIME_FOR_NEXT_ITERATION_FACTOR = 3; // 15;
+const Milliseconds SUFFICIENT_TIME_FOR_NEXT_ITERATION_FACTOR = 2; // 15;
 
 // benchmark
 const int BENCHMARK_PERFT_DEPTH = 6;

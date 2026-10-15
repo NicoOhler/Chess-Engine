@@ -15,7 +15,7 @@ class Engine
 public:
     Engine();
     Move search();
-    void stop();
+    void stopSearch(std::string reason = "");
     void reset();
     uint64 perft();
     void setPosition(std::string fen);
@@ -48,4 +48,5 @@ private:
     uint64 perft(int remaining_depth, bool divide = false);
     Score pv_search(int depth, int remaining_depth, Score alpha, Score beta);
     Score quiescence(Score alpha, Score beta, int max_depth = MAX_QUIESCENCE_DEPTH);
+    void printSearchInfo(int depth, Score score, Move pv_move);
 };

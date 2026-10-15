@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 
-std::string convertMillisecondsToString(Milliseconds milliseconds);
+std::string convertMillisecondsToTimeString(Milliseconds milliseconds);
 Milliseconds getMilliseconds();
 
 class Timer

@@ -8,7 +8,7 @@ Milliseconds getMilliseconds()
         .count();
 }
 
-std::string convertMillisecondsToString(Milliseconds milliseconds)
+std::string convertMillisecondsToTimeString(Milliseconds milliseconds)
 {
     int hours = milliseconds / 3600000;
     milliseconds %= 3600000;
@@ -27,6 +27,6 @@ void Timer::start()
 Milliseconds Timer::stop(LogType log_type)
 {
     end_time = getMilliseconds();
-    log(log_type, "Time taken: " + convertMillisecondsToString(end_time - start_time));
+    log(log_type, "Time taken: " + convertMillisecondsToTimeString(end_time - start_time));
     return end_time;
 }

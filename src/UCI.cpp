@@ -66,7 +66,7 @@ void UCI::handleIsReady()
 
 void UCI::handleUCINewGame()
 {
-    engine.stop();
+    engine.stopSearch();
     ScopeLock lock(engine_mutex);
     engine.reset();
 }
@@ -74,7 +74,7 @@ void UCI::handleUCINewGame()
 void UCI::handlePosition(std::string command)
 {
     // wait for engine to fully stop before changing the board state
-    engine.stop();
+    engine.stopSearch();
     ScopeLock lock(engine_mutex);
 
     // extract FEN and initialize board
@@ -98,7 +98,7 @@ void UCI::handlePosition(std::string command)
 
 void UCI::handleGo(std::string command)
 {
-    engine.stop();
+    engine.stopSearch();
     ScopeLock lock(engine_mutex);
     TimeManagement &time_management = engine.getTimeManagement();
     time_management.reset();
@@ -132,13 +132,13 @@ void UCI::handleGo(std::string command)
 
 void UCI::handleStop()
 {
-    engine.stop();
+    engine.stopSearch();
 }
 
 void UCI::handleQuit()
 {
     // notify background thread to quit and wait for it to finish
-    engine.stop();
+    engine.stopSearch();
     std::unique_lock<std::mutex> background_request_lock(background_request_mutex);
     quit_requested = true;
     background_request_cv.notify_one();
