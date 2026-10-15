@@ -22,8 +22,10 @@ typedef int32_t Milliseconds;
 
 // basic constants
 const Position NUM_SQUARES = 64;
-const Position NUM_ROWS = 8;
-const Position NUM_COLS = 8;
+const int8 NUM_PIECES = 12;
+const int8 NUM_ROWS = 8;
+const int8 NUM_COLS = 8;
+const int8 NUM_CASTLING_RIGHTS = 4;
 const std::string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const int MAX_MOVES = 218;
 const Score POS_INFINITY = 2147483647;
@@ -78,10 +80,10 @@ enum PROMOTION
 enum CASTLING_RIGHTS
 {
     NO_CASTLING = 0,
-    WHITE_KING_CASTLING = 1 << 4,
-    WHITE_QUEEN_CASTLING = 1 << 5,
-    BLACK_KING_CASTLING = 1 << 6,
-    BLACK_QUEEN_CASTLING = 1 << 7,
+    WHITE_KING_CASTLING = 1 << 0,
+    WHITE_QUEEN_CASTLING = 1 << 1,
+    BLACK_KING_CASTLING = 1 << 2,
+    BLACK_QUEEN_CASTLING = 1 << 3,
     WHITE_CASTLING = WHITE_KING_CASTLING | WHITE_QUEEN_CASTLING,
     BLACK_CASTLING = BLACK_KING_CASTLING | BLACK_QUEEN_CASTLING,
     ALL_CASTLING = WHITE_CASTLING | BLACK_CASTLING

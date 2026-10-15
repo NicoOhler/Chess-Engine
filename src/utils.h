@@ -13,6 +13,8 @@
         exit(1);                           \
     }
 
+Position getRow(Position square);
+Position getCol(Position square);
 std::string getSquareName(Position square);
 Position getSquareIndex(std::string square);
 Score getPieceValue(Piece piece);

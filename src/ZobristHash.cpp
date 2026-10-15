@@ -2,22 +2,24 @@
 
 ZobristHash::ZobristHash()
 {
-    std::mt19937_64 mt{RAND_SEED};
-    for (int square = 0; square < 64; square++)
-        for (int piece = 0; piece < 12; piece++)
-            piece_at_square[square][piece] = mt();
-    whites_turn = mt();
-    for (int i = 0; i < 4; i++)
-        castling_rights[i] = mt();
-    for (int i = 0; i < 8; i++)
-        en_passant_file[i] = mt();
+    // initialize xor keys with official polyglot keys for reproducibility and compatibility with openings books and other engines
+    int offset = 0;
+    for (int square = 0; square < NUM_SQUARES; square++)
+        for (int piece = 0; piece < NUM_PIECES; piece++)
+            piece_at_square[square][piece] = polyglot_keys[offset++];
+    for (int i = 0; i < NUM_CASTLING_RIGHTS; i++)
+        castling_rights[i] = polyglot_keys[offset++];
+    offset += NUM_CASTLING_RIGHTS;
+    for (int i = 0; i < NUM_COLS; i++)
+        en_passant_file[i] = polyglot_keys[offset++];
+    whites_turn = polyglot_keys[offset++];
 }
 
 uint64 ZobristHash::computeInitialHash(Board &board)
 {
     uint64 hash = 0;
     // add all pieces
-    for (int square = 0; square < 64; square++)
+    for (int square = 0; square < NUM_SQUARES; square++)
     {
         Piece piece = board.getPieceAt(square);
         if (piece != EMPTY)
@@ -30,7 +32,7 @@ uint64 ZobristHash::computeInitialHash(Board &board)
 
     // add en passant
     if (board.en_passant != NO_EN_PASSANT)
-        hash ^= en_passant_file[modPow2(board.en_passant, 8)];
+        hash ^= en_passant_file[modPow2(board.en_passant, NUM_COLS)];
 
     // add castling rights
     if (board.castling_rights & WHITE_KING_CASTLING)
@@ -60,7 +62,7 @@ uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
     bool is_en_passant = (move.to == undo.en_passant) && (moving_piece == (white_to_move ? WHITE_PAWN : BLACK_PAWN));
     if (undo.en_passant != NO_EN_PASSANT)
     {
-        hash ^= en_passant_file[modPow2(undo.en_passant, 8)];
+        hash ^= en_passant_file[modPow2(undo.en_passant, NUM_COLS)];
         // apply en passant capture
         if (is_en_passant)
             hash ^= piece_at_square[move.to + (white_to_move ? DOWN : UP)][white_to_move ? BLACK_PAWN : WHITE_PAWN];
@@ -68,7 +70,7 @@ uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
 
     // add new en passant square
     if (board.en_passant != NO_EN_PASSANT)
-        hash ^= en_passant_file[modPow2(move.to, 8)];
+        hash ^= en_passant_file[modPow2(move.to, NUM_COLS)];
 
     // remove captured piece
     if (undo.captured_piece != EMPTY && !is_en_passant)

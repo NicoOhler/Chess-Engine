@@ -1,10 +1,20 @@
 #include "utils.h"
 #include "Evaluation.h"
 
+Position getRow(Position square)
+{
+    return square / NUM_COLS;
+}
+
+Position getCol(Position square)
+{
+    return modPow2(square, NUM_COLS);
+}
+
 std::string getSquareName(Position square)
 {
-    assert(square >= 0 && square < 64, "Invalid square");
-    return char('a' + modPow2(square, 8)) + std::to_string(square / 8 + 1);
+    assert(square >= 0 && square < NUM_SQUARES, "Invalid square");
+    return char('a' + getCol(square)) + std::to_string(getRow(square) + 1);
 }
 
 Position getSquareIndex(std::string square)
@@ -13,7 +23,7 @@ Position getSquareIndex(std::string square)
     char col = square[0];
     char row = square[1];
     assert(col >= 'a' && col <= 'h' && row >= '1' && row <= '8', "Invalid square");
-    return 8 * (row - '1') + (col - 'a');
+    return NUM_COLS * (row - '1') + (col - 'a');
 }
 
 Score getPieceValue(Piece piece)

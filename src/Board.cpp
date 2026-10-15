@@ -9,7 +9,7 @@ Board Board::generateBoardFromFEN(std::string fen)
     {
         for (int col = COL_A; col <= COL_H; col++)
         {
-            Position square = 8 * row + col;
+            Position square = NUM_COLS * row + col;
             char c = fen[i++];
 
             if (c >= '1' && c <= '8')
@@ -34,7 +34,7 @@ Board Board::generateBoardFromFEN(std::string fen)
         i++;
     }
     else
-        for (int j = 0; j < 4; j++)
+        for (int j = 0; j < NUM_CASTLING_RIGHTS; j++)
         {
             if (fen[i] == ' ')
                 break;
@@ -201,16 +201,16 @@ void Board::printGameState(const Board &board)
 
 void Board::printBoard(const Board &board)
 {
-    char board_to_print[8][8];
+    char board_to_print[NUM_ROWS][NUM_COLS];
     Board::placePiecesOnBoard(board, board_to_print);
     std::cout << std::endl
               << "  a b c d e f g h" << std::endl;
-    for (char i = 0; i < 8; i++)
+    for (char i = 0; i < NUM_ROWS; i++)
     {
-        std::cout << 8 - i << " ";
-        for (char j = 0; j < 8; j++)
+        std::cout << NUM_ROWS - i << " ";
+        for (char j = 0; j < NUM_COLS; j++)
             std::cout << board_to_print[i][j] << " ";
-        std::cout << 8 - i << std::endl;
+        std::cout << NUM_ROWS - i << std::endl;
     }
     std::cout << "  a b c d e f g h" << std::endl
               << std::endl;
@@ -230,22 +230,22 @@ void Board::printCastlingRights(const Board &board)
     std::cout << std::endl;
 }
 
-void Board::placePiecesOnBoard(const Board &board, char board_to_print[8][8])
+void Board::placePiecesOnBoard(const Board &board, char board_to_print[NUM_ROWS][NUM_COLS])
 {
-    Bitboard pieces[12] = {board.white_pawns, board.white_rooks, board.white_knights, board.white_bishops, board.white_queens, board.white_king,
-                           board.black_pawns, board.black_rooks, board.black_knights, board.black_bishops, board.black_queens, board.black_king};
-    Piece piece_types[12] = {WHITE_PAWN_SYMBOL, WHITE_ROOK_SYMBOL, WHITE_KNIGHT_SYMBOL, WHITE_BISHOP_SYMBOL, WHITE_QUEEN_SYMBOL, WHITE_KING_SYMBOL,
-                             BLACK_PAWN_SYMBOL, BLACK_ROOK_SYMBOL, BLACK_KNIGHT_SYMBOL, BLACK_BISHOP_SYMBOL, BLACK_QUEEN_SYMBOL, BLACK_KING_SYMBOL};
-    for (char i = 0; i < 8; i++)
-        for (char j = 0; j < 8; j++)
+    Bitboard pieces[NUM_PIECES] = {board.white_pawns, board.white_rooks, board.white_knights, board.white_bishops, board.white_queens, board.white_king,
+                                   board.black_pawns, board.black_rooks, board.black_knights, board.black_bishops, board.black_queens, board.black_king};
+    Piece piece_types[NUM_PIECES] = {WHITE_PAWN_SYMBOL, WHITE_ROOK_SYMBOL, WHITE_KNIGHT_SYMBOL, WHITE_BISHOP_SYMBOL, WHITE_QUEEN_SYMBOL, WHITE_KING_SYMBOL,
+                                     BLACK_PAWN_SYMBOL, BLACK_ROOK_SYMBOL, BLACK_KNIGHT_SYMBOL, BLACK_BISHOP_SYMBOL, BLACK_QUEEN_SYMBOL, BLACK_KING_SYMBOL};
+    for (char i = 0; i < NUM_ROWS; i++)
+        for (char j = 0; j < NUM_COLS; j++)
             board_to_print[i][j] = ' ';
 
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < NUM_PIECES; i++)
     {
         while (pieces[i])
         {
             Position position = clearRightmostSetBit(pieces[i]);
-            board_to_print[7 - position / 8][modPow2(position, 8)] = piece_types[i];
+            board_to_print[(NUM_ROWS - 1) - position / NUM_COLS][modPow2(position, NUM_COLS)] = piece_types[i];
         }
     }
 }

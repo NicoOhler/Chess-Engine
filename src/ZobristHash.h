@@ -2,9 +2,7 @@
 #include "definitions.h"
 #include "MoveGenerator.h"
 #include "utils.h"
-#include <random>
-
-const uint64 RAND_SEED = 42; // for reproducibility
+#include "PolyglotKeys.h"
 
 class ZobristHash
 {
@@ -16,7 +14,7 @@ public:
 
 private:
     uint64 whites_turn;
-    uint64 piece_at_square[64][12];
-    uint64 castling_rights[16];
-    uint64 en_passant_file[8];
+    uint64 piece_at_square[NUM_SQUARES][NUM_PIECES];
+    uint64 castling_rights[NUM_CASTLING_RIGHTS];
+    uint64 en_passant_file[NUM_COLS];
 };

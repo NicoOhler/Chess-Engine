@@ -15,8 +15,8 @@ void MoveGenerator::initializePawnCaptureMasks()
     log(MOVE_GENERATOR, "Initializing pawn capture masks.");
     for (Position square = 0; square < NUM_SQUARES; square++)
     {
-        Position row = square / 8;
-        Position col = modPow2(square, 8);
+        Position row = getRow(square);
+        Position col = getCol(square);
 
         if (col != COL_A)
         {
@@ -41,8 +41,8 @@ void MoveGenerator::initializeKnightMoves()
     log(MOVE_GENERATOR, "Initializing knight moves.");
     for (Position square = 0; square < NUM_SQUARES; square++)
     {
-        Position row = square / 8;
-        Position col = modPow2(square, 8);
+        Position row = getRow(square);
+        Position col = getCol(square);
 
         if (col > COL_B && row < ROW_8)
             set(knight_moves[square], square + 2 * LEFT + UP);
@@ -75,28 +75,28 @@ void MoveGenerator::initializeBishopBlockers()
     log(MOVE_GENERATOR, "Initializing bishop blockers.");
     for (Position square = 0; square < NUM_SQUARES; square++)
     {
-        Position row = square / 8;
-        Position col = modPow2(square, 8);
+        Position row = getRow(square);
+        Position col = getCol(square);
 
         if (row < ROW_8)
         {
             if (col < COL_H)
-                for (Position i = square + UP_RIGHT; (i < NUM_SQUARES + DOWN && (modPow2(i, 8)) != COL_H); i += UP_RIGHT)
+                for (Position i = square + UP_RIGHT; (i < NUM_SQUARES + DOWN && getCol(i) != COL_H); i += UP_RIGHT)
                     set(bishop_blockers[square], i);
 
             if (col > COL_A)
-                for (Position i = square + UP_LEFT; (i < NUM_SQUARES + DOWN && (modPow2(i, 8)) != COL_A); i += UP_LEFT)
+                for (Position i = square + UP_LEFT; (i < NUM_SQUARES + DOWN && getCol(i) != COL_A); i += UP_LEFT)
                     set(bishop_blockers[square], i);
         }
 
         if (row > ROW_1)
         {
             if (col < COL_H)
-                for (Position i = square + DOWN_RIGHT; (i >= UP && (modPow2(i, 8)) != COL_H); i += DOWN_RIGHT)
+                for (Position i = square + DOWN_RIGHT; (i >= UP && getCol(i) != COL_H); i += DOWN_RIGHT)
                     set(bishop_blockers[square], i);
 
             if (col > COL_A)
-                for (Position i = square + DOWN_LEFT; (i >= UP && (modPow2(i, 8)) != COL_A); i += DOWN_LEFT)
+                for (Position i = square + DOWN_LEFT; (i >= UP && getCol(i) != COL_A); i += DOWN_LEFT)
                     set(bishop_blockers[square], i);
         }
 
@@ -109,15 +109,15 @@ void MoveGenerator::initializeRookBlockers()
     log(MOVE_GENERATOR, "Initializing rook blockers.");
     for (Position square = 0; square < NUM_SQUARES; square++)
     {
-        Position row = square / 8;
-        Position col = modPow2(square, 8);
+        Position row = getRow(square);
+        Position col = getCol(square);
 
         if (col < COL_H)
-            for (Position i = square + RIGHT; (modPow2(i, 8)) != COL_H; i += RIGHT)
+            for (Position i = square + RIGHT; getCol(i) != COL_H; i += RIGHT)
                 set(rook_blockers[square], i);
 
         if (col > COL_A)
-            for (Position i = square + LEFT; (modPow2(i, 8)) != COL_A; i += LEFT)
+            for (Position i = square + LEFT; getCol(i) != COL_A; i += LEFT)
                 set(rook_blockers[square], i);
 
         for (Position i = square + UP; i < NUM_SQUARES + DOWN; i += UP)
@@ -135,8 +135,8 @@ void MoveGenerator::initializeKingMoves()
     log(MOVE_GENERATOR, "Initializing king moves.");
     for (Position square = 0; square < NUM_SQUARES; square++)
     {
-        Position row = square / 8;
-        Position col = modPow2(square, 8);
+        Position row = getRow(square);
+        Position col = getCol(square);
 
         if (col != COL_H)
         {
@@ -273,7 +273,7 @@ void MoveGenerator::initializeRookBishopAttacks()
 Bitboard MoveGenerator::precomputeSlidingRookAttacks(Position square, Bitboard occupied)
 {
     Bitboard attacks = 0;
-    for (Position i = square + RIGHT; (modPow2(i, 8)) != COL_A; i += RIGHT)
+    for (Position i = square + RIGHT; getCol(i) != COL_A; i += RIGHT)
     {
         set(attacks, i);
         if (isSet(occupied, i))
@@ -281,7 +281,7 @@ Bitboard MoveGenerator::precomputeSlidingRookAttacks(Position square, Bitboard o
     }
 
     // need 1 >= 0 since modulo of negative numbers are negative in C
-    for (Position i = square + LEFT; i >= 0 && (modPow2(i, 8)) != COL_H; i += LEFT)
+    for (Position i = square + LEFT; i >= 0 && getCol(i) != COL_H; i += LEFT)
     {
         set(attacks, i);
         if (isSet(occupied, i))
@@ -308,28 +308,28 @@ Bitboard MoveGenerator::precomputeSlidingRookAttacks(Position square, Bitboard o
 Bitboard MoveGenerator::precomputeSlidingBishopAttacks(Position square, Bitboard occupied)
 {
     Bitboard attacks = 0;
-    for (Position i = square + UP_RIGHT; (i < NUM_SQUARES && (modPow2(i, 8)) != COL_A); i += UP_RIGHT)
+    for (Position i = square + UP_RIGHT; (i < NUM_SQUARES && getCol(i) != COL_A); i += UP_RIGHT)
     {
         attacks |= (1ULL << i);
         if (occupied & (1ULL << i))
             break;
     }
 
-    for (Position i = square + UP_LEFT; (i < NUM_SQUARES && (modPow2(i, 8)) != COL_H); i += UP_LEFT)
+    for (Position i = square + UP_LEFT; (i < NUM_SQUARES && getCol(i) != COL_H); i += UP_LEFT)
     {
         attacks |= (1ULL << i);
         if (occupied & (1ULL << i))
             break;
     }
 
-    for (Position i = square + DOWN_RIGHT; (i >= ROW_1 && (modPow2(i, 8)) != COL_A); i += DOWN_RIGHT)
+    for (Position i = square + DOWN_RIGHT; (i >= ROW_1 && getCol(i) != COL_A); i += DOWN_RIGHT)
     {
         attacks |= (1ULL << i);
         if (occupied & (1ULL << i))
             break;
     }
 
-    for (Position i = square + DOWN_LEFT; (i >= ROW_1 && (modPow2(i, 8)) != COL_H); i += DOWN_LEFT)
+    for (Position i = square + DOWN_LEFT; (i >= ROW_1 && getCol(i) != COL_H); i += DOWN_LEFT)
     {
         attacks |= (1ULL << i);
         if (occupied & (1ULL << i))
@@ -454,7 +454,7 @@ void MoveGenerator::generatePawnMoves(const Board &board, MoveList &moves, bool 
         // attack right
         Position to_right = from + direction_right;
         Bitboard attack = attack_right[from] & enemies;
-        bool is_en_passant_attack = (modPow2(from, 8) != COL_H && board.en_passant == to_right);
+        bool is_en_passant_attack = (getCol(from) != COL_H && board.en_passant == to_right);
         if (attack)
             addPawnMoveWithPossiblePromotion(moves, Move{from, to_right}, board.white_to_move);
         else if (is_en_passant_attack)
@@ -464,7 +464,7 @@ void MoveGenerator::generatePawnMoves(const Board &board, MoveList &moves, bool 
         // attack left
         Position to_left = from + direction_left;
         attack = attack_left[from] & enemies;
-        is_en_passant_attack = (modPow2(from, 8) != COL_A && board.en_passant == to_left);
+        is_en_passant_attack = (getCol(from) != COL_A && board.en_passant == to_left);
         if (attack)
             addPawnMoveWithPossiblePromotion(moves, Move{from, to_left}, board.white_to_move);
         else if (is_en_passant_attack)
@@ -836,8 +836,8 @@ void MoveGenerator::handleCastling(Board &board, Move move)
 
 void MoveGenerator::detectDoublePawnPushForEnPassant(Board &board, Move move)
 {
-    Position from_row = move.from / 8;
-    Position to_row = move.to / 8;
+    Position from_row = getRow(move.from);
+    Position to_row = getRow(move.to);
     board.en_passant = NO_EN_PASSANT;
     // mark en passant square if a pawn moved two squares forward and an enemy pawn can capture it
     if (board.white_to_move && (from_row == ROW_2 && to_row == ROW_4))

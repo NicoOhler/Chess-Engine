@@ -6,7 +6,7 @@
     + fetch/create dataset from played games
     + setup training environment 
 + reduce sizeof(Move)
-    + maybe use single 16bit uint for from + to + promotion + castling
+    + use single 16bit uint for from + to + promotion
 + staged move generation/ordering/exploration
     + retrieve best previous move and check it
     + generate captures and promotions
