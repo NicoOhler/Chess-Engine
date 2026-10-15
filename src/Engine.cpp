@@ -80,7 +80,7 @@ void Engine::calculateMoveScores(MoveList &moves, TranspositionEntry *entry)
             moves.scores[i] = POS_INFINITY;
         // then promotions
         else if (move.isPromotion())
-            moves.scores[i] = getPieceValue(getPromotionPiece(move.promotion_and_castling, board.white_to_move)) + PROMOTION_VALUE;
+            moves.scores[i] = getPieceValue(move.getPromotionPiece(board.white_to_move)) + PROMOTION_VALUE;
         // then captures according to Most Valuable Victim – Least Valuable Attacker
         // i.e., prioritize captures of high value with low value pieces
         else if (captured_piece != EMPTY)

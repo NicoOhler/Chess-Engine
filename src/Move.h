@@ -7,22 +7,23 @@ struct Move
 {
     Position from;
     Position to;
-    PromotionAndCastlingRights promotion_and_castling = NO_PROMOTION_OR_CASTLING;
+    Promotion promotion = NO_PROMOTION;
 
-    bool operator==(const Move &rhs);
-    bool operator!=(const Move &rhs);
+    Move(Position from = 0, Position to = 0, Promotion promotion = NO_PROMOTION)
+        : from(from), to(to), promotion(promotion) {}
 
-    bool isPromotion() const;
-    bool isCastling() const;
-    bool isCastling(const Board &board) const;
-    bool isCastlingCandidate() const;
     bool isUndo() const;
+    bool isCastlingCandidate() const;
+    bool isPromotion() const;
+    Piece getPromotionPiece(bool white_to_move);
 
     std::string toString() const;
+    bool operator==(const Move &rhs);
+    bool operator!=(const Move &rhs);
 };
 
 const Move UNDO_MOVE = Move{0, 0, UNDO};
-const Move NULL_MOVE = Move{0, 0, NO_PROMOTION_OR_CASTLING};
+const Move NULL_MOVE = Move{0, 0, NO_PROMOTION};
 
 struct MoveList
 {

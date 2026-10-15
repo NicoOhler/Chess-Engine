@@ -57,8 +57,7 @@ uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
     hash ^= piece_at_square[move.from][moving_piece];
 
     // remove previous en passant
-    bool is_pawn_move = moving_piece == (white_to_move ? WHITE_PAWN : BLACK_PAWN);
-    bool is_en_passant = is_pawn_move && (move.to == undo.en_passant);
+    bool is_en_passant = (move.to == undo.en_passant) && (moving_piece == (white_to_move ? WHITE_PAWN : BLACK_PAWN));
     if (undo.en_passant != NO_EN_PASSANT)
     {
         hash ^= en_passant_file[modPow2(undo.en_passant, 8)];
@@ -68,7 +67,7 @@ uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
     }
 
     // add new en passant square
-    if (is_pawn_move && (abs(move.from - move.to) == 16))
+    if (board.en_passant != NO_EN_PASSANT)
         hash ^= en_passant_file[modPow2(move.to, 8)];
 
     // remove captured piece
@@ -76,11 +75,12 @@ uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
         hash ^= piece_at_square[move.to][undo.captured_piece];
 
     // add piece to new position
-    Piece piece = move.isPromotion() ? getPromotionPiece(move.promotion_and_castling, white_to_move) : moving_piece;
+    Piece piece = move.isPromotion() ? move.getPromotionPiece(white_to_move) : moving_piece;
     hash ^= piece_at_square[move.to][piece];
 
     // additionally move rook if castling
-    if (move.isCastling())
+    bool is_king_move = moving_piece == (white_to_move ? WHITE_KING : BLACK_KING);
+    if (move.isCastlingCandidate() && is_king_move)
     {
         // remove old rook position and add new rook position
         bool king_side_castling = move.to > move.from;

@@ -2,22 +2,17 @@
 
 bool Move::operator==(const Move &rhs)
 {
-    return from == rhs.from && to == rhs.to && promotion_and_castling == rhs.promotion_and_castling;
+    return from == rhs.from && to == rhs.to && promotion == rhs.promotion;
 }
 
 bool Move::operator!=(const Move &rhs)
 {
-    return from != rhs.from || to != rhs.to || promotion_and_castling != rhs.promotion_and_castling;
+    return from != rhs.from || to != rhs.to || promotion != rhs.promotion;
 }
 
 bool Move::isPromotion() const
 {
-    return promotion_and_castling & (PROMOTE_TO_QUEEN | PROMOTE_TO_ROOK | PROMOTE_TO_BISHOP | PROMOTE_TO_KNIGHT);
-}
-
-bool Move::isCastling() const
-{
-    return promotion_and_castling & (WHITE_KING_CASTLING | WHITE_QUEEN_CASTLING | BLACK_KING_CASTLING | BLACK_QUEEN_CASTLING);
+    return promotion & (PROMOTE_TO_QUEEN | PROMOTE_TO_ROOK | PROMOTE_TO_BISHOP | PROMOTE_TO_KNIGHT);
 }
 
 bool Move::isCastlingCandidate() const
@@ -33,26 +28,38 @@ bool Move::isCastlingCandidate() const
     return false;
 }
 
-bool Move::isCastling(const Board &board) const
+Piece Move::getPromotionPiece(bool white_to_move)
 {
-    return isCastlingCandidate() && (board.getPieceAt(from) == (board.white_to_move ? WHITE_KING : BLACK_KING));
+    switch (promotion)
+    {
+    case PROMOTE_TO_QUEEN:
+        return white_to_move ? WHITE_QUEEN : BLACK_QUEEN;
+    case PROMOTE_TO_ROOK:
+        return white_to_move ? WHITE_ROOK : BLACK_ROOK;
+    case PROMOTE_TO_BISHOP:
+        return white_to_move ? WHITE_BISHOP : BLACK_BISHOP;
+    case PROMOTE_TO_KNIGHT:
+        return white_to_move ? WHITE_KNIGHT : BLACK_KNIGHT;
+    default:
+        throw std::invalid_argument("Invalid promotion: " + std::to_string(promotion));
+    }
 }
 
 bool Move::isUndo() const
 {
-    return promotion_and_castling & UNDO;
+    return promotion == UNDO;
 }
 
 std::string Move::toString() const
 {
     std::string str = getSquareName(from) + getSquareName(to);
-    if (promotion_and_castling & PROMOTE_TO_QUEEN)
+    if (promotion & PROMOTE_TO_QUEEN)
         str += "=Q";
-    else if (promotion_and_castling & PROMOTE_TO_ROOK)
+    else if (promotion & PROMOTE_TO_ROOK)
         str += "=R";
-    else if (promotion_and_castling & PROMOTE_TO_BISHOP)
+    else if (promotion & PROMOTE_TO_BISHOP)
         str += "=B";
-    else if (promotion_and_castling & PROMOTE_TO_KNIGHT)
+    else if (promotion & PROMOTE_TO_KNIGHT)
         str += "=N";
     return str;
 }

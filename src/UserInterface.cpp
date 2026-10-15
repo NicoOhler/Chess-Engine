@@ -204,7 +204,7 @@ Move UserInterface::promptForLegalMove(MoveList legal_moves)
             if (legal_move.from == from && legal_move.to == to)
             {
                 if (legal_move.isPromotion())
-                    legal_move.promotion_and_castling = promptForPromotionChoice();
+                    legal_move.promotion = promptForPromotionChoice();
                 return legal_move;
             }
         }

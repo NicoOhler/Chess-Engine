@@ -13,7 +13,6 @@ typedef signed char Position;
 typedef Position Direction;
 typedef unsigned char Promotion;
 typedef unsigned char CastlingRights;
-typedef unsigned char PromotionAndCastlingRights;
 typedef unsigned char Piece;
 typedef unsigned char PieceSymbol;
 typedef unsigned char Mode;
@@ -66,22 +65,26 @@ const std::string IN_PROGRESS = "In Progress";
 const std::string CHECKMATE = "Checkmate";
 const std::string DRAW = "Draw"; // equivalent to stalemate
 
-// promotion and castling rights can be stored within a single byte
-enum PROMOTION_AND_CASTLING_RIGHTS
+enum PROMOTION
 {
-    NO_PROMOTION_OR_CASTLING = 0,
+    NO_PROMOTION = 0,
     PROMOTE_TO_QUEEN = 1 << 0,
     PROMOTE_TO_ROOK = 1 << 1,
     PROMOTE_TO_BISHOP = 1 << 2,
     PROMOTE_TO_KNIGHT = 1 << 3,
+    UNDO = PROMOTE_TO_QUEEN | PROMOTE_TO_ROOK | PROMOTE_TO_BISHOP | PROMOTE_TO_KNIGHT
+};
+
+enum CASTLING_RIGHTS
+{
+    NO_CASTLING = 0,
     WHITE_KING_CASTLING = 1 << 4,
     WHITE_QUEEN_CASTLING = 1 << 5,
     BLACK_KING_CASTLING = 1 << 6,
     BLACK_QUEEN_CASTLING = 1 << 7,
     WHITE_CASTLING = WHITE_KING_CASTLING | WHITE_QUEEN_CASTLING,
     BLACK_CASTLING = BLACK_KING_CASTLING | BLACK_QUEEN_CASTLING,
-    ALL_CASTLING = WHITE_CASTLING | BLACK_CASTLING,
-    UNDO = ALL_CASTLING | PROMOTE_TO_QUEEN | PROMOTE_TO_ROOK | PROMOTE_TO_BISHOP | PROMOTE_TO_KNIGHT
+    ALL_CASTLING = WHITE_CASTLING | BLACK_CASTLING
 };
 
 enum PIECES

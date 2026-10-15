@@ -13,7 +13,6 @@
         exit(1);                           \
     }
 
-Piece getPromotionPiece(Promotion promotion, bool white_to_move);
 std::string getSquareName(Position square);
 Position getSquareIndex(std::string square);
 Score getPieceValue(Piece piece);
