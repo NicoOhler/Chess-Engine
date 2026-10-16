@@ -4,20 +4,19 @@ ZobristHash::ZobristHash()
 {
     // initialize xor keys with official polyglot keys for reproducibility and compatibility with openings books and other engines
     int offset = 0;
-    for (int square = 0; square < NUM_SQUARES; square++)
-        for (int piece = 0; piece < NUM_PIECES; piece++)
+    for (int piece = 0; piece < NUM_PIECES; piece++)
+        for (int square = 0; square < NUM_SQUARES; square++)
             piece_at_square[square][piece] = polyglot_keys[offset++];
     for (int i = 0; i < NUM_CASTLING_RIGHTS; i++)
         castling_rights[i] = polyglot_keys[offset++];
-    offset += NUM_CASTLING_RIGHTS;
     for (int i = 0; i < NUM_COLS; i++)
         en_passant_file[i] = polyglot_keys[offset++];
-    whites_turn = polyglot_keys[offset++];
+    is_whites_turn = polyglot_keys[offset++];
 }
 
-uint64 ZobristHash::computeInitialHash(Board &board)
+Hash ZobristHash::computeInitialHash(Board &board)
 {
-    uint64 hash = 0;
+    Hash hash = 0;
     // add all pieces
     for (int square = 0; square < NUM_SQUARES; square++)
     {
@@ -28,7 +27,7 @@ uint64 ZobristHash::computeInitialHash(Board &board)
 
     // indicate whose turn it is
     if (board.white_to_move)
-        hash ^= whites_turn;
+        hash ^= is_whites_turn;
 
     // add en passant
     if (board.en_passant != NO_EN_PASSANT)
@@ -46,14 +45,14 @@ uint64 ZobristHash::computeInitialHash(Board &board)
     return hash;
 }
 
-uint64 ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
+Hash ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
 {
-    uint64 &hash = board.hash;
+    Hash &hash = board.hash;
     Piece moving_piece = board.getPieceAt(move.to); // assume move has already been made => piece is at destination square
     bool white_to_move = moving_piece <= WHITE_KING;
 
     // toggle whose turn it is
-    hash ^= whites_turn;
+    hash ^= is_whites_turn;
 
     // remove piece from previous position
     hash ^= piece_at_square[move.from][moving_piece];
