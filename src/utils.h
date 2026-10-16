@@ -22,6 +22,7 @@ uint64 modPow2(uint64 n, uint64 m);
 void print(const std::string &message, bool newline = true);
 std::string readLineFromStdin();
 bool contains(const std::string &str, const std::string &substr);
+bool getBoolFromString(const std::string &str);
 
 class ScopeLock
 {

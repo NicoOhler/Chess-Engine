@@ -2,25 +2,30 @@
 
 void UCI::start()
 {
+    opening_book.enabled = opening_book.initializeBook(BOOK_FILE_OPTION_DEFAULT);
     background_thread = std::thread(&UCI::handleBackgroundRequests, this);
     std::string command;
     while (true)
     {
         command = readLineFromStdin();
-        if (command == "uci")
+        if (command == UCI_COMMAND)
             handleUCI();
-        else if (command == "isready")
+        else if (command == ISREADY_COMMAND)
             handleIsReady();
-        else if (command == "ucinewgame")
+        else if (command == UCINEWGAME_COMMAND)
             handleUCINewGame();
-        else if (command == "stop")
+        else if (command == STOP_COMMAND)
             handleStop();
-        else if (command == "quit")
+        else if (command == QUIT_COMMAND)
             handleQuit();
-        else if (command.substr(0, 8) == "position")
+        else if (command.substr(0, POSITION_COMMAND.length()) == POSITION_COMMAND)
             handlePosition(command);
-        else if (command.substr(0, 2) == "go")
+        else if (command.substr(0, GO_COMMAND.length()) == GO_COMMAND)
             handleGo(command);
+        else if (command.substr(0, SETOPTION_COMMAND.length()) == SETOPTION_COMMAND)
+            handleSetOption(command);
+        else if (command == HELP_COMMAND)
+            handleHelp();
         else
             print("Unknown command: '" + command + "'. Type help for more information.");
     }
@@ -55,6 +60,8 @@ void UCI::handleUCI()
 {
     print("id name Chess Engine");
     print("id author Nico Ohler");
+    print("option name " + USE_OPENING_BOOK_OPTION + " type check default " + USE_OPENING_BOOK_OPTION_DEFAULT);
+    print("option name " + BOOK_FILE_OPTION + " type string default " + BOOK_FILE_OPTION_DEFAULT);
     print("uciok");
 }
 
@@ -99,7 +106,20 @@ void UCI::handlePosition(const std::string &command)
 void UCI::handleGo(const std::string &command)
 {
     engine.stopSearch();
+
+    // provide a book move if available
+    if (opening_book.enabled)
+    {
+        Move book_move = opening_book.getBookMoveIfAvailable(engine.getBoard().hash);
+        if (book_move != NULL_MOVE)
+        {
+            print("bestmove " + book_move.toString());
+            return;
+        }
+    }
+
     ScopeLock lock(engine_mutex);
+    // configure time management based on UCI command parameters
     TimeManagement &time_management = engine.getTimeManagement();
     time_management.reset();
     try
@@ -130,6 +150,25 @@ void UCI::handleGo(const std::string &command)
     background_request_cv.notify_one();
 }
 
+void UCI::handleSetOption(const std::string &command)
+{
+    try
+    {
+        std::string option_name = extractArgumentFromCommand(command, "name ", " value ");
+        std::string option_value = extractArgumentFromCommand(command, "value ");
+        if (option_name == USE_OPENING_BOOK_OPTION)
+            opening_book.enabled = getBoolFromString(option_value);
+        else if (option_name == BOOK_FILE_OPTION)
+            opening_book.initializeBook(option_value);
+        else
+            print("No such option");
+    }
+    catch (const std::exception &e)
+    {
+        print("Error parsing 'setoption' command parameters: " + std::string(e.what()));
+    }
+}
+
 void UCI::handleStop()
 {
     engine.stopSearch();
@@ -145,6 +184,11 @@ void UCI::handleQuit()
     background_request_lock.unlock();
     background_thread.join();
     exit(0);
+}
+
+void UCI::handleHelp()
+{
+    print(UCI_HELP);
 }
 
 std::string UCI::extractArgumentFromCommand(const std::string &command, const std::string &prefix, const std::string &suffix)

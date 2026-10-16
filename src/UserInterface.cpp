@@ -297,7 +297,7 @@ void UserInterface::parseParameters(int argc, char *argv[])
         else if (std::string(argv[i]) == "-t" && i + 1 < argc)
             engine.getTimeManagement().configure(std::stoull(argv[++i]));
         else if (std::string(argv[i]) == "-o" && i + 1 < argc)
-            use_opening_book = opening_book.initializeBook(argv[++i]);
+            opening_book.enabled = opening_book.initializeBook(argv[++i]);
         else if (std::string(argv[i]) == "-h")
         {
             printHelp(argv[0]);

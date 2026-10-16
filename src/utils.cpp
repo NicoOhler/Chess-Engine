@@ -82,3 +82,13 @@ bool contains(const std::string &str, const std::string &substr)
 {
     return str.find(substr) != std::string::npos;
 }
+
+bool getBoolFromString(const std::string &str)
+{
+    if (str == "true" || str == "1")
+        return true;
+    else if (str == "false" || str == "0")
+        return false;
+    else
+        throw std::invalid_argument("Invalid boolean string: " + str);
+}
