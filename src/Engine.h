@@ -3,6 +3,7 @@
 #include "ZobristHash.h"
 #include "TranspositionTable.h"
 #include "Evaluation.h"
+#include "OpeningBook.h"
 #include "TimeManagement.h"
 #include "definitions.h"
 #include <iostream>
@@ -41,6 +42,7 @@ private:
     uint64 evaluated_nodes;
     int search_depth;
     bool search_stopped;
+    bool use_opening_book;
 
     bool makeMoveIfLegal(Move move);
     void calculateMoveScores(MoveList &moves, TranspositionEntry *entry);

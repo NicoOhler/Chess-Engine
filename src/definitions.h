@@ -1,10 +1,15 @@
 #pragma once
 #include <string>
-#include <inttypes.h>
 
 // useful data types
 typedef unsigned long long uint64;
-typedef int32_t Score;
+typedef signed int int32;
+typedef unsigned int uint32;
+typedef signed short int16;
+typedef unsigned short uint16;
+
+typedef uint16 Move16;
+typedef int32 Score;
 typedef uint64 Bitboard;
 typedef uint64 Hash;
 typedef unsigned char uint8;
@@ -18,7 +23,7 @@ typedef unsigned char PieceSymbol;
 typedef unsigned char Mode;
 typedef std::string GameState;
 typedef signed char HalfMoveClock;
-typedef int32_t Milliseconds;
+typedef int32 Milliseconds;
 
 // basic constants
 const Position NUM_SQUARES = 64;
@@ -70,10 +75,10 @@ const std::string DRAW = "Draw"; // equivalent to stalemate
 enum PROMOTION
 {
     NO_PROMOTION = 0,
-    PROMOTE_TO_QUEEN = 1 << 0,
-    PROMOTE_TO_ROOK = 1 << 1,
-    PROMOTE_TO_BISHOP = 1 << 2,
-    PROMOTE_TO_KNIGHT = 1 << 3,
+    PROMOTE_TO_KNIGHT = 1,
+    PROMOTE_TO_BISHOP = 2,
+    PROMOTE_TO_ROOK = 3,
+    PROMOTE_TO_QUEEN = 4,
     UNDO = PROMOTE_TO_QUEEN | PROMOTE_TO_ROOK | PROMOTE_TO_BISHOP | PROMOTE_TO_KNIGHT
 };
 
@@ -91,18 +96,18 @@ enum CASTLING_RIGHTS
 
 enum PIECES
 {
-    WHITE_PAWN,
-    WHITE_KNIGHT,
-    WHITE_BISHOP,
-    WHITE_ROOK,
-    WHITE_QUEEN,
-    WHITE_KING,
     BLACK_PAWN,
+    WHITE_PAWN,
     BLACK_KNIGHT,
+    WHITE_KNIGHT,
     BLACK_BISHOP,
+    WHITE_BISHOP,
     BLACK_ROOK,
+    WHITE_ROOK,
     BLACK_QUEEN,
+    WHITE_QUEEN,
     BLACK_KING,
+    WHITE_KING,
     EMPTY
 };
 

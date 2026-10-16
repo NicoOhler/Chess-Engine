@@ -1,5 +1,16 @@
 #include "Move.h"
 
+Move::Move(Move16 encoded_move)
+{
+    Position to_col = encoded_move & 0x7;          // bits 0-2
+    Position to_row = (encoded_move >> 3) & 0x7;   // bits 3-5
+    Position from_col = (encoded_move >> 6) & 0x7; // bits 6-8
+    Position from_row = (encoded_move >> 9) & 0x7; // bits 9-11
+    to = to_row * NUM_COLS + to_col;
+    from = from_row * NUM_COLS + from_col;
+    promotion = (encoded_move >> 12) & 0x7; // bits 12-14
+}
+
 bool Move::operator==(const Move &rhs)
 {
     return from == rhs.from && to == rhs.to && promotion == rhs.promotion;

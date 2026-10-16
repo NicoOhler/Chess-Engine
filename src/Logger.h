@@ -33,6 +33,7 @@ const LogType BENCHMARK = WHITE | LOG_TYPE_ENABLED;
 const LogType TRANSPOSITION_TABLE = WHITE | LOG_TYPE_ENABLED;
 const LogType TRANSPOSITION_TABLE_MATCH = WHITE;
 const LogType ENGINE_SETTINGS = WHITE;
+const LogType OPENING_BOOK = WHITE | LOG_TYPE_ENABLED;
 const LogType UI = WHITE | LOG_TYPE_ENABLED;
 
 void log(LogType logType, const std::string &message);

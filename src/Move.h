@@ -11,6 +11,7 @@ struct Move
 
     Move(Position from = 0, Position to = 0, Promotion promotion = NO_PROMOTION)
         : from(from), to(to), promotion(promotion) {}
+    Move(Move16 encoded_move);
 
     bool isUndo() const;
     bool isCastlingCandidate() const;
