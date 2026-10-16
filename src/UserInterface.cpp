@@ -93,7 +93,7 @@ void UserInterface::startPlayerVsPlayer()
 
     do
     {
-        Move move = promptForLegalMove(moves);
+        Move move = getMove(true);
         applyAndTrackMove(move);
         printGameState();
         moves = engine.getLegalMoves();
@@ -106,14 +106,14 @@ void UserInterface::startPlayerVsEngine()
     log(UI, "ChessEngine started in player vs engine mode.");
     printGameState();
     MoveList moves = engine.getLegalMoves();
-    bool ai_turn = promptForPlayerColor() != engine.getBoard().white_to_move;
-    log(UI, (ai_turn ? "The AI starts.\n" : "You start.\n"));
+    bool player_turn = promptForPlayerColor() == engine.getBoard().white_to_move;
+    log(UI, (player_turn ? "You start.\n" : "The AI starts.\n"));
     log(UI, "Enter 'p' to print legal moves or 'u' to undo the last move.");
 
     do
     {
-        Move move = ai_turn ? engine.search() : promptForLegalMove(moves);
-        ai_turn = !ai_turn;
+        Move move = getMove(player_turn);
+        player_turn = !player_turn;
         applyAndTrackMove(move, true);
         printGameState();
         moves = engine.getLegalMoves();
@@ -130,7 +130,7 @@ void UserInterface::startEngineVsEngine()
 
     do
     {
-        Move move = engine.search();
+        Move move = getMove(false);
         log(UI, "Press Enter to apply the chosen move.");
         input = readLineFromStdin();
         applyAndTrackMove(move);
@@ -138,6 +138,19 @@ void UserInterface::startEngineVsEngine()
         moves = engine.getLegalMoves();
     } while (!engine.isGameOver());
     log(UI, engine.getGameState());
+}
+
+Move UserInterface::getMove(bool is_player_turn)
+{
+    if (is_player_turn)
+        return promptForLegalMove(engine.getLegalMoves());
+    if (use_opening_book)
+    {
+        Move move = opening_book.getBookMoveIfAvailable(engine.getBoard().hash);
+        if (move != NULL_MOVE)
+            return move;
+    }
+    return engine.search();
 }
 
 void UserInterface::applyAndTrackMove(Move move, bool play_vs_engine)
@@ -283,6 +296,8 @@ void UserInterface::parseParameters(int argc, char *argv[])
             expected_perft = std::stoull(argv[++i]);
         else if (std::string(argv[i]) == "-t" && i + 1 < argc)
             engine.getTimeManagement().configure(std::stoull(argv[++i]));
+        else if (std::string(argv[i]) == "-o" && i + 1 < argc)
+            use_opening_book = opening_book.initializeBook(argv[++i]);
         else if (std::string(argv[i]) == "-h")
         {
             printHelp(argv[0]);
@@ -304,6 +319,7 @@ void UserInterface::printHelp(const std::string &executable_name)
               << "  -f FEN: Start the game with the given FEN string\n"
               << "  -p ply: Run perft/search with the given ply/depth/number of half moves)\n"
               << "  -t: Set search time (in milliseconds)\n"
+              << "  -o: opening book file path (disabled by default)\n"
               << "  -h: Show this help message" << std::endl;
 }
 

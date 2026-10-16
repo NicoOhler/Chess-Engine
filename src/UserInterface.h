@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine.h"
+#include "OpeningBook.h"
 #include "Timer.h"
 #include "UCI.h"
 #include <stack>
@@ -24,12 +25,14 @@ public:
 
 private:
     Engine engine;
+    OpeningBook opening_book;
     Timer timer;
     std::stack<Move> move_history;
 
     // default parameters
     Mode mode = UCI_MODE;
     uint64 expected_perft = 0;
+    bool use_opening_book = false;
 
     // mode handlers
     void startUCI();
@@ -41,6 +44,7 @@ private:
     void startEngineVsEngine();
 
     // utility functions
+    Move getMove(bool is_player_turn);
     void applyAndTrackMove(Move move, bool play_vs_engine = false);
     void printHelp(const std::string &executable_name);
     void printGameState();

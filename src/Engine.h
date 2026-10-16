@@ -3,7 +3,6 @@
 #include "ZobristHash.h"
 #include "TranspositionTable.h"
 #include "Evaluation.h"
-#include "OpeningBook.h"
 #include "TimeManagement.h"
 #include "definitions.h"
 #include <iostream>

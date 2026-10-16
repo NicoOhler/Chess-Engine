@@ -3,7 +3,6 @@
 OpeningBook::OpeningBook()
 {
     srand(time(0));
-    initializeBook(TESTING_BOOK);
 }
 
 OpeningBook::~OpeningBook()
@@ -11,22 +10,21 @@ OpeningBook::~OpeningBook()
     freeBook();
 }
 
-void OpeningBook::initializeBook(const std::string &book_path)
+bool OpeningBook::initializeBook(const std::string &book_path)
 {
     freeBook();
-
     std::ifstream file(book_path, std::ios::binary | std::ios::ate);
     if (!file.is_open())
     {
         log(OPENING_BOOK, "Failed to open opening book at: " + book_path);
-        return;
+        return false;
     }
 
     std::streamsize file_size = file.tellg();
     if (file_size <= 0 || (file_size % sizeof(PolyglotBookEntry)) != 0)
     {
         log(OPENING_BOOK, "Invalid book file: " + book_path);
-        return;
+        return false;
     }
 
     num_entries = static_cast<uint64>(file_size / sizeof(PolyglotBookEntry));
@@ -38,7 +36,7 @@ void OpeningBook::initializeBook(const std::string &book_path)
     {
         log(OPENING_BOOK, "Error reading book file data.");
         freeBook();
-        return;
+        return false;
     }
 
     // convert polyglot book format (big-endian) to internal representation
@@ -49,10 +47,10 @@ void OpeningBook::initializeBook(const std::string &book_path)
         book[i].weight = __builtin_bswap16(polyglot_book[i].weight);
     }
     log(OPENING_BOOK, "Loaded opening book with " + std::to_string(num_entries) + " entries from: " + book_path);
-    getBookMove(0x463b96181691fc9c); // test book move retrieval
+    return true;
 }
 
-Move OpeningBook::getBookMove(const Hash &hash)
+Move OpeningBook::getBookMoveIfAvailable(const Hash &hash)
 {
     uint64 index = getBookIndex(hash);
     if (index >= num_entries)
@@ -67,18 +65,25 @@ Move OpeningBook::getBookMove(const Hash &hash)
         last_entry_index++;
 
     // compute total weight
-    uint16 total_weight = 0;
+    uint32 total_weight = 0;
+    log(OPENING_BOOK_MOVE, "Found " + std::to_string(last_entry_index - first_entry_index + 1) + " book entries for hash: " + std::to_string(hash));
     for (uint64 i = first_entry_index; i <= last_entry_index; i++)
+    {
+        log(OPENING_BOOK_MOVE, "\tBook entry: " + book[i].toString());
         total_weight += book[i].weight;
+    }
 
     // sample move based on relative weights
-    uint16 random_weight = rand() % total_weight;
-    uint16 cumulative_weight = 0;
+    uint32 random_weight = rand() % total_weight;
+    uint32 cumulative_weight = 0;
     for (uint64 i = first_entry_index; i <= last_entry_index; i++)
     {
         cumulative_weight += book[i].weight;
         if (cumulative_weight > random_weight)
+        {
+            log(OPENING_BOOK_MOVE, "Selected book move: " + book[i].move.toString());
             return book[i].move;
+        }
     }
     throw std::runtime_error("Failed to select a book move for hash: " + std::to_string(hash));
     return NULL_MOVE;
@@ -103,7 +108,8 @@ uint64 OpeningBook::getBookIndex(const Hash &hash)
 
 void OpeningBook::freeBook()
 {
-    delete[] book;
+    if (book != nullptr)
+        delete[] book;
     book = nullptr;
     num_entries = 0;
 }

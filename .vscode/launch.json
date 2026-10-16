@@ -47,7 +47,7 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "Local PvP w/ Custom Board",
+            "name": "Player vs Player",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/output/engine",
@@ -73,13 +73,15 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "PvE w/ Custom Board",
+            "name": "Player vs Engine",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/output/engine",
             "args": [
                 "-m",
                 "r",
+                "-o",
+                "../data/opening_books/Rebel.bin",
                 // "-f",
                 // "rnbqkbnr/pp1p1ppp/4p3/1Pp5/8/8/P1PPPPPP/RNBQKBNR w KQkq c6 0 3"
             ],

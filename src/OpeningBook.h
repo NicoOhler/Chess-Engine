@@ -4,14 +4,6 @@
 #include "ZobristHash.h"
 #include <iostream>
 #include <fstream>
-#include <vector>
-#include <cstdint>
-#include <cstring>
-#include <algorithm>
-
-const std::string TESTING_BOOK = "../data/opening_books/Rebel.bin";
-const std::string BALANCED_BOOK = "../data/opening_books/book.bin";
-const std::string SOTA_BOOK = "../data/opening_books/Performance.bin";
 
 // "official" polyglot book entry structure (big-endian)
 struct PolyglotBookEntry
@@ -38,12 +30,12 @@ public:
     OpeningBook();
     ~OpeningBook();
 
-    void initializeBook(const std::string &book_path);
-    Move getBookMove(const Hash &hash);
+    bool initializeBook(const std::string &book_path);
+    Move getBookMoveIfAvailable(const Hash &hash);
 
 private:
-    BookEntry *book;
-    uint64 num_entries;
+    BookEntry *book = nullptr;
+    uint64 num_entries = 0;
     void freeBook();
     uint64 getBookIndex(const Hash &hash);
 };
