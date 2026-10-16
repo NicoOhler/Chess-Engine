@@ -13,33 +13,40 @@ OpeningBook::~OpeningBook()
 bool OpeningBook::initializeBook(const std::string &book_path)
 {
     freeBook();
-    std::ifstream file(book_path, std::ios::binary | std::ios::ate);
-    if (!file.is_open())
+    int fd = ::open(book_path.c_str(), O_RDONLY);
+    if (fd == -1)
     {
         log(OPENING_BOOK, "Failed to open opening book at: " + book_path);
         return false;
     }
 
-    std::streamsize file_size = file.tellg();
-    if (file_size <= 0 || (file_size % sizeof(PolyglotBookEntry)) != 0)
+    struct stat sb;
+    if (fstat(fd, &sb) == -1 || sb.st_size <= 0 || (sb.st_size % sizeof(PolyglotBookEntry)) != 0)
     {
         log(OPENING_BOOK, "Invalid book file: " + book_path);
+        ::close(fd);
         return false;
     }
 
-    num_entries = static_cast<uint64>(file_size / sizeof(PolyglotBookEntry));
-    PolyglotBookEntry polyglot_book[num_entries];
-    // todo would mmap be faster than heap allocation?
-    book = new BookEntry[num_entries];
-    file.seekg(0, std::ios::beg);
-    if (!file.read(reinterpret_cast<char *>(polyglot_book), file_size))
+    num_entries = static_cast<uint64>(sb.st_size / sizeof(PolyglotBookEntry));
+    PolyglotBookEntry *polyglot_book = reinterpret_cast<PolyglotBookEntry *>(mmap(nullptr, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
+    if (polyglot_book == MAP_FAILED)
     {
-        log(OPENING_BOOK, "Error reading book file data.");
-        freeBook();
+        log(OPENING_BOOK, "Failed to memory-map book file: " + book_path);
+        ::close(fd);
         return false;
     }
 
     // convert polyglot book format (big-endian) to internal representation
+    book = reinterpret_cast<BookEntry *>(mmap(nullptr, num_entries * sizeof(BookEntry), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
+    if (book == MAP_FAILED)
+    {
+        log(OPENING_BOOK, "Failed to allocate memory for book entries");
+        munmap(polyglot_book, sb.st_size);
+        ::close(fd);
+        return false;
+    }
+
     for (size_t i = 0; i < num_entries; i++)
     {
         book[i].hash = __builtin_bswap64(polyglot_book[i].hash);
@@ -47,11 +54,16 @@ bool OpeningBook::initializeBook(const std::string &book_path)
         book[i].weight = __builtin_bswap16(polyglot_book[i].weight);
     }
     log(OPENING_BOOK, "Loaded opening book with " + std::to_string(num_entries) + " entries from: " + book_path);
+    munmap(polyglot_book, sb.st_size);
+    ::close(fd);
     return true;
 }
 
 Move OpeningBook::getBookMoveIfAvailable(const Hash &hash)
 {
+    if (!enabled || book == nullptr || num_entries == 0)
+        return NULL_MOVE;
+
     uint64 index = getBookIndex(hash);
     if (index >= num_entries)
         return NULL_MOVE;
@@ -109,9 +121,10 @@ uint64 OpeningBook::getBookIndex(const Hash &hash)
 void OpeningBook::freeBook()
 {
     if (book != nullptr)
-        delete[] book;
+        munmap(book, num_entries * sizeof(BookEntry));
     book = nullptr;
     num_entries = 0;
+    enabled = false;
 }
 
 std::string BookEntry::toString() const

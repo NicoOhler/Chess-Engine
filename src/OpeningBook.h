@@ -2,8 +2,10 @@
 
 #include "Move.h"
 #include "ZobristHash.h"
-#include <iostream>
-#include <fstream>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 // "official" polyglot book entry structure (big-endian)
 struct PolyglotBookEntry
@@ -32,6 +34,7 @@ public:
 
     bool initializeBook(const std::string &book_path);
     Move getBookMoveIfAvailable(const Hash &hash);
+    bool enabled = false;
 
 private:
     BookEntry *book = nullptr;
