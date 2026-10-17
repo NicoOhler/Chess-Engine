@@ -23,7 +23,8 @@ Board Board::generateBoardFromFEN(const std::string &fen)
             set(board.occupied, square);
             set(isupper(c) ? board.white_pieces : board.black_pieces, square);
         }
-        assert(fen[i++] == (row != ROW_1 ? '/' : ' '), "Invalid FEN");
+        if (fen[i++] != (row != ROW_1 ? '/' : ' '))
+            throw std::invalid_argument("Invalid FEN: Expected '/' or ' ' after row " + std::to_string(row));
     }
 
     // parse side to move, castling rights, en passant square
@@ -53,11 +54,13 @@ Board Board::generateBoardFromFEN(const std::string &fen)
                 board.castling_rights |= BLACK_QUEEN_CASTLING;
                 break;
             default:
-                assert(false, "Invalid FEN");
+                throw std::invalid_argument("Invalid FEN: Invalid castling rights character: " + std::string(1, fen[i - 1]));
             }
         }
 
-    assert(fen[i++] == ' ', "Invalid FEN");
+    if (fen[i++] != ' ')
+        throw std::invalid_argument("Invalid FEN: Expected space after castling rights");
+
     bool no_en_passant = fen[i] == '-';
     if (no_en_passant)
         board.en_passant = NO_EN_PASSANT;
@@ -125,7 +128,7 @@ Bitboard *Board::getBitboardByPiece(Piece piece)
     }
 }
 
-Bitboard *Board::getBitboardByPieceSymbol(Piece piece)
+Bitboard *Board::getBitboardByPieceSymbol(PieceSymbol piece)
 {
     switch (piece)
     {

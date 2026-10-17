@@ -91,16 +91,34 @@ void UCI::handlePosition(const std::string &command)
         fen = extractArgumentFromCommand(command, " fen ", " moves");
     engine.setPosition(fen);
 
-    // todo extract moves and apply them
-    if (contains(command, " moves"))
-    {
-        print("Move parsing not yet implemented in UCI interface.");
+    if (!contains(command, " moves "))
         return;
+    try
+    {
+        std::string moves = extractArgumentFromCommand(command, " moves ", "");
+        char *move_str = strtok(const_cast<char *>(moves.c_str()), " ");
+        while (move_str)
+        {
+            MoveList legal_moves = engine.getLegalMoves();
+            bool move_is_legal = false;
+            Move move = Move(move_str);
+            for (int i = 0; i < legal_moves.size; i++)
+                if (legal_moves.moves[i] == move)
+                {
+                    move_is_legal = true;
+                    engine.makeMove(move, false);
+                    move_str = strtok(nullptr, " ");
+                    break;
+                }
+            if (!move_is_legal)
+                throw std::invalid_argument("Illegal move: " + move.toString());
+        }
     }
-
-    MoveList moves;
-    for (int i = 0; i < moves.size; i++)
-        engine.makeMove(moves.moves[i], false);
+    catch (const std::exception &e)
+    {
+        print("Error parsing and applying moves: " + std::string(e.what()));
+        engine.setPosition(fen);
+    }
 }
 
 void UCI::handleGo(const std::string &command)
@@ -197,6 +215,8 @@ std::string UCI::extractArgumentFromCommand(const std::string &command, const st
     if (start == std::string::npos)
         return "";
     start += prefix.length();
+    if (suffix.empty())
+        return command.substr(start);
     size_t end = command.find(suffix, start);
     if (end == std::string::npos)
         return command.substr(start);

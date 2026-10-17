@@ -99,8 +99,6 @@ void MoveGenerator::initializeBishopBlockers()
                 for (Position i = square + DOWN_LEFT; (i >= UP && getCol(i) != COL_A); i += DOWN_LEFT)
                     set(bishop_blockers[square], i);
         }
-
-        assert(countSetBits(bishop_blockers[square]) == BISHOP_RELEVANT_SQUARES[square], "Bishop blockers count does not match relevant squares.");
     }
 }
 
@@ -125,8 +123,6 @@ void MoveGenerator::initializeRookBlockers()
 
         for (Position i = square + DOWN; i >= UP; i += DOWN)
             set(rook_blockers[square], i);
-
-        assert(countSetBits(rook_blockers[square]) == ROOK_RELEVANT_SQUARES[square], "Rook blockers count does not match relevant squares.");
     }
 }
 

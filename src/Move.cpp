@@ -11,6 +11,28 @@ Move::Move(Move16 encoded_move)
     promotion = (encoded_move >> 12) & 0x7; // bits 12-14
 }
 
+Move::Move(std::string move_string)
+{
+    if (move_string.length() < 4)
+        throw std::invalid_argument("Invalid move string: " + move_string);
+    from = getSquareIndex(move_string.substr(0, 2));
+    to = getSquareIndex(move_string.substr(2, 2));
+    promotion = NO_PROMOTION;
+    if (move_string.length() == 5)
+    {
+        if (move_string[4] == BLACK_QUEEN_SYMBOL || move_string[4] == WHITE_QUEEN_SYMBOL)
+            promotion = PROMOTE_TO_QUEEN;
+        else if (move_string[4] == BLACK_ROOK_SYMBOL || move_string[4] == WHITE_ROOK_SYMBOL)
+            promotion = PROMOTE_TO_ROOK;
+        else if (move_string[4] == BLACK_BISHOP_SYMBOL || move_string[4] == WHITE_BISHOP_SYMBOL)
+            promotion = PROMOTE_TO_BISHOP;
+        else if (move_string[4] == BLACK_KNIGHT_SYMBOL || move_string[4] == WHITE_KNIGHT_SYMBOL)
+            promotion = PROMOTE_TO_KNIGHT;
+        else
+            throw std::invalid_argument("Invalid promotion character: " + std::string(1, move_string[4]));
+    }
+}
+
 bool Move::operator==(const Move &rhs)
 {
     return from == rhs.from && to == rhs.to && promotion == rhs.promotion;

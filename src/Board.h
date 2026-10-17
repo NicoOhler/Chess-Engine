@@ -43,7 +43,7 @@ struct Board // represents game state
     Hash hash;
 
     Bitboard *getBitboardByPiece(Piece piece);
-    Bitboard *getBitboardByPieceSymbol(Piece piece);
+    Bitboard *getBitboardByPieceSymbol(PieceSymbol piece);
     Piece getPieceAt(Position position) const;
     bool isSquareOccupied(Position position) const;
 

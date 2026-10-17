@@ -6,13 +6,6 @@
 #include <iostream>
 #include <mutex>
 
-#define assert(condition, message)         \
-    if (!(condition))                      \
-    {                                      \
-        std::cerr << message << std::endl; \
-        exit(1);                           \
-    }
-
 Position getRow(Position square);
 Position getCol(Position square);
 std::string getSquareName(Position square);

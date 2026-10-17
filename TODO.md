@@ -39,26 +39,9 @@
     + evaluates whether a patch makes the engine stronger compared to live version
     + e.g. using fast-chess
 + estimate ELO
-    + requires UCI support
     + connect to lichess-bot api
     + https://anmols.bearblog.dev/how-to-determine-chess-bot-elo-lichess/
 + come up with a good name
-+ opening book
-    + play probabilistic book moves at first
-        + saves compute time
-        + prevents "local minima"
-        + even large search depths cannot determine "best moves" 
-    + use well established book format
-    + stores common position in list sorted by hash
-        + hash (board representation)
-        + occurences
-        + games won by black/white
-        + games drawn
-    + integrate from existing textual database for simplicity
-        + extract FEN
-        + create board representation
-        + compute its hash
-        + populate own database
 + endgame tablebase 
     + consists of precomputed endgame positions with known outcomes
     + purpose

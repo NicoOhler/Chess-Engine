@@ -24,7 +24,7 @@ const std::string HELP_COMMAND = "help";
 const std::string USE_OPENING_BOOK_OPTION = "OwnBook";
 const std::string USE_OPENING_BOOK_OPTION_DEFAULT = "true";
 const std::string BOOK_FILE_OPTION = "BookFile";
-const std::string BOOK_FILE_OPTION_DEFAULT = "../data/opening_books/Rebel.bin";
+const std::string BOOK_FILE_OPTION_DEFAULT = "../data/opening_books/book.bin";
 
 const std::string UCI_HELP = "Available commands:\n"
                              "uci - initialize UCI mode\n"

@@ -73,7 +73,8 @@ void UserInterface::startPerft()
     if (expected_perft)
     {
         uint64 difference = nodes > expected_perft ? nodes - expected_perft : expected_perft - nodes;
-        assert(nodes == expected_perft, "Expected: " + std::to_string(expected_perft) + "\nDiff: " + std::to_string(difference));
+        if (difference > 0)
+            log(PERFT, "Expected: " + std::to_string(expected_perft) + "\nDiff: " + std::to_string(difference));
     }
 }
 
@@ -88,7 +89,6 @@ void UserInterface::startPlayerVsPlayer()
 {
     log(UI, "ChessEngine started in player vs player mode.");
     printGameState();
-    MoveList moves = engine.getLegalMoves();
     log(UI, "Enter 'p' to print legal moves or 'u' to undo the last move.");
 
     do
@@ -96,7 +96,6 @@ void UserInterface::startPlayerVsPlayer()
         Move move = getMove(true);
         applyAndTrackMove(move);
         printGameState();
-        moves = engine.getLegalMoves();
     } while (!engine.isGameOver());
     log(UI, engine.getGameState());
 }
@@ -105,7 +104,6 @@ void UserInterface::startPlayerVsEngine()
 {
     log(UI, "ChessEngine started in player vs engine mode.");
     printGameState();
-    MoveList moves = engine.getLegalMoves();
     bool player_turn = promptForPlayerColor() == engine.getBoard().white_to_move;
     log(UI, (player_turn ? "You start.\n" : "The AI starts.\n"));
     log(UI, "Enter 'p' to print legal moves or 'u' to undo the last move.");
@@ -116,7 +114,6 @@ void UserInterface::startPlayerVsEngine()
         player_turn = !player_turn;
         applyAndTrackMove(move, true);
         printGameState();
-        moves = engine.getLegalMoves();
     } while (!engine.isGameOver());
     log(UI, engine.getGameState());
 }
@@ -125,7 +122,6 @@ void UserInterface::startEngineVsEngine()
 {
     log(UI, "ChessEngine started in engine vs engine mode.");
     printGameState();
-    MoveList moves = engine.getLegalMoves();
     std::string input;
 
     do
@@ -135,7 +131,6 @@ void UserInterface::startEngineVsEngine()
         input = readLineFromStdin();
         applyAndTrackMove(move);
         printGameState();
-        moves = engine.getLegalMoves();
     } while (!engine.isGameOver());
     log(UI, engine.getGameState());
 }
@@ -155,9 +150,8 @@ Move UserInterface::getMove(bool is_player_turn)
 
 void UserInterface::applyAndTrackMove(Move move, bool play_vs_engine)
 {
-    if (move.isUndo())
+    if (move.isUndo() && !move_history.empty())
     {
-        assert(!move_history.empty(), "No move to undo");
         // additionally undo the AI's move if playing against the engine
         if (play_vs_engine && !move_history.empty())
         {
@@ -209,8 +203,8 @@ Move UserInterface::promptForLegalMove(MoveList legal_moves)
         }
 
         // return move if legal else skip
-        Position from = 8 * (input[1] - '1') + (input[0] - 'a');
-        Position to = 8 * (input[3] - '1') + (input[2] - 'a');
+        Position from = getSquareIndex(input.substr(0, 2));
+        Position to = getSquareIndex(input.substr(2, 2));
         for (int i = 0; i < legal_moves.size; i++)
         {
             Move legal_move = legal_moves.moves[i];

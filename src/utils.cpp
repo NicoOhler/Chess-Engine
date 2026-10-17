@@ -13,16 +13,19 @@ Position getCol(Position square)
 
 std::string getSquareName(Position square)
 {
-    assert(square >= 0 && square < NUM_SQUARES, "Invalid square");
+    if (square < 0 || square >= NUM_SQUARES)
+        throw std::invalid_argument("Invalid square");
     return char('a' + getCol(square)) + std::to_string(getRow(square) + 1);
 }
 
 Position getSquareIndex(const std::string &square)
 {
-    assert(square.length() == 2, "Invalid square");
+    if (square.length() != 2)
+        throw std::invalid_argument("Invalid square");
     char col = square[0];
     char row = square[1];
-    assert(col >= 'a' && col <= 'h' && row >= '1' && row <= '8', "Invalid square");
+    if (col < 'a' || col > 'h' || row < '1' || row > '8')
+        throw std::invalid_argument("Invalid square");
     return NUM_COLS * (row - '1') + (col - 'a');
 }
 
