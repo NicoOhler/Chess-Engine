@@ -4,12 +4,21 @@
 Score Evaluation::evaluate(Board board)
 {
     Score score = 0;
-    score += evaluateMaterial(board);
-    // score += evaluateMobility(board); // mobility evaluation is too slow for now
-    score += evaluatePawnStructure(board);
-    if (!board.white_to_move)
-        score = -score;
-    return score;
+    int perspective = board.white_to_move ? 1 : -1;
+    score += evaluateKingSafety(board);
+    if (!score) // skip remaining evaluation for checkmates
+    {
+        score += evaluateMaterial(board);
+        // score += evaluateMobility(board); // mobility evaluation is too slow for now
+        score += evaluatePawnStructure(board);
+    }
+    return score * perspective;
+}
+
+Score Evaluation::evaluateKingSafety(Board board)
+{
+    // TODO: implement king safety evaluation
+    return countSetBits(board.white_king) * KING_VALUE - countSetBits(board.black_king) * KING_VALUE;
 }
 
 Score Evaluation::evaluateMaterial(Board board)
@@ -20,14 +29,12 @@ Score Evaluation::evaluateMaterial(Board board)
     material += countSetBits(board.white_bishops) * BISHOP_VALUE;
     material += countSetBits(board.white_rooks) * ROOK_VALUE;
     material += countSetBits(board.white_queens) * QUEEN_VALUE;
-    material += countSetBits(board.white_king) * KING_VALUE;
 
     material -= countSetBits(board.black_pawns) * PAWN_VALUE;
     material -= countSetBits(board.black_knights) * KNIGHT_VALUE;
     material -= countSetBits(board.black_bishops) * BISHOP_VALUE;
     material -= countSetBits(board.black_rooks) * ROOK_VALUE;
     material -= countSetBits(board.black_queens) * QUEEN_VALUE;
-    material -= countSetBits(board.black_king) * KING_VALUE;
     log(EVALUATION, "Material: " + std::to_string(material));
     return material;
 }

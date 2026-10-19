@@ -23,6 +23,7 @@ class Evaluation
 {
 private:
     MoveGenerator move_generator = MoveGenerator::getInstance();
+    Score evaluateKingSafety(Board board);
     Score evaluateMaterial(Board board);
     Score evaluateMobility(Board board);
     Score evaluatePawnStructure(Board board);
