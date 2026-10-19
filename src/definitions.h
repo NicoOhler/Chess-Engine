@@ -33,8 +33,9 @@ const int8 NUM_COLS = 8;
 const int8 NUM_CASTLING_RIGHTS = 4;
 const std::string START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const int MAX_MOVES = 218;
-const Score POS_INFINITY = 2147483647;
-const Score NEG_INFINITY = -2147483648;
+// not quite min/max of int32 to avoid overflow when negating
+const Score POS_INFINITY = 2147483000;
+const Score NEG_INFINITY = -2147483000;
 const Score USED_MOVE = NEG_INFINITY;
 const HalfMoveClock HALF_MOVE_CLOCK_RESET = -1;
 const HalfMoveClock HALF_MOVE_CLOCK_LIMIT = 100;
@@ -59,7 +60,7 @@ const int TRANSPOSITION_TABLE_SIZE_MB = 256;
 // time management
 const int CLOCK_UPDATE_INTERVAL_NODES = 10000;
 const Milliseconds DEFAULT_SEARCH_TIME = 5000;
-const Milliseconds FRACTION_OF_TIME_TO_ALLOCATE = 30;
+const Milliseconds FRACTION_OF_TIME_TO_ALLOCATE = 22;
 const Milliseconds SUFFICIENT_TIME_FOR_NEXT_ITERATION_FACTOR = 2; // 15;
 
 // benchmark

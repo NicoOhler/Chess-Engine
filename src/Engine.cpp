@@ -59,8 +59,8 @@ Move Engine::search()
         best_move = transposition_table.probe(board.hash)->best_move;
         printSearchInfo(depth, score, best_move);
 
-        if (!time_management.sufficientTimeForNextIterationLeft())
-            stopSearch("Insufficient time for next iteration after " + convertMillisecondsToTimeString(time_management.getElapsedTime()));
+        // if (!time_management.sufficientTimeForNextIterationLeft())
+        //     stopSearch("Insufficient time for next iteration after " + convertMillisecondsToTimeString(time_management.getElapsedTime()));
     }
     // transposition_table.printHitRate();
     return best_move;
@@ -122,7 +122,7 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
 
     // return evaluation for leaf nodes (max depth reached)
     if (remaining_depth == 0)
-        return quiescence(lower_bound, upper_bound, ply); // ? why ply?
+        return quiescence(lower_bound, upper_bound, ply);
 
     // generate and evaluate moves until pruning possible
     MoveList pseudo_legal_moves = move_generator.generatePseudoLegalMoves(board);
@@ -212,7 +212,7 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
     {
         Move move = move_generator.pickBestMove(pseudo_legal_moves);
         Piece captured_piece = board.getPieceAt(move.to);
-        if (captured_piece == EMPTY && move.isPromotion())
+        if (captured_piece == EMPTY && !move.isPromotion())
             continue;
 
         if (!makeMoveIfLegal(move))
