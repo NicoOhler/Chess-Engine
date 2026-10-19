@@ -23,6 +23,51 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
+            "name": "Chess-GUI-for-UCI",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Chess-GUI-for-UCI/build/chess-gui",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/Chess-GUI-for-UCI/build",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build Chess Engine",
+            "miDebuggerPath": "/usr/bin/gdb",
+        },
+        {
+            "name": "Lichess-Bot",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/bin/bash",
+            "args": [
+                "-c",
+                "cd ${workspaceFolder}/lichess-bot/ && source ./venv/bin/activate && python3 lichess-bot.py -v --logfile lichess_bot_log.txt"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/lichess-bot/",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build Chess Engine",
+            "miDebuggerPath": "/usr/bin/gdb",
+        },
+        {
             "name": "Benchmark",
             "type": "cppdbg",
             "request": "launch",
@@ -129,7 +174,7 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "Hard Custom Perft",
+            "name": "Custom Perft",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/output/engine",
@@ -189,7 +234,7 @@
             "miDebuggerPath": "/usr/bin/gdb",
         },
         {
-            "name": "Custom Search",
+            "name": "Search",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/output/engine",
@@ -197,7 +242,7 @@
                 "-m",
                 "s",
                 "-f",
-                "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - ",
+                "8/2pR2pk/7p/rP3P2/5q1P/1P6/3N4/3Q2K1 w - - 3 34 ",
                 "-t",
                 "5000"
                 //"30000"

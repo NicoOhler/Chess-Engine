@@ -3,7 +3,7 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "Build Chess Engine",
+            "label": "Build Chess Engine w/o Profiling",
             "command": "/usr/bin/g++",
             "args": [
                 "-g",
@@ -16,15 +16,11 @@
             },
             "problemMatcher": [
                 "$gcc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            ]
         },
         {
             "type": "shell",
-            "label": "Build Chess Engine with Profiling",
+            "label": "Build Chess Engine w/ Profiling",
             "command": "/usr/bin/g++",
             "args": [
                 "-O3",
@@ -39,11 +35,40 @@
             },
             "problemMatcher": [
                 "$gcc"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "Copy executable to GUI folder",
+            "command": "/usr/bin/cp",
+            "args": [
+                "${workspaceFolder}/output/engine",
+                "${workspaceFolder}/Chess-GUI-for-UCI/Resources/engines/engine"
             ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build Chess Engine",
+            "dependsOn": [
+                "Build Chess Engine w/o Profiling",
+                "Copy executable to GUI folder"
+            ],
+            "dependsOrder": "sequence",
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Build Chess Engine with Profiling",
+            "dependsOn": [
+                "Build Chess Engine w/ Profiling",
+                "Copy executable to GUI folder"
+            ],
+            "dependsOrder": "sequence"
         }
     ]
 }

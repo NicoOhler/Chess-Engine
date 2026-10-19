@@ -1,4 +1,6 @@
 /data/opening_books/*
+/lichess-bot
+/Chess-GUI-for-UCI
 /fastchess
 /output
 log.txt
