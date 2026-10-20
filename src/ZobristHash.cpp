@@ -49,7 +49,7 @@ Hash ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
 {
     Hash &hash = board.hash;
     Piece moving_piece = board.pieces[move.to]; // assume move has already been made => piece is at destination square
-    bool white_to_move = moving_piece <= WHITE_KING;
+    bool white_to_move = !board.white_to_move;
 
     // toggle whose turn it is
     hash ^= is_whites_turn;

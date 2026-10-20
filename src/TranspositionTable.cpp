@@ -26,19 +26,14 @@ void TranspositionTable::store(Hash hash, Score score, Move best_move, int remai
 {
     Hash index = modPow2(hash, table_size);
     TranspositionEntry &entry = table[index];
-    bool is_position_in_table = entry.hash == hash;
 
-    // always store new positions
-    if (is_position_in_table)
-    {
-        // do not store if present entry has greater depth
-        if (entry.remaining_depth > remaining_depth)
-            return;
+    // do not store if present entry has greater depth
+    if (entry.remaining_depth > remaining_depth)
+        return;
 
-        // do not store if present entry is exact, while new is not exact, keep present entry
-        if (entry.type == EXACT && type != EXACT)
-            return;
-    }
+    // do not store if present entry is exact, while new is not exact, keep present entry
+    if (entry.hash == hash && (entry.type == EXACT && type != EXACT))
+        return;
 
     entry.hash = hash;
     entry.score = score;
