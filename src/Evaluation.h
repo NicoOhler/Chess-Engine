@@ -19,6 +19,21 @@ const Score BLOCKED_PAWN_VALUE = -50;
 const Score PROMOTION_VALUE = 20000;
 const Score CAPTURE_VALUE = 2000;
 
+const Score PIECE_VALUES[NUM_PIECES] = {
+    PAWN_VALUE,
+    KNIGHT_VALUE,
+    BISHOP_VALUE,
+    ROOK_VALUE,
+    QUEEN_VALUE,
+    KING_VALUE,
+    PAWN_VALUE,
+    KNIGHT_VALUE,
+    BISHOP_VALUE,
+    ROOK_VALUE,
+    QUEEN_VALUE,
+    KING_VALUE,
+};
+
 class Evaluation
 {
 private:

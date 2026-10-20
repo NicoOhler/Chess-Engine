@@ -52,5 +52,5 @@ struct Board // represents game state
     static void printGameState(const Board &board);
     static void printBoard(const Board &board);
     static void printCastlingRights(const Board &board);
-    static void placePiecesOnBoard(const Board &board, char board_to_print[8][8]);
+    static void placePiecesOnBoard(const Board &board, char board_to_print[NUM_ROWS][NUM_COLS]);
 };

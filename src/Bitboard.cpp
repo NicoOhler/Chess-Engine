@@ -12,6 +12,11 @@ void set(Bitboard &board, Position position)
 
 void clear(Bitboard &board, Position position)
 {
+    board &= ~(1ULL << position);
+}
+
+void toggle(Bitboard &board, Position position)
+{
     board ^= 1ULL << position;
 }
 
@@ -52,7 +57,7 @@ void printBitboard(const Bitboard &board, const std::string &title)
     {
         std::cout << row + 1 << " ";
         for (Position col = 0; col < NUM_COLS; col++)
-            std::cout << bits[row * NUM_COLS + col] ? "1" : "0";
+            std::cout << (bits[row * NUM_COLS + col] ? "1" : "0");
         std::cout << std::endl;
     }
     std::cout << "  ";

@@ -20,8 +20,8 @@ struct Move
     Piece getPromotionPiece(bool white_to_move);
 
     std::string toString() const;
-    bool operator==(const Move &rhs);
-    bool operator!=(const Move &rhs);
+    bool operator==(const Move &rhs) const;
+    bool operator!=(const Move &rhs) const;
 };
 
 const Move UNDO_MOVE = Move{0, 0, UNDO};

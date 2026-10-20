@@ -1,19 +1,20 @@
 #pragma once
 #include <string>
+#include <cstdint>
 
 // useful data types
-typedef unsigned long long uint64;
-typedef signed int int32;
-typedef unsigned int uint32;
-typedef signed short int16;
-typedef unsigned short uint16;
+typedef uint64_t uint64;
+typedef int32_t int32;
+typedef uint32_t uint32;
+typedef int16_t int16;
+typedef uint16_t uint16;
+typedef int8_t int8;
+typedef uint8_t uint8;
 
 typedef uint16 Move16;
 typedef int32 Score;
 typedef uint64 Bitboard;
 typedef uint64 Hash;
-typedef unsigned char uint8;
-typedef signed char int8;
 typedef signed char Position;
 typedef Position Direction;
 typedef unsigned char Promotion;
@@ -60,7 +61,7 @@ const int TRANSPOSITION_TABLE_SIZE_MB = 256;
 // time management
 const int CLOCK_UPDATE_INTERVAL_NODES = 10000;
 const Milliseconds DEFAULT_SEARCH_TIME = 5000;
-const Milliseconds FRACTION_OF_TIME_TO_ALLOCATE = 22;
+const Milliseconds FRACTION_OF_TIME_TO_ALLOCATE = 20;
 const Milliseconds SUFFICIENT_TIME_FOR_NEXT_ITERATION_FACTOR = 2; // 15;
 
 // benchmark
@@ -80,7 +81,7 @@ enum PROMOTION
     PROMOTE_TO_BISHOP = 2,
     PROMOTE_TO_ROOK = 3,
     PROMOTE_TO_QUEEN = 4,
-    UNDO = PROMOTE_TO_QUEEN | PROMOTE_TO_ROOK | PROMOTE_TO_BISHOP | PROMOTE_TO_KNIGHT
+    UNDO = 5
 };
 
 enum CASTLING_RIGHTS

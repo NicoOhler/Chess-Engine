@@ -69,24 +69,11 @@ Board Board::generateBoardFromFEN(const std::string &fen)
     i += no_en_passant ? 2 : 3;
 
     // parse half move clock if present
-    if (fen.length() > i)
-    {
-        bool two_digits = fen[i + 1] != ' ';
-        if (two_digits)
-            board.half_move_clock = (fen[i++] - '0') * 10 + (fen[i++] - '0');
-        else
-            board.half_move_clock = fen[i++] - '0';
-    }
+    board.half_move_clock = 0;
+    while (i < fen.length() && isdigit(fen[i]))
+        board.half_move_clock = board.half_move_clock * 10 + (fen[i++] - '0');
 
     // ? is the full move number needed for anything?
-    /*
-    i++;
-    two_digits = fen.length() != i + 1;
-    if (two_digits)
-    board.full_move_number = (fen[i++] - '0') * 10 + (fen[i++] - '0');
-    else
-    board.full_move_number = fen[i] - '0';
-    */
     return board;
 }
 

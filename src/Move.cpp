@@ -33,12 +33,12 @@ Move::Move(std::string move_string)
     }
 }
 
-bool Move::operator==(const Move &rhs)
+bool Move::operator==(const Move &rhs) const
 {
     return from == rhs.from && to == rhs.to && promotion == rhs.promotion;
 }
 
-bool Move::operator!=(const Move &rhs)
+bool Move::operator!=(const Move &rhs) const
 {
     return from != rhs.from || to != rhs.to || promotion != rhs.promotion;
 }
@@ -87,13 +87,13 @@ std::string Move::toString() const
 {
     std::string str = getSquareName(from) + getSquareName(to);
     if (promotion & PROMOTE_TO_QUEEN)
-        str += "=Q";
+        str += "Q";
     else if (promotion & PROMOTE_TO_ROOK)
-        str += "=R";
+        str += "R";
     else if (promotion & PROMOTE_TO_BISHOP)
-        str += "=B";
+        str += "B";
     else if (promotion & PROMOTE_TO_KNIGHT)
-        str += "=N";
+        str += "N";
     return str;
 }
 

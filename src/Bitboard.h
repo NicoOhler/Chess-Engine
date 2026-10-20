@@ -43,6 +43,7 @@ const Bitboard BLACK_QUEEN_ROOK_START_POSITION = 0x0100000000000000;
 void movePiece(Bitboard &board, Position from, Position to);
 void set(Bitboard &board, Position position);
 void clear(Bitboard &board, Position position);
+void toggle(Bitboard &board, Position position);
 bool isSet(const Bitboard &board, Position position);
 std::vector<bool> getBits(const Bitboard &board);
 int8 countSetBits(const Bitboard &board);

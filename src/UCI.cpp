@@ -49,7 +49,7 @@ void UCI::handleBackgroundRequests()
         {
             search_requested = false;
             lock.unlock();
-            ScopeLock engine_lock(engine_mutex);
+            std::lock_guard<std::mutex> engine_lock(engine_mutex);
             Move best_move = engine.search();
             print("bestmove " + best_move.toString());
         }
@@ -67,14 +67,14 @@ void UCI::handleUCI()
 
 void UCI::handleIsReady()
 {
-    ScopeLock lock(engine_mutex);
+    std::lock_guard<std::mutex> lock(engine_mutex);
     print("readyok");
 }
 
 void UCI::handleUCINewGame()
 {
     engine.stopSearch();
-    ScopeLock lock(engine_mutex);
+    std::lock_guard<std::mutex> lock(engine_mutex);
     engine.reset();
 }
 
@@ -82,7 +82,7 @@ void UCI::handlePosition(const std::string &command)
 {
     // wait for engine to fully stop before changing the board state
     engine.stopSearch();
-    ScopeLock lock(engine_mutex);
+    std::lock_guard<std::mutex> lock(engine_mutex);
 
     // extract FEN and initialize board
     std::string fen = START_FEN;
@@ -125,6 +125,8 @@ void UCI::handleGo(const std::string &command)
 {
     engine.stopSearch();
 
+    // todo go perft
+
     // provide a book move if available
     if (opening_book.enabled)
     {
@@ -136,7 +138,7 @@ void UCI::handleGo(const std::string &command)
         }
     }
 
-    ScopeLock lock(engine_mutex);
+    std::lock_guard<std::mutex> lock(engine_mutex);
     // configure time management based on UCI command parameters
     TimeManagement &time_management = engine.getTimeManagement();
     time_management.reset();
@@ -163,7 +165,7 @@ void UCI::handleGo(const std::string &command)
     }
 
     // notify background thread to start search
-    ScopeLock background_request_lock(background_request_mutex);
+    std::lock_guard<std::mutex> background_request_lock(background_request_mutex);
     search_requested = true;
     background_request_cv.notify_one();
 }

@@ -10,7 +10,6 @@ const bool LOG_TO_CONSOLE = true;
 const bool APPEND_TO_FILE = false;
 
 const LogType LOG_TYPE_ENABLED = 0x1;
-const LogType LOG_TYPE_DISABLED = 0x0;
 const LogType WHITE = 0x2;
 
 const LogType CHESS_BOARD = WHITE | LOG_TYPE_ENABLED;
