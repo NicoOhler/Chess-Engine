@@ -9,32 +9,32 @@ const std::string LOG_FILE = "log.txt"; // does not write to file if empty strin
 const bool LOG_TO_CONSOLE = true;
 const bool APPEND_TO_FILE = false;
 
-const LogType LOG_TYPE_ENABLED = 0x1;
-const LogType WHITE = 0x2;
+const LogType DISABLED = 0x0;
+const LogType ENABLED = 0x1;
 
-const LogType CHESS_BOARD = WHITE | LOG_TYPE_ENABLED;
-const LogType MOVE_GENERATOR = WHITE;
-const LogType PAWN_MOVE = WHITE;
-const LogType KNIGHT_MOVE = WHITE;
-const LogType BISHOP_MOVE = WHITE;
-const LogType ROOK_MOVE = WHITE;
-const LogType QUEEN_MOVE = WHITE;
-const LogType KING_MOVE = WHITE;
-const LogType REMOVE_ILLEGAL_MOVES = WHITE;
-const LogType REMAINING_MOVES = WHITE;
-const LogType PERFT = WHITE | LOG_TYPE_ENABLED;
-const LogType SEARCH = WHITE | LOG_TYPE_ENABLED;
-const LogType SEARCH_DEPTHS = WHITE | LOG_TYPE_ENABLED;
-const LogType FEN = WHITE;
-const LogType TIME = WHITE | LOG_TYPE_ENABLED;
-const LogType EVALUATION = WHITE;
-const LogType BENCHMARK = WHITE | LOG_TYPE_ENABLED;
-const LogType TRANSPOSITION_TABLE = WHITE | LOG_TYPE_ENABLED;
-const LogType TRANSPOSITION_TABLE_MATCH = WHITE;
-const LogType ENGINE_SETTINGS = WHITE;
-const LogType OPENING_BOOK = WHITE;
-const LogType OPENING_BOOK_MOVE = WHITE;
-const LogType UI = WHITE | LOG_TYPE_ENABLED;
+const LogType CHESS_BOARD = ENABLED;
+const LogType MOVE_GENERATOR = DISABLED;
+const LogType PAWN_MOVE = DISABLED;
+const LogType KNIGHT_MOVE = DISABLED;
+const LogType BISHOP_MOVE = DISABLED;
+const LogType ROOK_MOVE = DISABLED;
+const LogType QUEEN_MOVE = DISABLED;
+const LogType KING_MOVE = DISABLED;
+const LogType REMOVE_ILLEGAL_MOVES = DISABLED;
+const LogType REMAINING_MOVES = DISABLED;
+const LogType PERFT = ENABLED;
+const LogType SEARCH = ENABLED;
+const LogType SEARCH_DEPTHS = ENABLED;
+const LogType FEN = DISABLED;
+const LogType TIME = ENABLED;
+const LogType EVALUATION = DISABLED;
+const LogType BENCHMARK = ENABLED;
+const LogType TRANSPOSITION_TABLE = ENABLED;
+const LogType TRANSPOSITION_TABLE_MATCH = DISABLED;
+const LogType ENGINE_SETTINGS = DISABLED;
+const LogType OPENING_BOOK = DISABLED;
+const LogType OPENING_BOOK_MOVE = DISABLED;
+const LogType UI = ENABLED;
 
 void log(LogType logType, const std::string &message);
 

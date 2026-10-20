@@ -29,6 +29,39 @@ Position getSquareIndex(const std::string &square)
     return NUM_COLS * (row - '1') + (col - 'a');
 }
 
+Piece getPieceFromSymbol(char symbol)
+{
+    switch (symbol)
+    {
+    case WHITE_PAWN_SYMBOL:
+        return WHITE_PAWN;
+    case WHITE_ROOK_SYMBOL:
+        return WHITE_ROOK;
+    case WHITE_KNIGHT_SYMBOL:
+        return WHITE_KNIGHT;
+    case WHITE_BISHOP_SYMBOL:
+        return WHITE_BISHOP;
+    case WHITE_QUEEN_SYMBOL:
+        return WHITE_QUEEN;
+    case WHITE_KING_SYMBOL:
+        return WHITE_KING;
+    case BLACK_PAWN_SYMBOL:
+        return BLACK_PAWN;
+    case BLACK_ROOK_SYMBOL:
+        return BLACK_ROOK;
+    case BLACK_KNIGHT_SYMBOL:
+        return BLACK_KNIGHT;
+    case BLACK_BISHOP_SYMBOL:
+        return BLACK_BISHOP;
+    case BLACK_QUEEN_SYMBOL:
+        return BLACK_QUEEN;
+    case BLACK_KING_SYMBOL:
+        return BLACK_KING;
+    default:
+        throw std::invalid_argument("Invalid piece symbol: " + std::string(1, symbol));
+    }
+}
+
 uint64 modPow2(uint64 n, uint64 m)
 {
     return n & (m - 1); // fast modulo for power of 2

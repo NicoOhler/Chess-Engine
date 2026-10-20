@@ -18,23 +18,23 @@ Score Evaluation::evaluate(Board board)
 Score Evaluation::evaluateKingSafety(Board board)
 {
     // TODO: implement king safety evaluation
-    return countSetBits(board.white_king) * KING_VALUE - countSetBits(board.black_king) * KING_VALUE;
+    return countSetBits(board.piece_bitboards[WHITE_KING]) * KING_VALUE - countSetBits(board.piece_bitboards[BLACK_KING]) * KING_VALUE;
 }
 
 Score Evaluation::evaluateMaterial(Board board)
 {
     Score material = 0;
-    material += countSetBits(board.white_pawns) * PAWN_VALUE;
-    material += countSetBits(board.white_knights) * KNIGHT_VALUE;
-    material += countSetBits(board.white_bishops) * BISHOP_VALUE;
-    material += countSetBits(board.white_rooks) * ROOK_VALUE;
-    material += countSetBits(board.white_queens) * QUEEN_VALUE;
+    material += countSetBits(board.piece_bitboards[WHITE_PAWN]) * PAWN_VALUE;
+    material += countSetBits(board.piece_bitboards[WHITE_KNIGHT]) * KNIGHT_VALUE;
+    material += countSetBits(board.piece_bitboards[WHITE_BISHOP]) * BISHOP_VALUE;
+    material += countSetBits(board.piece_bitboards[WHITE_ROOK]) * ROOK_VALUE;
+    material += countSetBits(board.piece_bitboards[WHITE_QUEEN]) * QUEEN_VALUE;
 
-    material -= countSetBits(board.black_pawns) * PAWN_VALUE;
-    material -= countSetBits(board.black_knights) * KNIGHT_VALUE;
-    material -= countSetBits(board.black_bishops) * BISHOP_VALUE;
-    material -= countSetBits(board.black_rooks) * ROOK_VALUE;
-    material -= countSetBits(board.black_queens) * QUEEN_VALUE;
+    material -= countSetBits(board.piece_bitboards[BLACK_PAWN]) * PAWN_VALUE;
+    material -= countSetBits(board.piece_bitboards[BLACK_KNIGHT]) * KNIGHT_VALUE;
+    material -= countSetBits(board.piece_bitboards[BLACK_BISHOP]) * BISHOP_VALUE;
+    material -= countSetBits(board.piece_bitboards[BLACK_ROOK]) * ROOK_VALUE;
+    material -= countSetBits(board.piece_bitboards[BLACK_QUEEN]) * QUEEN_VALUE;
     log(EVALUATION, "Material: " + std::to_string(material));
     return material;
 }
@@ -52,8 +52,8 @@ Score Evaluation::evaluateMobility(Board board)
 Score Evaluation::evaluatePawnStructure(Board board)
 {
     Direction direction = board.white_to_move ? UP : DOWN;
-    Bitboard own_pawns = board.white_to_move ? board.white_pawns : board.black_pawns;
-    Bitboard enemy_pawns = board.white_to_move ? board.black_pawns : board.white_pawns;
+    Bitboard own_pawns = board.piece_bitboards[board.white_to_move ? WHITE_PAWN : BLACK_PAWN];
+    Bitboard enemy_pawns = board.piece_bitboards[board.white_to_move ? BLACK_PAWN : WHITE_PAWN];
     Bitboard enemy_pawns_editable = enemy_pawns;
     Bitboard own_pawns_editable = own_pawns;
 

@@ -20,7 +20,7 @@ Hash ZobristHash::computeInitialHash(Board &board)
     // add all pieces
     for (int square = 0; square < NUM_SQUARES; square++)
     {
-        Piece piece = board.getPieceAt(square);
+        Piece piece = board.pieces[square];
         if (piece != EMPTY)
             hash ^= piece_at_square[square][piece];
     }
@@ -48,7 +48,7 @@ Hash ZobristHash::computeInitialHash(Board &board)
 Hash ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
 {
     Hash &hash = board.hash;
-    Piece moving_piece = board.getPieceAt(move.to); // assume move has already been made => piece is at destination square
+    Piece moving_piece = board.pieces[move.to]; // assume move has already been made => piece is at destination square
     bool white_to_move = moving_piece <= WHITE_KING;
 
     // toggle whose turn it is

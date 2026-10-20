@@ -63,19 +63,7 @@ bool Move::isCastlingCandidate() const
 
 Piece Move::getPromotionPiece(bool white_to_move)
 {
-    switch (promotion)
-    {
-    case PROMOTE_TO_QUEEN:
-        return white_to_move ? WHITE_QUEEN : BLACK_QUEEN;
-    case PROMOTE_TO_ROOK:
-        return white_to_move ? WHITE_ROOK : BLACK_ROOK;
-    case PROMOTE_TO_BISHOP:
-        return white_to_move ? WHITE_BISHOP : BLACK_BISHOP;
-    case PROMOTE_TO_KNIGHT:
-        return white_to_move ? WHITE_KNIGHT : BLACK_KNIGHT;
-    default:
-        throw std::invalid_argument("Invalid promotion: " + std::to_string(promotion));
-    }
+    return promotion + (WHITE * white_to_move);
 }
 
 bool Move::isUndo() const

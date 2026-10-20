@@ -73,8 +73,8 @@ void Engine::calculateMoveScores(MoveList &moves, TranspositionEntry *entry)
     for (int i = 0; i < moves.size; i++)
     {
         Move move = moves.moves[i];
-        Piece moving_piece = board.getPieceAt(move.from);
-        Piece captured_piece = board.getPieceAt(move.to);
+        Piece moving_piece = board.pieces[move.from];
+        Piece captured_piece = board.pieces[move.to];
         // search previously best move first, which will likely cause a beta cutoff
         if (move == best_move)
             moves.scores[i] = POS_INFINITY;
@@ -211,7 +211,7 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
     for (int i = 0; i < pseudo_legal_moves.size && !search_stopped; i++)
     {
         Move move = move_generator.pickBestMove(pseudo_legal_moves);
-        Piece captured_piece = board.getPieceAt(move.to);
+        Piece captured_piece = board.pieces[move.to];
         if (captured_piece == EMPTY && !move.isPromotion())
             continue;
 

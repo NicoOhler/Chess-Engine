@@ -36,6 +36,6 @@ void Logger::log(LogType logType, const std::string &message)
 
 void log(LogType logType, const std::string &message)
 {
-    if (logType & LOG_TYPE_ENABLED)
+    if (logType & ENABLED)
         Logger::GetInstance()->log(logType, message);
 }

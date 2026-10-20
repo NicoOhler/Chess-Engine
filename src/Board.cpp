@@ -18,10 +18,11 @@ Board Board::generateBoardFromFEN(const std::string &fen)
                 continue;
             }
 
-            Bitboard *piece = board.getBitboardByPieceSymbol(c);
-            set(*piece, square);
+            Piece piece = getPieceFromSymbol(c);
+            board.pieces[square] = piece;
+            set(board.piece_bitboards[piece], square);
             set(board.occupied, square);
-            set(isupper(c) ? board.white_pieces : board.black_pieces, square);
+            set(board.colors[isupper(c) ? WHITE : BLACK], square);
         }
         if (fen[i++] != (row != ROW_1 ? '/' : ' '))
             throw std::invalid_argument("Invalid FEN: Expected '/' or ' ' after row " + std::to_string(row));
@@ -82,102 +83,6 @@ bool Board::isSquareOccupied(Position position) const
     return occupied & (1ULL << position);
 }
 
-Bitboard *Board::getBitboardByPiece(Piece piece)
-{
-    switch (piece)
-    {
-    case WHITE_PAWN:
-        return &white_pawns;
-    case WHITE_ROOK:
-        return &white_rooks;
-    case WHITE_KNIGHT:
-        return &white_knights;
-    case WHITE_BISHOP:
-        return &white_bishops;
-    case WHITE_QUEEN:
-        return &white_queens;
-    case WHITE_KING:
-        return &white_king;
-    case BLACK_PAWN:
-        return &black_pawns;
-    case BLACK_ROOK:
-        return &black_rooks;
-    case BLACK_KNIGHT:
-        return &black_knights;
-    case BLACK_BISHOP:
-        return &black_bishops;
-    case BLACK_QUEEN:
-        return &black_queens;
-    case BLACK_KING:
-        return &black_king;
-    default:
-        throw std::invalid_argument("Invalid piece: " + std::to_string(piece));
-    }
-}
-
-Bitboard *Board::getBitboardByPieceSymbol(PieceSymbol piece)
-{
-    switch (piece)
-    {
-    case WHITE_PAWN_SYMBOL:
-        return &white_pawns;
-    case WHITE_ROOK_SYMBOL:
-        return &white_rooks;
-    case WHITE_KNIGHT_SYMBOL:
-        return &white_knights;
-    case WHITE_BISHOP_SYMBOL:
-        return &white_bishops;
-    case WHITE_QUEEN_SYMBOL:
-        return &white_queens;
-    case WHITE_KING_SYMBOL:
-        return &white_king;
-    case BLACK_PAWN_SYMBOL:
-        return &black_pawns;
-    case BLACK_ROOK_SYMBOL:
-        return &black_rooks;
-    case BLACK_KNIGHT_SYMBOL:
-        return &black_knights;
-    case BLACK_BISHOP_SYMBOL:
-        return &black_bishops;
-    case BLACK_QUEEN_SYMBOL:
-        return &black_queens;
-    case BLACK_KING_SYMBOL:
-        return &black_king;
-    default:
-        throw std::invalid_argument("Invalid piece symbol: " + std::to_string(piece));
-    }
-}
-
-Piece Board::getPieceAt(Position position) const
-{
-    Bitboard mask = 1ULL << position;
-    if (white_pawns & mask)
-        return WHITE_PAWN;
-    if (black_pawns & mask)
-        return BLACK_PAWN;
-    if (white_rooks & mask)
-        return WHITE_ROOK;
-    if (white_knights & mask)
-        return WHITE_KNIGHT;
-    if (white_bishops & mask)
-        return WHITE_BISHOP;
-    if (white_queens & mask)
-        return WHITE_QUEEN;
-    if (white_king & mask)
-        return WHITE_KING;
-    if (black_rooks & mask)
-        return BLACK_ROOK;
-    if (black_knights & mask)
-        return BLACK_KNIGHT;
-    if (black_bishops & mask)
-        return BLACK_BISHOP;
-    if (black_queens & mask)
-        return BLACK_QUEEN;
-    if (black_king & mask)
-        return BLACK_KING;
-    return EMPTY;
-}
-
 void Board::printGameState(const Board &board)
 {
     Board::printBoard(board);
@@ -191,16 +96,17 @@ void Board::printGameState(const Board &board)
 
 void Board::printBoard(const Board &board)
 {
-    char board_to_print[NUM_ROWS][NUM_COLS];
-    Board::placePiecesOnBoard(board, board_to_print);
     std::cout << std::endl
               << "  a b c d e f g h" << std::endl;
-    for (char i = 0; i < NUM_ROWS; i++)
+    for (char row = 0; row < NUM_ROWS; row++)
     {
-        std::cout << NUM_ROWS - i << " ";
-        for (char j = 0; j < NUM_COLS; j++)
-            std::cout << board_to_print[i][j] << " ";
-        std::cout << NUM_ROWS - i << std::endl;
+        std::cout << NUM_ROWS - row << " ";
+        for (char col = 0; col < NUM_COLS; col++)
+        {
+            Position square = NUM_COLS * (NUM_ROWS - row - 1) + col;
+            std::cout << PIECE_SYMBOLS[board.pieces[square]] << " ";
+        }
+        std::cout << NUM_ROWS - row << std::endl;
     }
     std::cout << "  a b c d e f g h" << std::endl
               << std::endl;
@@ -218,24 +124,4 @@ void Board::printCastlingRights(const Board &board)
     if (board.castling_rights & BLACK_QUEEN_CASTLING)
         std::cout << "q";
     std::cout << std::endl;
-}
-
-void Board::placePiecesOnBoard(const Board &board, char board_to_print[NUM_ROWS][NUM_COLS])
-{
-    Bitboard pieces[NUM_PIECES] = {board.white_pawns, board.white_rooks, board.white_knights, board.white_bishops, board.white_queens, board.white_king,
-                                   board.black_pawns, board.black_rooks, board.black_knights, board.black_bishops, board.black_queens, board.black_king};
-    Piece piece_types[NUM_PIECES] = {WHITE_PAWN_SYMBOL, WHITE_ROOK_SYMBOL, WHITE_KNIGHT_SYMBOL, WHITE_BISHOP_SYMBOL, WHITE_QUEEN_SYMBOL, WHITE_KING_SYMBOL,
-                                     BLACK_PAWN_SYMBOL, BLACK_ROOK_SYMBOL, BLACK_KNIGHT_SYMBOL, BLACK_BISHOP_SYMBOL, BLACK_QUEEN_SYMBOL, BLACK_KING_SYMBOL};
-    for (char i = 0; i < NUM_ROWS; i++)
-        for (char j = 0; j < NUM_COLS; j++)
-            board_to_print[i][j] = ' ';
-
-    for (int i = 0; i < NUM_PIECES; i++)
-    {
-        while (pieces[i])
-        {
-            Position position = clearRightmostSetBit(pieces[i]);
-            board_to_print[(NUM_ROWS - 1) - position / NUM_COLS][modPow2(position, NUM_COLS)] = piece_types[i];
-        }
-    }
 }

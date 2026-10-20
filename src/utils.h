@@ -10,6 +10,7 @@ Position getRow(Position square);
 Position getCol(Position square);
 std::string getSquareName(Position square);
 Position getSquareIndex(const std::string &square);
+Piece getPieceFromSymbol(char symbol);
 uint64 modPow2(uint64 n, uint64 m);
 void print(const std::string &message, bool newline = true);
 std::string readLineFromStdin();
