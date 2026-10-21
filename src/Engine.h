@@ -48,5 +48,5 @@ private:
     uint64 perft(int remaining_depth, bool divide = false);
     Score pv_search(int depth, int remaining_depth, Score alpha, Score beta);
     Score quiescence(Score alpha, Score beta, int max_depth = MAX_QUIESCENCE_DEPTH);
-    void printSearchInfo(int depth, Score score, Move pv_move);
+    void printSearchInfo(int depth, Score score, Move pv_move, Milliseconds &iteration_time);
 };

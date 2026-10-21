@@ -628,20 +628,6 @@ Move MoveGenerator::pickBestMove(MoveList &moves)
     return moves.moves[best_move_index];
 }
 
-bool MoveGenerator::markMoveAsUsed(MoveList &moves, Move move)
-{
-    if (move == NULL_MOVE)
-        return false;
-
-    for (int i = 0; i < moves.size; i++)
-        if (moves.moves[i] == move)
-        {
-            moves.scores[i] = USED_MOVE;
-            return true;
-        }
-    return false;
-}
-
 MoveGenerator &MoveGenerator::getInstance()
 {
     static MoveGenerator instance;

@@ -45,6 +45,7 @@ Move Engine::search()
     search_stopped = false;
     Move best_move = NULL_MOVE;
     time_management.start(board.white_to_move);
+    Milliseconds iteration_time = 0;
 
     // iterative deepening
     for (int depth = 1; depth <= search_depth && !search_stopped; depth++)
@@ -57,7 +58,7 @@ Move Engine::search()
 
         // update best move and continue search
         best_move = transposition_table.probe(board.hash)->best_move;
-        printSearchInfo(depth, score, best_move);
+        printSearchInfo(depth, score, best_move, iteration_time);
 
         // if (!time_management.sufficientTimeForNextIterationLeft())
         //     stopSearch("Insufficient time for next iteration after " + convertMillisecondsToTimeString(time_management.getElapsedTime()));
@@ -133,17 +134,7 @@ Score Engine::pv_search(int ply, int remaining_depth, Score lower_bound, Score u
     bool null_window = false;
     for (int i = 0; i < pseudo_legal_moves.size && !search_stopped; i++)
     {
-        // explore retrieved move first if available, then explore moves in order of score
-        if (i == 0 && entry != nullptr)
-        {
-            move = entry->best_move;
-            // move needs to be pseudo-legal (to avoid hash collisions)
-            if (!move_generator.markMoveAsUsed(pseudo_legal_moves, move))
-                continue;
-            // ? why does exploring this move before move generation not make search faster
-        }
-        else
-            move = move_generator.pickBestMove(pseudo_legal_moves);
+        move = move_generator.pickBestMove(pseudo_legal_moves);
         if (!makeMoveIfLegal(move))
             continue;
 
@@ -204,15 +195,20 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
     if (ply >= MAX_QUIESCENCE_DEPTH || best_score + DELTA_VALUE < lower_bound)
         return best_score;
 
-    // further examine captures, checks and promotions
+    // further examine interesting moves (captures, promotions, checks, en passant)
     MoveList pseudo_legal_moves = move_generator.generatePseudoLegalMoves(board, true);
     TranspositionEntry *entry = transposition_table.probe(board.hash);
     calculateMoveScores(pseudo_legal_moves, entry);
+    bool king_in_check = !move_generator.isKingSafe(board, board.white_to_move);
     for (int i = 0; i < pseudo_legal_moves.size && !search_stopped; i++)
     {
+        // only consider interesting moves (captures, promotions, checks, en passant)
         Move move = move_generator.pickBestMove(pseudo_legal_moves);
-        Piece captured_piece = board.pieces[move.to];
-        if (captured_piece == EMPTY && !move.isPromotion())
+        bool is_capture = board.pieces[move.to] != EMPTY;
+        bool is_promotion = move.isPromotion();
+        bool is_en_passant = (move.to == board.en_passant) && (board.pieces[move.from] == (board.white_to_move ? WHITE_PAWN : BLACK_PAWN));
+        bool is_interesting = king_in_check || is_capture || is_promotion || is_en_passant;
+        if (!is_interesting)
             continue;
 
         if (!makeMoveIfLegal(move))
@@ -231,13 +227,13 @@ Score Engine::quiescence(Score lower_bound, Score upper_bound, int ply)
     return best_score;
 }
 
-void Engine::printSearchInfo(int depth, Score score, Move pv_move)
+void Engine::printSearchInfo(int depth, Score score, Move pv_move, Milliseconds &iteration_time)
 {
     std::string info = "info depth " + std::to_string(depth);
     info += " score cp " + std::to_string(score);
     info += " pv " + pv_move.toString();
     info += " nodes " + std::to_string(evaluated_nodes);
-    Milliseconds iteration_time = time_management.getElapsedTime() - iteration_time;
+    iteration_time = time_management.getElapsedTime() - iteration_time;
     if (iteration_time > 0)
     {
         info += " time " + std::to_string(iteration_time);

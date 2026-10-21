@@ -284,7 +284,7 @@ void UserInterface::parseParameters(int argc, char *argv[])
             mode = argv[++i][0];
         else if (std::string(argv[i]) == "-f" && i + 1 < argc)
             engine.setPosition(argv[++i]);
-        else if (std::string(argv[i]) == "-p" && i + 1 < argc)
+        else if (std::string(argv[i]) == "-d" && i + 1 < argc)
             engine.setSearchDepth(std::stoi(argv[++i]));
         else if (std::string(argv[i]) == "-e" && i + 1 < argc)
             expected_perft = std::stoull(argv[++i]);
@@ -308,10 +308,10 @@ void UserInterface::parseParameters(int argc, char *argv[])
 
 void UserInterface::printHelp(const std::string &executable_name)
 {
-    std::cout << "Usage: " << executable_name << " [-m mode] [-f FEN] [-p ply] [-h]\n"
+    std::cout << "Usage: " << executable_name << " [-m mode] [-f FEN] [-d depth] [-h]\n"
               << "  -m mode: Set the engine mode (" << AVAILABLE_MODES << ")\n"
               << "  -f FEN: Start the game with the given FEN string\n"
-              << "  -p ply: Run perft/search with the given ply/depth/number of half moves)\n"
+              << "  -d depth: Run perft/search with the given depth/ply/number of half moves)\n"
               << "  -t: Set search time (in milliseconds)\n"
               << "  -o: opening book file path (disabled by default)\n"
               << "  -h: Show this help message" << std::endl;
