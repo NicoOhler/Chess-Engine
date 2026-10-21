@@ -15,7 +15,7 @@ struct Move
     Move(std::string move_string);
 
     bool isUndo() const;
-    bool isCastlingCandidate() const;
+    bool isCastling(bool is_king_move) const;
     bool isPromotion() const;
     Piece getPromotionPiece(bool white_to_move);
 

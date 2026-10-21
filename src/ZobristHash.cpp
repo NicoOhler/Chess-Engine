@@ -81,7 +81,7 @@ Hash ZobristHash::updateHash(Board &board, Move move, UndoInfo undo)
 
     // additionally move rook if castling
     bool is_king_move = moving_piece == (white_to_move ? WHITE_KING : BLACK_KING);
-    if (move.isCastlingCandidate() && is_king_move)
+    if (move.isCastling(is_king_move))
     {
         // remove old rook position and add new rook position
         bool king_side_castling = move.to > move.from;

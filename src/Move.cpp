@@ -48,7 +48,7 @@ bool Move::isPromotion() const
     return promotion & (PROMOTE_TO_QUEEN | PROMOTE_TO_ROOK | PROMOTE_TO_BISHOP | PROMOTE_TO_KNIGHT);
 }
 
-bool Move::isCastlingCandidate() const
+bool Move::isCastling(bool is_king) const
 {
     if (from == WHITE_KING_START_POSITION && to == WHITE_KING_START_POSITION + 2)
         return true;
