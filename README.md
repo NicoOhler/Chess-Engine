@@ -4,7 +4,7 @@ This is a bitboard-based chess engine written in pure C++17. It can be played fr
 
 ## Lichess
 
-- **Engine rating:** _TODO_ (as of October 2026)
+- **Engine rating:** _TODO_ - I am going to update this soon. I promise :)
 - **Bot account:** [N1742Bot](https://lichess.org/@/N1742Bot)
 
 ## Engine status
