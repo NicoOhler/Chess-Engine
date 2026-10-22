@@ -50,6 +50,8 @@ bool Move::isPromotion() const
 
 bool Move::isCastling(bool is_king) const
 {
+    if (!is_king)
+        return false;
     if (from == WHITE_KING_START_POSITION && to == WHITE_KING_START_POSITION + 2)
         return true;
     if (from == WHITE_KING_START_POSITION && to == WHITE_KING_START_POSITION - 2)
