@@ -1,11 +1,11 @@
-# Chess Engine
+# Daraen
 
-This is a bitboard-based chess engine written in pure C++17. It can be played from the command line or connect to a GUI via the Universal Chess Interface (UCI). 
+Daraen is a bitboard-based chess engine written in pure C++17. It can be played from the command line or connect to a GUI via the Universal Chess Interface (UCI). 
 
 ## Lichess
 
 - **Engine rating:** _TODO_ - I am going to update this soon. I promise :)
-- **Bot account:** [N1742Bot](https://lichess.org/@/N1742Bot)
+- **Bot account:** [Daraen](https://lichess.org/@/DaraenBot)
 
 ## Engine status
 ### Implemented
