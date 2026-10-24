@@ -9,7 +9,7 @@
                 "-g",
                 "${workspaceFolder}/src/*.cpp",
                 "-o",
-                "${workspaceFolder}/output/engine"
+                "${workspaceFolder}/output/daraen"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -28,7 +28,7 @@
                 "-g",
                 "${workspaceFolder}/src/*.cpp",
                 "-o",
-                "${workspaceFolder}/output/engine"
+                "${workspaceFolder}/output/daraen"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -42,7 +42,7 @@
             "label": "Copy executable to GUI folder",
             "command": "/usr/bin/cp",
             "args": [
-                "${workspaceFolder}/output/engine",
+                "${workspaceFolder}/output/daraen",
                 "${workspaceFolder}/Chess-GUI-for-UCI/Resources/engines/engine"
             ],
             "options": {

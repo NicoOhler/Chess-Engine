@@ -5,7 +5,7 @@
             "name": "UCI Mode",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
+            "program": "${workspaceFolder}/output/daraen",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/output",
@@ -71,7 +71,7 @@
             "name": "Benchmark",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
+            "program": "${workspaceFolder}/output/daraen",
             "args": [
                 "-m",
                 "b",
@@ -95,7 +95,7 @@
             "name": "Player vs Player",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
+            "program": "${workspaceFolder}/output/daraen",
             "args": [
                 "-m",
                 "l",
@@ -121,7 +121,7 @@
             "name": "Player vs Engine",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
+            "program": "${workspaceFolder}/output/daraen",
             "args": [
                 "-m",
                 "r",
@@ -149,7 +149,7 @@
             "name": "Perft 7 w/ Divide",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
+            "program": "${workspaceFolder}/output/daraen",
             "args": [
                 "-m",
                 "p",
@@ -177,7 +177,7 @@
             "name": "Custom Perft",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
+            "program": "${workspaceFolder}/output/daraen",
             "args": [
                 "-m",
                 "p",
@@ -207,7 +207,7 @@
             "name": "Hard Kiwipete Perft",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
+            "program": "${workspaceFolder}/output/daraen",
             "args": [
                 "-m",
                 "p",
@@ -237,7 +237,7 @@
             "name": "Search",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/output/engine",
+            "program": "${workspaceFolder}/output/daraen",
             "args": [
                 "-m",
                 "s",
@@ -272,7 +272,7 @@
                 "record",
                 "-g",
                 "--",
-                "./engine",
+                "./daraen",
                 "-m",
                 "s",
                 "-p",
@@ -316,7 +316,7 @@
             "program": "/bin/bash",
             "args": [
                 "-c",
-                "\"valgrind -s --leak-check=full --show-leak-kinds=all ./engine -m b\"",
+                "\"valgrind -s --leak-check=full --show-leak-kinds=all ./daraen -m b\"",
             ],
             "cwd": "${workspaceFolder}/output",
             "stopAtEntry": false,

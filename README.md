@@ -40,11 +40,11 @@ Daraen is a bitboard-based chess engine written in pure C++17. It can be played 
 
 Build the engine from the repository root:
 ```bash
-g++ -std=c++17 -O3 src/*.cpp -o ./engine
+g++ -std=c++17 -O3 src/*.cpp -o ./daraen
 ```
 and run it from the repository root:
 ```bash
-./engine
+./daraen
 ```
 
 Sample build tasks are provided in [`.vscode/tasks.json`](.vscode/tasks.json). 
@@ -67,16 +67,16 @@ Examples:
 
 ```bash
 # Run perft at depth 5 from the starting position.
-./engine -m p -d 5
+./daraen -m p -d 5
 
 # Run perft and report a difference from an expected node count.
-./engine -m p -d 5 -e 4865609
+./daraen -m p -d 5 -e 4865609
 
 # Search a FEN for 2 seconds.
-./engine -m s -f "r1bqk2r/pppp1ppp/2n2n2/8/1b1P4/2N2N2/PPP2PPP/R1BQKB1R w KQkq - 0 1" -t 2000
+./daraen -m s -f "r1bqk2r/pppp1ppp/2n2n2/8/1b1P4/2N2N2/PPP2PPP/R1BQKB1R w KQkq - 0 1" -t 2000
 
 # Play against the engine with an opening book.
-./engine -m r -o data/opening_books/book.bin
+./daraen -m r -o data/opening_books/book.bin
 ```
 
 More examples can be found in [`.vscode/launch.json`](.vscode/launch.json).
